@@ -1,23 +1,102 @@
-### AL ###
-#Template for AL projects for Dynamics 365 Business Central
-#launch.json folder
+# ========================
+# .NET
+# ========================
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.db
+*.tss
+*.opensdf
+*.sdf
+*.suo
+*.cache
+*.dll
+*.exe
+!*[Tt]ests/*.dll
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+*.ncrunchproject
+*.ncrunchsolution
+_NCrunch_*
+nCrunchTemp_*
+*.ncrunchproject
+.dotnet/
+.tools/
+[Pp]ublish/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+TestResult.xml
+*.coverage
+*.coveragexml
+
+# ========================
+# Angular
+# ========================
+apps/web/node_modules/
+apps/web/dist/
+apps/web/.angular/
+apps/web/*.js.map
+apps/web/npm-debug.log
+apps/web/yarn-error.log
+
+# ========================
+# Flutter
+# ========================
+apps/mobile/.dart_tool/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/mobile/.packages
+apps/mobile/build/
+apps/mobile/.pub-cache/
+apps/mobile/.pub/
+apps/mobile/ios/Pods/
+apps/mobile/android/.gradle/
+apps/mobile/android/captures/
+apps/mobile/android/local.properties
+apps/mobile/android/key.properties
+apps/mobile/*.iml
+
+# ========================
+# IDE
+# ========================
+.idea/
 .vscode/
-#Cache folder
-.alcache/
-#Symbols folder
-.alpackages/
-#Snapshots folder
-.snapshots/
-#Testing Output folder
-.output/
-#Extension App-file
-*.app
-#Rapid Application Development File
-rad.json
-#Translation Base-file
-*.g.xlf
-#License-files
-*.bclicense
-*.flf
-#Test results file
-TestResults.xml
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ========================
+# Docker
+# ========================
+.env
+.env.local
+.env.*.local
+
+# ========================
+# Secrets
+# ========================
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
