@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# docker-compose.override.yml — development konfiguracija
+#
+# Docker Compose automatski merguje ovaj fajl sa docker-compose.yml.
+# Ovde idu: portovi, environment varijable, development-only podesavanja.
+#
+# Cross-platform napomena (Mac vs Windows):
+#   - Na Mac-u: ne trebaju User Secrets volumes jer koristimo env vars
+#   - Na Windows-u: isti fajl radi isto
+#   - Nema HTTPS u Docker dev okruzenju — terminirajte TLS na reverse proxy-ju
+#
+# Environment varijable sa __ (double underscore) mapiraju se na nested config:
+#   ConnectionStrings__IdentityDb  →  ConnectionStrings:IdentityDb u appsettings
+#   Jwt__Secret                    →  Jwt:Secret u appsettings
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  identity.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # HTTP only u Docker dev-u — nema certifikata, nema HTTPS komplikacija
+      - ASPNETCORE_URLS=http://+:8080
+      # Connection string koristi ime containera "ba-db" kao server
+      # (Docker interni DNS razresava ime servisa unutar backend mreze)
+      - ConnectionStrings__IdentityDb=Server=ba-db;Database=IdentityDb;User=SA;Password=Password@12345#;TrustServerCertificate=True
+      # JWT podesavanja — overriduju appsettings.json vrednosti
+      # Secret ovde je za development only — u produkciji dolazi iz Azure Key Vault
+      - Jwt__Secret=dev-super-secret-key-minimum-32-characters-long-for-hmacsha256
+      - Jwt__Issuer=identity-api
+      - Jwt__Audience=business-assistant-clients
+      - Jwt__ExpiryMinutes=60
+    ports:
+      # host_port:container_port
+      # Identity API dostupan na: http://localhost:5100
+      # Swagger UI: http://localhost:5100/swagger
+      - "5100:8080"
+
+  ba-db:
+    ports:
+      # SQL Server dostupan na host masini za direktno spajanje iz IDE-a ili SSMS
+      # Connection string za lokalni pristup: Server=localhost,1433;User=SA;Password=Password@12345#;TrustServerCertificate=True
+      - "1433:1433"

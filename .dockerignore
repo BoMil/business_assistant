@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .dockerignore — sta se NE salje Docker daemonu pri buildu
+#
+# Bez ovog fajla, Docker bi poslao kompletan repo (ukljucujuci node_modules,
+# Flutter build artefakte, bin/obj foldere) — to bi bilo stotine MB i drasticno
+# usporilo svaki "docker compose up --build".
+# ─────────────────────────────────────────────────────────────────────────────
+
+# .NET build artefakti (regenerisu se tokom dotnet build u Dockerfile-u)
+**/bin/
+**/obj/
+
+# Angular
+apps/web/node_modules/
+apps/web/dist/
+apps/web/.angular/
+
+# Flutter
+apps/mobile/build/
+apps/mobile/.dart_tool/
+apps/mobile/.pub-cache/
+apps/mobile/ios/Pods/
+apps/mobile/android/.gradle/
+
+# IDE
+.vs/
+.idea/
+.vscode/
+**/*.user
+
+# Git
+.git/
+.gitignore
+
+# Docker (ne treba unutar image-a)
+.dockerignore
+docker-compose*.yml
+
+# Tajne i lokalne konfiguracije
+.env
+.env.local
+**/appsettings.Development.json
+**/appsettings.Local.json
+
+# OS artefakti
+.DS_Store
+Thumbs.db
+
+# Dokumentacija (ne treba u runtime image-u)
+docs/
+*.md
+LICENSE

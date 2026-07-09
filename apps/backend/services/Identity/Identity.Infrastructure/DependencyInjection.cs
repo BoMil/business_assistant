@@ -38,6 +38,10 @@ public static class DependencyInjection
                 };
             });
 
+        // Required for UseAuthorization() middleware in Program.cs.
+        // Without this, the app throws InvalidOperationException on startup.
+        services.AddAuthorization();
+
         return services;
     }
 }

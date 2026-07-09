@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Business Assistant — Docker Compose
+#
+# Zepp pattern:
+#   docker-compose.yml         — definise services, networks, volumes (bez portova i env vars)
+#   docker-compose.override.yml — dodaje portove i environment varijable za development
+#
+# Pokretanje: docker compose up --build
+# Zaustavljanje: docker compose down
+# Reset baze:   docker compose down -v   (brise i volume sa podacima!)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: business-assistant
+
+networks:
+  # Interni bridge network — servisi komuniciraju po imenu containera (npr. "ba-db")
+  # bez izlaganja portova na host masini (to rade ports: u override fajlu)
+  backend:
+    driver: bridge
+
+volumes:
+  # Named volume za SQL Server podatke — prezivis docker compose down
+  # Izgubi se samo sa: docker compose down -v
+  ba-db:
+    driver: local
+
+services:
+
+  # ── Identity mikroservis ────────────────────────────────────────────────────
+  identity.api:
+    image: ${DOCKER_REGISTRY-}identityapi
+    container_name: identity-api
+    networks:
+      - backend
+    build:
+      # context je ROOT repozitorijuma — mora biti root jer Dockerfile
+      # kopira fajlove i iz apps/backend/services/ i iz apps/backend/shared/
+      context: .
+      dockerfile: apps/backend/services/Identity/Identity.API/Dockerfile
+    depends_on:
+      ba-db:
+        # condition: service_healthy ceka da SQL Server bude spreman (healthcheck)
+        # pre nego sto pokrene identity.api — bez ovoga app bi pao pri startu
+        condition: service_healthy
+
+  # ── SQL Server ─────────────────────────────────────────────────────────────
+  # Jedan SQL Server instance, odvojena baza po mikroservisu (Zepp pattern).
+  # Svaki mikroservis koristi sopstvenu bazu: IdentityDb, BusinessDb, itd.
+  ba-db:
+    container_name: ba-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    networks:
+      - backend
+    volumes:
+      - ba-db:/var/opt/mssql
+    environment:
+      - MSSQL_SA_PASSWORD=Password@12345#
+      - MSSQL_USER=SA
+      - ACCEPT_EULA=Y
+    healthcheck:
+      # -C = TrustServerCertificate (obavezno za mssql-tools18)
+      # Proverava svakih 1s, odustaje posle 20 neuspelih pokusaja (~20s timeout)
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Password@12345#", "-Q", "SELECT 1", "-C"]
+      interval: 1s
+      retries: 20
