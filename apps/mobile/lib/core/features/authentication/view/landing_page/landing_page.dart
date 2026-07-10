@@ -221,10 +221,10 @@ class _LandingPageState extends State<LandingPage> {
 
     // Build list of (icon, title, description) tuples for enabled features only
     final allFeatures = [
-      if (flags.business) (Icons.business_center_outlined, t.featureBusiness, t.featureBusinessDesc),
+      if (flags.rental) (Icons.business_center_outlined, t.featureBusiness, t.featureBusinessDesc),
       if (flags.poultry) (Icons.egg_outlined, t.featurePoultry, t.featurePoultryDesc),
       if (flags.reporting) (Icons.description_outlined, t.featureReporting, t.featureReportingDesc),
-      if (flags.analytics) (Icons.bar_chart_outlined, t.featureAnalytics, t.featureAnalyticsDesc),
+      if (flags.inventory) (Icons.bar_chart_outlined, t.featureAnalytics, t.featureAnalyticsDesc),
     ];
 
     if (allFeatures.isEmpty) return const SizedBox.shrink();

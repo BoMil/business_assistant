@@ -98,6 +98,50 @@ jobs:
             echo "name=staging" >> $GITHUB_OUTPUT
           fi
 
+      # ── 8.5. Fetch tenant config from backend (optional) ─────────────────────
+      # Once a real Identity API is deployed, set TENANT_CONFIG_API_URL and
+      # TENANT_CONFIG_API_KEY as repo secrets to pull fresh branding + feature
+      # flags from the tenant's database row and merge them into the local
+      # .env file before building. Until then (no secret configured) this step
+      # is a no-op — the checked-in .env file is used as-is, same as today.
+      - name: Fetch tenant config from backend (optional)
+        env:
+          TENANT_CONFIG_API_URL: ${{ secrets.TENANT_CONFIG_API_URL }}
+          TENANT_CONFIG_API_KEY: ${{ secrets.TENANT_CONFIG_API_KEY }}
+        run: |
+          ENV_FILE=".env/${{ matrix.tenant }}.${{ steps.env_name.outputs.name }}.json"
+
+          if [ -z "$TENANT_CONFIG_API_URL" ]; then
+            echo "TENANT_CONFIG_API_URL not set — using local $ENV_FILE as-is."
+            exit 0
+          fi
+
+          echo "Fetching tenant config for '${{ matrix.tenant }}' from $TENANT_CONFIG_API_URL"
+          curl -sf -H "X-Api-Key: $TENANT_CONFIG_API_KEY" \
+            "$TENANT_CONFIG_API_URL/tenants/${{ matrix.tenant }}/config" -o tenant-config.json
+
+          # Backend returns hex colors like "#1A237E" — mobile expects ARGB "FF1A237E".
+          # featureFlags.* -> FEATURE_* (uppercase), name -> APP_NAME.
+          jq '{
+            APP_NAME: .name,
+            PRIMARY_COLOR: ("FF" + (.primaryColor | ltrimstr("#") | ascii_upcase)),
+            ACCENT_COLOR: ("FF" + (.accentColor | ltrimstr("#") | ascii_upcase)),
+            ERROR_COLOR: ("FF" + (.errorColor | ltrimstr("#") | ascii_upcase)),
+            FEATURE_RENTAL: (.featureFlags.rental | tostring),
+            FEATURE_INVENTORY: (.featureFlags.inventory | tostring),
+            FEATURE_REPORTING: (.featureFlags.reporting | tostring),
+            FEATURE_POULTRY: (.featureFlags.poultry | tostring),
+            FEATURE_THEME_CHANGE: (.featureFlags.themeChange | tostring),
+            FEATURE_LANGUAGE: (.featureFlags.language | tostring)
+          }' tenant-config.json > tenant-config.mapped.json
+
+          # Merge fetched values over the local file — SERVER_ADDRESS/ENVIRONMENT/
+          # PACKAGE_NAME/TENANT_ID aren't part of the fetched JSON, so they're kept as-is.
+          jq -s '.[0] * .[1]' "$ENV_FILE" tenant-config.mapped.json > "$ENV_FILE.merged"
+          mv "$ENV_FILE.merged" "$ENV_FILE"
+
+          echo "Merged tenant config into $ENV_FILE"
+
       - name: Build release APK
         env:
           PACKAGE_NAME: com.businessassistant.${{ matrix.tenant }}

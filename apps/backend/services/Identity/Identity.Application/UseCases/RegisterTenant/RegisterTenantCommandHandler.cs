@@ -24,7 +24,7 @@ internal sealed class RegisterTenantCommandHandler(
         if (emailTaken)
             throw new ConflictException(new ConflictError($"Email '{request.OwnerEmail}' is already registered."));
 
-        var tenant = Tenant.Create(request.TenantName, request.Slug, request.PrimaryColor, request.SecondaryColor);
+        var tenant = Tenant.Create(request.TenantName, request.Slug, request.PrimaryColor, request.AccentColor, request.ErrorColor);
 
         var passwordHash = passwordHasher.Hash(request.OwnerPassword);
         var owner = User.Create(request.OwnerFirstName, request.OwnerLastName, request.OwnerEmail, request.OwnerPhoneNumber, passwordHash, tenant.Id, UserRole.Owner);

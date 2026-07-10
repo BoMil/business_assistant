@@ -28,7 +28,11 @@ internal sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .IsRequired()
             .HasMaxLength(20);
 
-        builder.Property(t => t.SecondaryColor)
+        builder.Property(t => t.AccentColor)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(t => t.ErrorColor)
             .IsRequired()
             .HasMaxLength(20);
 

@@ -42,7 +42,12 @@ apps/mobile/
 │   │   │       ├── models/       # requests/ and responses/
 │   │   │       └── view/         # landing_page, login_page, initial_screen
 │   │   ├── shared/
-│   │   │   └── widgets/          # Reusable widgets (e.g. header_bar)
+│   │   │   ├── pages/
+│   │   │   │   └── page_frame/    # PageFrame — shared screen scaffold (header + padding)
+│   │   │   └── widgets/
+│   │   │       ├── buttons/       # CustomOutlinedButton, ButtonWithLoadingState
+│   │   │       ├── input_fields/  # PrimaryInputField, InputLabel
+│   │   │       └── screens/       # header_bar
 │   │   └── utils/
 │   │       ├── api/               # api_response, dio interceptor
 │   │       ├── stream_to_listenable.dart
@@ -77,6 +82,12 @@ loaded from `.env/<tenant>.<environment>.json`, e.g. `.env/demo.development.json
 `lib/config/environment/environment.dart` reads this into a typed config, and
 `lib/config/tenant/feature_flags.dart` exposes the `FEATURE_*` flags.
 
+`TenantConfig` (colors, name) and `FeatureFlags` (`Rental`, `Inventory`,
+`Reporting`, `Poultry`, `ThemeChange`, `Language`) are kept **1:1 with the
+backend's `Tenant` entity** (Identity service) — same field names on both
+sides, so a tenant's branding/feature-flags mean the same thing whether they
+come from a local `.env` file or from the database via CI (see below).
+
 ## Tenant branding (CI)
 
 `scripts/set_tenant_branding.sh` runs in the GitHub Actions workflow
@@ -86,6 +97,16 @@ loaded from `.env/<tenant>.<environment>.json`, e.g. `.env/demo.development.json
 1. Validates that `assets/tenants/$TENANT_ID/{logo.svg,app_icon.png,splash_logo.png}` exist
 2. Ensures the tenant asset directory is listed in `pubspec.yaml`
 3. Generates `flutter_launcher_icons.yaml` / `flutter_native_splash.yaml` and runs the generators
+
+Right after that, an optional **"Fetch tenant config from backend"** step calls
+`GET /tenants/{slug}/config` on the Identity API (protected by an `X-Api-Key`
+header) and merges the tenant's live colors/feature-flags from the database
+into the `.env/<tenant>.<environment>.json` file before the build — only the
+overlapping keys are overwritten, so `SERVER_ADDRESS`/`ENVIRONMENT`/
+`PACKAGE_NAME`/`TENANT_ID` always come from the local file. This step needs
+the `TENANT_CONFIG_API_URL` and `TENANT_CONFIG_API_KEY` repo secrets; until a
+backend is actually deployed and those secrets are set, it's a no-op and the
+checked-in `.env` file is used as-is, same as local development.
 
 ## Localization
 

@@ -1,5 +1,6 @@
 using Identity.Application.Repositories;
 using Identity.Application.Services;
+using Identity.Application.UseCases.Common;
 using Identity.Domain.Entities;
 using MediatR;
 using DomainRefreshToken = Identity.Domain.Entities.RefreshToken;
@@ -32,16 +33,19 @@ internal sealed class LoginCommandHandler(
         // → EF Core gleda šta je promenio, pravi INSERT/UPDATE SQL naredbe, izvršava ih
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var config = new TenantConfig(
+        var config = new TenantConfigDto(
             user.Tenant.Id,
             user.Tenant.Name,
             user.Tenant.LogoUrl,
             user.Tenant.PrimaryColor,
-            user.Tenant.SecondaryColor,
+            user.Tenant.AccentColor,
+            user.Tenant.ErrorColor,
             user.Tenant.FeatureFlags.Rental,
             user.Tenant.FeatureFlags.Inventory,
             user.Tenant.FeatureFlags.Reporting,
-            user.Tenant.FeatureFlags.Poultry);
+            user.Tenant.FeatureFlags.Poultry,
+            user.Tenant.FeatureFlags.ThemeChange,
+            user.Tenant.FeatureFlags.Language);
 
         return new LoginResult(accessToken, rawRefreshToken, config);
     }

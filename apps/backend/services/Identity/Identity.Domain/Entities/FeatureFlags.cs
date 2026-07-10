@@ -6,4 +6,6 @@ public class FeatureFlags
     public bool Inventory { get; set; } = true;
     public bool Reporting { get; set; } = true;
     public bool Poultry { get; set; } = false;
+    public bool ThemeChange { get; set; } = true;
+    public bool Language { get; set; } = true;
 }

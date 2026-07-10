@@ -30,6 +30,8 @@ services:
       - Jwt__Issuer=identity-api
       - Jwt__Audience=business-assistant-clients
       - Jwt__ExpiryMinutes=60
+      # Deljeni kljuc za GET /tenants/{slug}/config — koristi ga CI/CD pipeline, dev only
+      - CiApiKey=dev-ci-api-key-change-me
     ports:
       # host_port:container_port
       # Identity API dostupan na: http://localhost:5100

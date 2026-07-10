@@ -22,19 +22,19 @@ class FeatureFlags {
 
   // ── Domain features ───────────────────────────────────────────────────────
 
-  /// Core business management module (products, employees, expenses).
-  final bool business =
-      const bool.fromEnvironment('FEATURE_BUSINESS', defaultValue: true);
+  /// Rental management module.
+  final bool rental =
+      const bool.fromEnvironment('FEATURE_RENTAL', defaultValue: true);
 
   /// Poultry farm tracking module (flocks, mortality, feed, health events).
   final bool poultry =
       const bool.fromEnvironment('FEATURE_POULTRY', defaultValue: true);
 
+  /// Inventory management module.
+  final bool inventory =
+      const bool.fromEnvironment('FEATURE_INVENTORY', defaultValue: true);
+
   /// Reporting module — export and schedule PDF/Excel reports.
   final bool reporting =
       const bool.fromEnvironment('FEATURE_REPORTING', defaultValue: true);
-
-  /// Analytics dashboard — charts and KPI summaries.
-  final bool analytics =
-      const bool.fromEnvironment('FEATURE_ANALYTICS', defaultValue: true);
 }
