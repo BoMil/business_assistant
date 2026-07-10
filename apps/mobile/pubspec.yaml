@@ -1,0 +1,65 @@
+name: business_assistant
+description: "Business Operations Platform — white-label multi-tenant mobile app."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP client — used for all API calls (Identity, future microservices)
+  dio: ^5.8.0+1
+
+  # State management — Cubit pattern (simpler than full Bloc for most screens)
+  flutter_bloc: ^8.1.6
+
+  # Navigation — declarative routing with auth redirect support
+  go_router: ^14.6.2
+
+  # Secure token storage — JWT access token + refresh token stored in Keystore/Keychain
+  flutter_secure_storage: ^9.2.4
+
+  # JWT payload parsing — reads exp, sub, role, tenantId claims without a server round-trip
+  jwt_decode: ^0.3.1
+
+  # In-app toast notifications — success / error / warning / info
+  toastification: ^2.3.0
+
+  # SVG image rendering — tenant logos are SVG files stored in assets/tenants/
+  flutter_svg: ^2.0.16
+
+  # Localizations (ARB-based) — English and Serbian supported
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Linting — flutter_lints ruleset + our overrides in analysis_options.yaml
+  flutter_lints: ^4.0.0
+
+  # Generates launcher icons for Android (and iOS when we add it)
+  flutter_launcher_icons: ^0.14.3
+
+  # Generates the native splash screen from a PNG asset
+  flutter_native_splash: ^2.4.4
+
+flutter:
+  # Required for ARB code generation (l10n)
+  generate: true
+
+  uses-material-design: true
+
+  assets:
+    # SVG vector assets (shared across tenants)
+    - assets/svg/
+    # GIF assets (e.g. the shared button loading spinner)
+    - assets/gifs/
+    # Demo tenant assets: logo.svg, app_icon.png, splash_logo.png
+    - assets/tenants/demo/

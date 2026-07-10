@@ -1,0 +1,79 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+// White-label: applicationId and app label are injected per-tenant at build time.
+// Locally: falls back to the demo tenant defaults.
+// On CI: set_tenant_branding.sh exports PACKAGE_NAME and APP_NAME before the build.
+def tenantPackageName = System.getenv("PACKAGE_NAME") ?: "com.businessassistant.demo"
+def tenantAppName = System.getenv("APP_NAME") ?: "Business Assistant"
+
+// Read key.properties for local release signing (not used on CI).
+// Create android/key.properties with your local keystore path if you want to
+// test release builds locally. This file is gitignored.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    // namespace must match the package declared in AndroidManifest.xml and MainActivity.kt.
+    // This does NOT change with the tenant — it identifies the code, not the store listing.
+    namespace = "com.businessassistant.business_assistant"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion "27.0.12077973"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        // applicationId is the Play Store identifier — changes per tenant
+        applicationId = tenantPackageName
+        // Inject the tenant app name into AndroidManifest.xml android:label placeholder
+        manifestPlaceholders += [appName: tenantAppName]
+        // flutter_secure_storage requires minSdk 23 (Android 6.0)
+        minSdk = 23
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    signingConfigs {
+        release {
+            if (System.getenv()["GITHUB_ACTIONS"]) {
+                // On GitHub Actions, secrets are exported as environment variables
+                // by the mobile-android.yml workflow before the build step.
+                storeFile file(System.getenv()["ANDROID_KEYSTORE_PATH"])
+                storePassword System.getenv()["ANDROID_KEYSTORE_PASSWORD"]
+                keyAlias System.getenv()["ANDROID_KEY_ALIAS"]
+                keyPassword System.getenv()["ANDROID_KEY_PASSWORD"]
+            } else {
+                // Local release signing — requires android/key.properties
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}

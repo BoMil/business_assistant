@@ -1,0 +1,10 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    prefer_single_quotes: true
+
+analyzer:
+  errors:
+    # Suppress TODO comment warnings — we use them intentionally for future work
+    todo: ignore

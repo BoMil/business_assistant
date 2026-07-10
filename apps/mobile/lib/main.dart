@@ -1,0 +1,124 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:toastification/toastification.dart';
+import 'package:business_assistant/config/environment/environment.dart';
+import 'package:business_assistant/config/routes/router_config.dart';
+import 'package:business_assistant/config/routes/routes.dart';
+import 'package:business_assistant/config/translations/translation_storage.dart';
+import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/utils/api/app_interceptor.dart';
+import 'package:business_assistant/theme/theme_config.dart';
+import 'package:business_assistant/theme/themes.dart';
+
+/// Entry point of the Business Assistant mobile app.
+///
+/// Startup sequence:
+///   1. Suppress debug prints in non-DEV environments.
+///   2. Initialize the Dio interceptor (token injection + 401 refresh).
+///   3. Run MyApp.
+void main() async {
+  // Disable all debugPrint() calls in release mode and non-DEV environments
+  // so no sensitive data appears in device logs on staging/production.
+  if (kReleaseMode || Environment.environment != 'DEV') {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Set up the singleton Dio instance with the auth interceptor before any
+  // repository can make an HTTP call.
+  AppInterceptor().initializeInterceptor();
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  /// AuthCubit is created here so it lives for the lifetime of the app.
+  /// It is shared with RouterState (for GoRouter's redirect) and provided
+  /// to the widget tree via MultiBlocProvider.
+  AuthCubit authCubit = AuthCubit(secureStorage: const FlutterSecureStorage());
+
+  @override
+  void initState() {
+    // Give GoRouter access to authCubit before the first build
+    RouterState().authCubit = authCubit;
+
+    // Load translations for the default locale (English) so
+    // TranslationStorage.translation is usable before the first frame
+    TranslationStorage().initTranslation();
+    TranslationStorage().onLanguageChanged = _onLanguageChanged;
+
+    // Register theme change callback — setState() causes MaterialApp.router
+    // to re-read ThemeConfig().currentTheme and apply the new theme
+    ThemeConfig().onThemeChanged = _onThemeChange;
+    _initializeTheme();
+
+    super.initState();
+  }
+
+  /// Reads the persisted theme from secure storage and applies it.
+  Future<void> _initializeTheme() async {
+    ThemeMode themeMode = await ThemeConfig().initThemeConfig();
+    ThemeConfig().changeTheme(themeMode);
+  }
+
+  @override
+  void dispose() {
+    // Close the stream to avoid memory leaks
+    RouterState().authCubit.close();
+    super.dispose();
+  }
+
+  void _onThemeChange(ThemeMode themeMode) => setState(() {});
+
+  void _onLanguageChanged() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    // Reset navigator keys and recalculate initialRoute on every rebuild.
+    // This is safe because GoRouter caches its own state internally.
+    RouterState().initializeRouteState();
+
+    return MultiBlocProvider(
+      providers: [
+        // AuthCubit is global — GoRouter's redirect and all screens can read it
+        BlocProvider(
+          create: (context) => RouterState().authCubit..initAuthState(),
+        ),
+      ],
+      child: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          // Hook for side-effects on auth state changes (analytics, etc.)
+          // GoRouter handles the actual navigation via its redirect callback.
+        },
+        // ToastificationWrapper must wrap MaterialApp so toastification.show()
+        // works from anywhere in the app without a BuildContext
+        child: ToastificationWrapper(
+          child: MaterialApp.router(
+            theme: Themes.light,
+            darkTheme: Themes.dark,
+            themeMode: ThemeConfig().currentTheme,
+            locale: TranslationStorage().selectedLanguage,
+            routerDelegate: Routes().goRouterInstance.routerDelegate,
+            routeInformationProvider:
+                Routes().goRouterInstance.routeInformationProvider,
+            routeInformationParser:
+                Routes().goRouterInstance.routeInformationParser,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
+        ),
+      ),
+    );
+  }
+}
