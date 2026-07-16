@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Shared.Presentation.ErrorHandling;
 
 namespace Identity.Presentation.Endpoints.Tenants.RegisterTenant;
 
@@ -28,7 +29,7 @@ public static class RegisterTenant
         }
     }
 
-    public static async Task<Created<RegisterTenantResult>> Handle(
+    public static async Task<Results<Created<RegisterTenantResult>, ProblemHttpResult>> Handle(
         RegisterTenantRequest request,
         ISender sender,
         CancellationToken cancellationToken)
@@ -39,6 +40,7 @@ public static class RegisterTenant
             request.PrimaryColor,
             request.AccentColor,
             request.ErrorColor,
+            request.Type,
             request.OwnerFirstName,
             request.OwnerLastName,
             request.OwnerEmail,
@@ -47,9 +49,12 @@ public static class RegisterTenant
 
         var result = await sender.Send(command, cancellationToken);
 
-        // 201 Created — a new resource was created.
-        // The null here is the Location header (URL to the new resource).
-        // We'll fill this in once we have a GET /tenants/{id} endpoint.
-        return TypedResults.Created((string?)null, result);
+        if (result.IsSuccess)
+            // 201 Created — a new resource was created.
+            // The null here is the Location header (URL to the new resource).
+            // We'll fill this in once we have a GET /tenants/{id} endpoint.
+            return TypedResults.Created((string?)null, result.Value);
+
+        return CommonHttpErrorHandlers.HandleError(result.Errors[0]);
     }
 }

@@ -121,18 +121,20 @@ jobs:
             "$TENANT_CONFIG_API_URL/tenants/${{ matrix.tenant }}/config" -o tenant-config.json
 
           # Backend returns hex colors like "#1A237E" — mobile expects ARGB "FF1A237E".
-          # featureFlags.* -> FEATURE_* (uppercase), name -> APP_NAME.
+          # TenantConfigDto is flat (not nested under featureFlags/modules) and
+          # camelCased by ASP.NET Core's default JSON policy — events/inventory/clients
+          # come from the tenant's TenantModules, themeChange/language from FeatureFlags.
           jq '{
             APP_NAME: .name,
             PRIMARY_COLOR: ("FF" + (.primaryColor | ltrimstr("#") | ascii_upcase)),
             ACCENT_COLOR: ("FF" + (.accentColor | ltrimstr("#") | ascii_upcase)),
             ERROR_COLOR: ("FF" + (.errorColor | ltrimstr("#") | ascii_upcase)),
-            FEATURE_RENTAL: (.featureFlags.rental | tostring),
-            FEATURE_INVENTORY: (.featureFlags.inventory | tostring),
-            FEATURE_REPORTING: (.featureFlags.reporting | tostring),
-            FEATURE_POULTRY: (.featureFlags.poultry | tostring),
-            FEATURE_THEME_CHANGE: (.featureFlags.themeChange | tostring),
-            FEATURE_LANGUAGE: (.featureFlags.language | tostring)
+            TENANT_TYPE: .type,
+            MODULE_EVENTS: (.events | tostring),
+            MODULE_INVENTORY: (.inventory | tostring),
+            MODULE_CLIENTS: (.clients | tostring),
+            FEATURE_THEME_CHANGE: (.themeChange | tostring),
+            FEATURE_LANGUAGE: (.language | tostring)
           }' tenant-config.json > tenant-config.mapped.json
 
           # Merge fetched values over the local file — SERVER_ADDRESS/ENVIRONMENT/

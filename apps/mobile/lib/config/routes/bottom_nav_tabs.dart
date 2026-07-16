@@ -1,0 +1,71 @@
+import 'package:flutter/material.dart';
+import 'package:business_assistant/config/routes/route_names.dart';
+import 'package:business_assistant/config/routes/router_config.dart';
+import 'package:business_assistant/config/tenant/tenant_modules.dart';
+import 'package:business_assistant/core/features/clients/view/clients_page.dart';
+import 'package:business_assistant/core/features/events/view/events_page.dart';
+import 'package:business_assistant/core/features/inventory/view/inventory_page.dart';
+
+/// One entry in the bottom navigation bar.
+class BottomNavTab {
+  final String path;
+  final IconData icon;
+  final String label;
+  final GlobalKey<NavigatorState> navigatorKey;
+  final WidgetBuilder pageBuilder;
+
+  const BottomNavTab({
+    required this.path,
+    required this.icon,
+    required this.label,
+    required this.navigatorKey,
+    required this.pageBuilder,
+  });
+}
+
+/// The bottom nav is built from TenantModules, not TenantType directly — the
+/// type only seeds the modules' defaults when a tenant is created (see the
+/// backend's TenantModules.CreateDefaults). Each module is independent, so any
+/// combination can be toggled per-tenant afterwards.
+///
+/// Modules are compile-time constants (--dart-define-from-file), so this list
+/// is effectively fixed for the lifetime of a given build — it doesn't change
+/// at runtime.
+List<BottomNavTab> visibleBottomNavTabs() {
+  final modules = TenantModules();
+
+  return [
+    if (modules.events)
+      BottomNavTab(
+        path: RouteNames.eventsPage,
+        icon: Icons.event,
+        label: 'Events',
+        navigatorKey: RouterState().eventsNavigatorKey,
+        pageBuilder: (_) => const EventsPage(),
+      ),
+    if (modules.inventory)
+      BottomNavTab(
+        path: RouteNames.inventoryPage,
+        icon: Icons.inventory_2,
+        label: 'Inventory',
+        navigatorKey: RouterState().inventoryNavigatorKey,
+        pageBuilder: (_) => const InventoryPage(),
+      ),
+    if (modules.clients)
+      BottomNavTab(
+        path: RouteNames.clientsPage,
+        icon: Icons.people,
+        label: 'Clients',
+        navigatorKey: RouterState().clientsNavigatorKey,
+        pageBuilder: (_) => const ClientsPage(),
+      ),
+  ];
+}
+
+/// Where an authenticated user lands — the first tab this build actually has.
+/// Falls back to the landing page in the (invalid-config) case where no tabs
+/// are enabled at all.
+String defaultAuthenticatedRoute() {
+  final tabs = visibleBottomNavTabs();
+  return tabs.isEmpty ? RouteNames.landingPage : tabs.first.path;
+}

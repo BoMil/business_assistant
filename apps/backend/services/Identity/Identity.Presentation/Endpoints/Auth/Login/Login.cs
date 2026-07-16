@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Shared.Presentation.ErrorHandling;
 
 namespace Identity.Presentation.Endpoints.Auth.Login;
 
@@ -35,16 +36,20 @@ public static class Login
     /// without spinning up the full HTTP pipeline.
     ///
     /// Return type is a union: either Ok with the result, or a Problem (error) response.
-    /// Errors (wrong password, deactivated account) are thrown as exceptions in the Application
-    /// layer and caught by the global exception handler in Program.cs.
+    /// Errors (wrong password, deactivated account) are returned as a failed Result from the
+    /// Application layer and translated to a Problem response here.
     /// </summary>
-    public static async Task<Ok<LoginResult>> Handle(
+    public static async Task<Results<Ok<LoginResult>, ProblemHttpResult>> Handle(
         LoginRequest request,
         ISender sender,
         CancellationToken cancellationToken)
     {
         var command = new LoginCommand(request.Email, request.Password);
         var result = await sender.Send(command, cancellationToken);
-        return TypedResults.Ok(result);
+
+        if (result.IsSuccess)
+            return TypedResults.Ok(result.Value);
+
+        return CommonHttpErrorHandlers.HandleError(result.Errors[0]);
     }
 }

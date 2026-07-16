@@ -36,12 +36,22 @@ internal sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .IsRequired()
             .HasMaxLength(20);
 
-        // FeatureFlags is stored as a JSON column in a single SQL column ("FeatureFlags").
+        // Store the enum as an int in the database (Rental=1, Farming=2).
+        builder.Property(t => t.Type)
+            .HasConversion<int>()
+            .IsRequired();
+
+        // FeatureFlags/Modules are each stored as a JSON column in a single SQL column.
         // EF Core 8 handles serialization/deserialization automatically.
-        // This avoids a separate table for a simple per-tenant config object.
+        // This avoids a separate table for simple per-tenant config objects.
         builder.OwnsOne(t => t.FeatureFlags, ff =>
         {
             ff.ToJson();
+        });
+
+        builder.OwnsOne(t => t.Modules, m =>
+        {
+            m.ToJson();
         });
 
         builder.HasMany(t => t.Users)

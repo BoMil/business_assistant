@@ -1,3 +1,4 @@
+using Identity.Domain.Enums;
 using Shared.Domain.Common;
 
 namespace Identity.Domain.Entities;
@@ -12,13 +13,15 @@ public class Tenant : Entity<Guid>
     public string ErrorColor { get; private set; } = "#eb2e25";
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public TenantType Type { get; private set; }
     public FeatureFlags FeatureFlags { get; private set; } = new();
+    public TenantModules Modules { get; private set; } = new();
 
     public ICollection<User> Users { get; private set; } = [];
 
     private Tenant() { }
 
-    public static Tenant Create(string name, string slug, string primaryColor, string accentColor, string errorColor)
+    public static Tenant Create(string name, string slug, string primaryColor, string accentColor, string errorColor, TenantType type)
     {
         return new Tenant
         {
@@ -29,7 +32,9 @@ public class Tenant : Entity<Guid>
             AccentColor = accentColor,
             ErrorColor = errorColor,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            Type = type,
+            Modules = TenantModules.CreateDefaults(type)
         };
     }
 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Shared.Presentation.ErrorHandling;
 
 namespace Identity.Presentation.Endpoints.Tenants.GetTenantConfig;
 
@@ -32,12 +33,16 @@ public static class GetTenantConfig
         }
     }
 
-    public static async Task<Ok<TenantConfigDto>> Handle(
+    public static async Task<Results<Ok<TenantConfigDto>, ProblemHttpResult>> Handle(
         string slug,
         ISender sender,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetTenantConfigQuery(slug), cancellationToken);
-        return TypedResults.Ok(result);
+
+        if (result.IsSuccess)
+            return TypedResults.Ok(result.Value);
+
+        return CommonHttpErrorHandlers.HandleError(result.Errors[0]);
     }
 }

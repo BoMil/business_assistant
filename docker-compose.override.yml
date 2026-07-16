@@ -38,6 +38,21 @@ services:
       # Swagger UI: http://localhost:5100/swagger
       - "5100:8080"
 
+  business.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__BusinessDb=Server=ba-db;Database=BusinessDb;User=SA;Password=Password@12345#;TrustServerCertificate=True
+      # Jwt vrednosti moraju biti IDENTICNE Identity servisu — Business samo validira
+      # tokene koje je Identity izdao, ne izdaje sopstvene (vidi Business.Infrastructure).
+      - Jwt__Secret=dev-super-secret-key-minimum-32-characters-long-for-hmacsha256
+      - Jwt__Issuer=identity-api
+      - Jwt__Audience=business-assistant-clients
+    ports:
+      # Business API dostupan na: http://localhost:5101
+      # Swagger UI: http://localhost:5101/swagger
+      - "5101:8080"
+
   ba-db:
     ports:
       # SQL Server dostupan na host masini za direktno spajanje iz IDE-a ili SSMS

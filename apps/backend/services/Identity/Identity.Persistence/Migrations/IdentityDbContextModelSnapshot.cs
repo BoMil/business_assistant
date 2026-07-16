@@ -96,6 +96,9 @@ namespace Identity.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Slug")
@@ -178,19 +181,7 @@ namespace Identity.Persistence.Migrations
                             b1.Property<Guid>("TenantId")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<bool>("Inventory")
-                                .HasColumnType("bit");
-
                             b1.Property<bool>("Language")
-                                .HasColumnType("bit");
-
-                            b1.Property<bool>("Poultry")
-                                .HasColumnType("bit");
-
-                            b1.Property<bool>("Rental")
-                                .HasColumnType("bit");
-
-                            b1.Property<bool>("Reporting")
                                 .HasColumnType("bit");
 
                             b1.Property<bool>("ThemeChange")
@@ -206,7 +197,34 @@ namespace Identity.Persistence.Migrations
                                 .HasForeignKey("TenantId");
                         });
 
+                    b.OwnsOne("Identity.Domain.Entities.TenantModules", "Modules", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<bool>("Clients")
+                                .HasColumnType("bit");
+
+                            b1.Property<bool>("Events")
+                                .HasColumnType("bit");
+
+                            b1.Property<bool>("Inventory")
+                                .HasColumnType("bit");
+
+                            b1.HasKey("TenantId");
+
+                            b1.ToTable("Tenants");
+
+                            b1.ToJson("Modules");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId");
+                        });
+
                     b.Navigation("FeatureFlags")
+                        .IsRequired();
+
+                    b.Navigation("Modules")
                         .IsRequired();
                 });
 

@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Identity.Application\Identity.Application.csproj" />
+    <ProjectReference Include="..\..\..\shared\Shared.Presentation\Shared.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

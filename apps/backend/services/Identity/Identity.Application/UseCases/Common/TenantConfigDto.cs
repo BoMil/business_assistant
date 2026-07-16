@@ -1,3 +1,5 @@
+using Identity.Domain.Enums;
+
 namespace Identity.Application.UseCases.Common;
 
 /// <summary>
@@ -11,9 +13,9 @@ public record TenantConfigDto(
     string PrimaryColor,
     string AccentColor,
     string ErrorColor,
-    bool Rental,
+    TenantType Type,
+    bool Events,
     bool Inventory,
-    bool Reporting,
-    bool Poultry,
+    bool Clients,
     bool ThemeChange,
     bool Language);

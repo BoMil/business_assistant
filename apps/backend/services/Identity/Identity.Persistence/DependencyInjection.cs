@@ -17,10 +17,7 @@ public static class DependencyInjection
         services.AddDbContext<IdentityDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("IdentityDb")));
 
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ITenantRepository, TenantRepository>();
-        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUnitOfWorkIdentity, UnitOfWorkIdentity>();
 
         return services;
     }

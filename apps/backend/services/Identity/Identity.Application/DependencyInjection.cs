@@ -1,5 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Application.Behaviors.Logging;
+using Shared.Application.Behaviors.Validation;
 
 namespace Identity.Application;
 
@@ -10,10 +12,12 @@ public static class DependencyInjection
         services.AddMediatR(cfg =>
         {
             cfg.Lifetime = ServiceLifetime.Scoped;
-            cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+            cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly)
+                .AddOpenBehavior(typeof(LoggingBehavior<,>), ServiceLifetime.Scoped)
+                .AddOpenBehavior(typeof(ValidationBehavior<,>), ServiceLifetime.Scoped);
         });
 
-        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, ServiceLifetime.Singleton);
 
         return services;
     }

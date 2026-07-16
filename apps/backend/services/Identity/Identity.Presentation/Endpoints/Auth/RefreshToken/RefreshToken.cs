@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Shared.Presentation.ErrorHandling;
 
 namespace Identity.Presentation.Endpoints.Auth.RefreshToken;
 
@@ -26,13 +27,17 @@ public static class RefreshToken
         }
     }
 
-    public static async Task<Ok<RefreshTokenResult>> Handle(
+    public static async Task<Results<Ok<RefreshTokenResult>, ProblemHttpResult>> Handle(
         RefreshTokenRequest request,
         ISender sender,
         CancellationToken cancellationToken)
     {
         var command = new RefreshTokenCommand(request.Token);
         var result = await sender.Send(command, cancellationToken);
-        return TypedResults.Ok(result);
+
+        if (result.IsSuccess)
+            return TypedResults.Ok(result.Value);
+
+        return CommonHttpErrorHandlers.HandleError(result.Errors[0]);
     }
 }

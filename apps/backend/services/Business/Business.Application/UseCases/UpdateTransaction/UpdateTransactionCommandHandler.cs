@@ -1,0 +1,48 @@
+using Business.Application.Repositories;
+using Business.Application.UseCases.Common;
+using Business.Domain.Enums;
+using Shared.Domain.Errors;
+using Business.Domain.ValueObjects;
+using FluentResults;
+using MediatR;
+
+namespace Business.Application.UseCases.UpdateTransaction;
+
+internal sealed class UpdateTransactionCommandHandler(IUnitOfWorkBusiness unitOfWork)
+    : IRequestHandler<UpdateTransactionCommand, Result>
+{
+    public async Task<Result> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
+    {
+        var transaction = await unitOfWork.Transactions.GetByIdAsync(request.Id, request.TenantId, cancellationToken);
+        if (transaction is null)
+            return Result.Fail(new NotFoundError($"Transaction '{request.Id}' not found."));
+
+        if (transaction.IsCancelled)
+            return Result.Fail("A cancelled transaction cannot be edited.");
+
+        if (transaction.Type == TransactionType.Rental && request.From is not null && request.To is not null)
+        {
+            // Exclude this transaction's own current reservation, since we're about to replace it.
+            var availability = await StockAvailabilityChecker.EnsureAvailableAsync(
+                unitOfWork.Assets, unitOfWork.Transactions, request.TenantId,
+                request.From.Value, request.To.Value, request.LineItems, excludeTransactionId: transaction.Id, cancellationToken);
+
+            if (availability.IsFailed)
+                return availability;
+        }
+
+        var location = request.LocationAddress is null || request.LocationLatitude is null || request.LocationLongitude is null
+            ? null
+            : Location.Create(request.LocationAddress, request.LocationLatitude.Value, request.LocationLongitude.Value);
+
+        transaction.Update(request.Title, request.Description, request.From, request.To, location, request.ClientId);
+
+        transaction.ClearLineItems();
+        foreach (var item in request.LineItems)
+            transaction.AddLineItem(item.AssetId, item.Quantity, item.Price);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Ok();
+    }
+}

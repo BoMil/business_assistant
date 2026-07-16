@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:business_assistant/config/routes/bottom_nav_tabs.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 
@@ -17,13 +18,18 @@ class RouterState {
   GlobalKey<NavigatorState> rootNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'rootNavigatorKey');
 
-  /// Shell navigator key — used for the bottom navigation tab's nested navigator.
-  /// Reserved for when we add the home shell route.
-  GlobalKey<NavigatorState> homeNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'homeNavigatorKey');
+  /// Shell navigator keys — one per bottom navigation tab's nested navigator.
+  /// Not every tab is necessarily shown (see bottom_nav_tabs.dart) — unused
+  /// keys are simply never attached to a StatefulShellBranch.
+  GlobalKey<NavigatorState> eventsNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'eventsNavigatorKey');
+  GlobalKey<NavigatorState> inventoryNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'inventoryNavigatorKey');
+  GlobalKey<NavigatorState> clientsNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'clientsNavigatorKey');
 
   /// The initial route GoRouter starts at — set dynamically based on auth state.
-  String initialRoute = RouteNames.homePage;
+  String initialRoute = RouteNames.initialScreen;
 
   static final RouterState _instance = RouterState._internal();
 
@@ -36,17 +42,21 @@ class RouterState {
   void _resetKeys() {
     rootNavigatorKey =
         GlobalKey<NavigatorState>(debugLabel: 'rootNavigatorKey');
-    homeNavigatorKey =
-        GlobalKey<NavigatorState>(debugLabel: 'homeNavigatorKey');
+    eventsNavigatorKey =
+        GlobalKey<NavigatorState>(debugLabel: 'eventsNavigatorKey');
+    inventoryNavigatorKey =
+        GlobalKey<NavigatorState>(debugLabel: 'inventoryNavigatorKey');
+    clientsNavigatorKey =
+        GlobalKey<NavigatorState>(debugLabel: 'clientsNavigatorKey');
   }
 
   /// Maps the current auth state to the correct initial route:
   ///   AuthInitial   → initialScreen (splash — covers the loading gap)
-  ///   Authenticated → homePage
+  ///   Authenticated → first visible bottom nav tab
   ///   Unauthenticated → landingPage
   void _setInitialRoute() {
     if (authCubit.state is Authenticated) {
-      initialRoute = RouteNames.homePage;
+      initialRoute = defaultAuthenticatedRoute();
     } else if (authCubit.state is Unauthenticated) {
       initialRoute = RouteNames.landingPage;
     } else {

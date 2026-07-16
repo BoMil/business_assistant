@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:business_assistant/config/routes/bottom_nav_tabs.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/routes/router_config.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/features/authentication/view/initial_screen.dart';
 import 'package:business_assistant/core/features/authentication/view/landing_page/landing_page.dart';
 import 'package:business_assistant/core/features/authentication/view/login_page/login_page.dart';
+import 'package:business_assistant/core/shared/widgets/navigation/bottom_navigation_frame.dart';
 import 'package:business_assistant/core/utils/stream_to_listenable.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,7 +21,7 @@ import 'package:go_router/go_router.dart';
 ///   2. StreamToListenable calls notifyListeners() — GoRouter re-evaluates redirect.
 ///   3. redirect() reads the current AuthState and returns the correct path.
 ///      - Unauthenticated → landingPage (unless already on an unauth route)
-///      - Authenticated + first login → homePage
+///      - Authenticated + first login → first visible bottom nav tab
 ///      - null → stay on current route (no redirect needed)
 class Routes {
   static final GoRouter _goRouterInstance = GoRouter(
@@ -44,8 +46,7 @@ class Routes {
       if (context.read<AuthCubit>().state is Authenticated &&
           context.read<AuthCubit>().redirectToHomeInitialy) {
         context.read<AuthCubit>().redirectToHomeInitialy = false;
-        // Uncomment when home screen exists:
-        // return RouteNames.homePage;
+        return defaultAuthenticatedRoute();
       }
 
       return null; // no redirect — stay on current route
@@ -100,18 +101,24 @@ class Routes {
         },
       ),
 
-      // TODO: Add StatefulShellRoute with bottom navigation when home screen is ready
-      // StatefulShellRoute.indexedStack(
-      //   builder: (context, state, navigationShell) => BottomNavigationFrame(navigationShell),
-      //   branches: [
-      //     StatefulShellBranch(
-      //       navigatorKey: RouterState().homeNavigatorKey,
-      //       routes: [
-      //         GoRoute(path: RouteNames.homePage, builder: (_, __) => const HomePage()),
-      //       ],
-      //     ),
-      //   ],
-      // ),
+      // Bottom navigation shell — tabs shown depend on FeatureFlags, built once
+      // from visibleBottomNavTabs() so the branches and the nav bar itself
+      // (BottomNavigationFrame) never fall out of sync.
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            BottomNavigationFrame(navigationShell: navigationShell),
+        branches: visibleBottomNavTabs()
+            .map((tab) => StatefulShellBranch(
+                  navigatorKey: tab.navigatorKey,
+                  routes: [
+                    GoRoute(
+                      path: tab.path,
+                      builder: (context, state) => tab.pageBuilder(context),
+                    ),
+                  ],
+                ))
+            .toList(),
+      ),
     ],
   );
 

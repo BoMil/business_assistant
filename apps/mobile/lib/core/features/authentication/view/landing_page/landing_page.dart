@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/tenant/feature_flags.dart';
 import 'package:business_assistant/config/tenant/tenant_config.dart';
+import 'package:business_assistant/config/tenant/tenant_modules.dart';
 import 'package:business_assistant/config/translations/enums/language.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
@@ -217,14 +218,12 @@ class _LandingPageState extends State<LandingPage> {
   // ── Feature cards ──────────────────────────────────────────────────────────
 
   Widget _buildFeaturesSection(dynamic t) {
-    final flags = FeatureFlags();
+    final modules = TenantModules();
 
     // Build list of (icon, title, description) tuples for enabled features only
     final allFeatures = [
-      if (flags.rental) (Icons.business_center_outlined, t.featureBusiness, t.featureBusinessDesc),
-      if (flags.poultry) (Icons.egg_outlined, t.featurePoultry, t.featurePoultryDesc),
-      if (flags.reporting) (Icons.description_outlined, t.featureReporting, t.featureReportingDesc),
-      if (flags.inventory) (Icons.bar_chart_outlined, t.featureAnalytics, t.featureAnalyticsDesc),
+      if (modules.events) (Icons.business_center_outlined, t.featureBusiness, t.featureBusinessDesc),
+      if (modules.inventory) (Icons.bar_chart_outlined, t.featureAnalytics, t.featureAnalyticsDesc),
     ];
 
     if (allFeatures.isEmpty) return const SizedBox.shrink();

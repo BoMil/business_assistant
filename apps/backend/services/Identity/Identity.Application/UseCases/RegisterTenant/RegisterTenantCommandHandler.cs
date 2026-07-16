@@ -1,38 +1,36 @@
+using FluentResults;
 using Identity.Application.Repositories;
 using Identity.Application.Services;
 using Identity.Domain.Entities;
 using Identity.Domain.Enums;
 using MediatR;
-using Shared.Domain.Errors;
 
 namespace Identity.Application.UseCases.RegisterTenant;
 
 internal sealed class RegisterTenantCommandHandler(
-    ITenantRepository tenantRepository,
-    IUserRepository userRepository,
-    IUnitOfWork unitOfWork,
+    IUnitOfWorkIdentity unitOfWork,
     IPasswordHasher passwordHasher)
-    : IRequestHandler<RegisterTenantCommand, RegisterTenantResult>
+    : IRequestHandler<RegisterTenantCommand, Result<RegisterTenantResult>>
 {
-    public async Task<RegisterTenantResult> Handle(RegisterTenantCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RegisterTenantResult>> Handle(RegisterTenantCommand request, CancellationToken cancellationToken)
     {
-        var slugTaken = await tenantRepository.ExistsBySlugAsync(request.Slug, cancellationToken);
+        var slugTaken = await unitOfWork.Tenants.ExistsBySlugAsync(request.Slug, cancellationToken);
         if (slugTaken)
-            throw new ConflictException(new ConflictError($"Slug '{request.Slug}' is already taken."));
+            return Result.Fail($"Slug '{request.Slug}' is already taken.");
 
-        var emailTaken = await userRepository.ExistsByEmailAsync(request.OwnerEmail, cancellationToken);
+        var emailTaken = await unitOfWork.Users.ExistsByEmailAsync(request.OwnerEmail, cancellationToken);
         if (emailTaken)
-            throw new ConflictException(new ConflictError($"Email '{request.OwnerEmail}' is already registered."));
+            return Result.Fail($"Email '{request.OwnerEmail}' is already registered.");
 
-        var tenant = Tenant.Create(request.TenantName, request.Slug, request.PrimaryColor, request.AccentColor, request.ErrorColor);
+        var tenant = Tenant.Create(request.TenantName, request.Slug, request.PrimaryColor, request.AccentColor, request.ErrorColor, request.Type);
 
         var passwordHash = passwordHasher.Hash(request.OwnerPassword);
         var owner = User.Create(request.OwnerFirstName, request.OwnerLastName, request.OwnerEmail, request.OwnerPhoneNumber, passwordHash, tenant.Id, UserRole.Owner);
 
-        await tenantRepository.AddAsync(tenant, cancellationToken);
-        await userRepository.AddAsync(owner, cancellationToken);
+        await unitOfWork.Tenants.AddAsync(tenant, cancellationToken);
+        await unitOfWork.Users.AddAsync(owner, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new RegisterTenantResult(tenant.Id, owner.Id);
+        return Result.Ok(new RegisterTenantResult(tenant.Id, owner.Id));
     }
 }

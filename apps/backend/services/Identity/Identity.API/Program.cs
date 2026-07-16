@@ -5,12 +5,19 @@ using Identity.Presentation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Shared.Domain.Errors;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BUILDER — sve sto treba da se registruje PRE app.Build()
 // ─────────────────────────────────────────────────────────────────────────────
 var builder = WebApplication.CreateBuilder(args);
+
+// Serialize enums as their name (e.g. "Rental") instead of the underlying int —
+// TenantConfigDto.Type is the first enum exposed in a response DTO, and mobile's
+// CI config-fetch step (mobile-android.yml) reads it as a string.
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 
 // Swagger/OpenAPI
 // AddEndpointsApiExplorer() generise opise za Minimal API rute (bez njega Swagger ne vidi rute).
@@ -98,46 +105,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 
         var logger = context.RequestServices.GetRequiredService<ILogger<WebApplication>>();
 
-        if (exception is ValidationException validationEx)
-        {
-            // Bacen iz Application sloja kada input ne prolazi validaciju
-            // (npr. prazan email, prekratka lozinka, nepostojeci tenant slug).
-            logger.LogWarning(exception, "Validation failed.");
-
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await Results.Problem(
-                title: "Validation Error",
-                detail: validationEx.Error.Message,
-                statusCode: StatusCodes.Status400BadRequest
-            ).ExecuteAsync(context);
-        }
-        else if (exception is ConflictException conflictEx)
-        {
-            // Bacen kada pokusas da kreiras nesto sto vec postoji
-            // (npr. tenant sa istim slug-om, user sa istim email-om).
-            logger.LogWarning(exception, "A conflict occurred.");
-
-            context.Response.StatusCode = StatusCodes.Status409Conflict;
-            await Results.Problem(
-                title: "Conflict",
-                detail: conflictEx.Error.Message,
-                statusCode: StatusCodes.Status409Conflict
-            ).ExecuteAsync(context);
-        }
-        else if (exception is NotFoundException notFoundEx)
-        {
-            // Bacen kada trazeni resurs ne postoji u bazi
-            // (npr. refresh token koji je vec iskoriscen ili istekao).
-            logger.LogWarning(exception, "Resource not found.");
-
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            await Results.Problem(
-                title: "Not Found",
-                detail: notFoundEx.Error.Message,
-                statusCode: StatusCodes.Status404NotFound
-            ).ExecuteAsync(context);
-        }
-        else if (exception is BadHttpRequestException)
+        if (exception is BadHttpRequestException)
         {
             // Automatski bacen od strane ASP.NET Core kada JSON body ne moze
             // da se deserijalizuje u ocekivani tip (npr. pogresno formatiran JSON).

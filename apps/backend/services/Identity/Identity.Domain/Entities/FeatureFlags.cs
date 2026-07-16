@@ -1,11 +1,11 @@
 namespace Identity.Domain.Entities;
 
+/// <summary>
+/// Generic UX preferences — same meaning regardless of tenant type, unlike
+/// <see cref="TenantModules"/> which controls which business modules/pages exist.
+/// </summary>
 public class FeatureFlags
 {
-    public bool Rental { get; set; } = true;
-    public bool Inventory { get; set; } = true;
-    public bool Reporting { get; set; } = true;
-    public bool Poultry { get; set; } = false;
     public bool ThemeChange { get; set; } = true;
     public bool Language { get; set; } = true;
 }

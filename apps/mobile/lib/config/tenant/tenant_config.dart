@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:business_assistant/config/tenant/tenant_type.dart';
 
 /// Singleton that exposes compile-time tenant customization.
 ///
@@ -49,4 +50,9 @@ class TenantConfig {
 
   /// Path to the tenant's SVG logo inside the Flutter asset bundle.
   String get logoPath => 'assets/tenants/$tenantId/logo.svg';
+
+  /// What kind of business this tenant runs — see tenant_type.dart.
+  static const String _tenantTypeRaw =
+      String.fromEnvironment('TENANT_TYPE', defaultValue: 'Rental');
+  final TenantType tenantType = tenantTypeFromString(_tenantTypeRaw);
 }

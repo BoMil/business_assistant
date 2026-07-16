@@ -43,6 +43,19 @@ services:
         # pre nego sto pokrene identity.api — bez ovoga app bi pao pri startu
         condition: service_healthy
 
+  # ── Business mikroservis ────────────────────────────────────────────────────
+  business.api:
+    image: ${DOCKER_REGISTRY-}businessapi
+    container_name: business-api
+    networks:
+      - backend
+    build:
+      context: .
+      dockerfile: apps/backend/services/Business/Business.API/Dockerfile
+    depends_on:
+      ba-db:
+        condition: service_healthy
+
   # ── SQL Server ─────────────────────────────────────────────────────────────
   # Jedan SQL Server instance, odvojena baza po mikroservisu (Zepp pattern).
   # Svaki mikroservis koristi sopstvenu bazu: IdentityDb, BusinessDb, itd.
