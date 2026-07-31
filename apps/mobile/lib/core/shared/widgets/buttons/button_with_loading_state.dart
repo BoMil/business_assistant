@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
 import 'package:business_assistant/theme/theme_color.dart';
 
@@ -31,7 +30,7 @@ class ButtonWithLoadingState extends StatefulWidget {
     this.size,
     this.borderColor = Colors.transparent,
     this.padding,
-    this.height = 50,
+    this.height = 55,
     this.child,
     this.isGradientVisible = false,
     this.buttonTextStyle,
@@ -58,7 +57,7 @@ class ButtonWithLoadingStateState extends State<ButtonWithLoadingState> {
       padding: widget.padding,
       height: widget.height,
       borderColor: widget.borderColor,
-      backgroundColor: widget.backgroundColor ?? TenantConfig().primaryColor,
+      backgroundColor: widget.backgroundColor ?? AppColors.brandPrimary,
       color: widget.textColor ?? AppColors.baseWhite,
       title: widget.buttonText,
       size: widget.size ?? Size(MediaQuery.sizeOf(context).width, 50),

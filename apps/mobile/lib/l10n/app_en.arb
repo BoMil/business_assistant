@@ -27,6 +27,43 @@
     "emailInvalid": "Enter a valid email address",
     "passwordRequired": "Password is required",
     "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me",
     "fieldIsRequired": "This field is required",
-    "fieldDoesntPassRegularExpressionValidation": "This field is invalid"
+    "fieldDoesntPassRegularExpressionValidation": "This field is invalid",
+    "noItemsAvailable": "No items available",
+    "yes": "Yes",
+    "no": "No",
+    "genericErrorMessage": "Something went wrong. Please try again.",
+
+    "eventStatusPending": "Pending",
+    "eventStatusInProgress": "In Progress",
+    "eventStatusFinished": "Finished",
+    "eventStatusCanceled": "Canceled",
+
+    "eventsSearchHint": "Search events...",
+    "eventsEmptyStateText": "No events yet",
+
+    "eventDetailsTitle": "Event Details",
+    "eventTitleLabel": "Title",
+    "eventDescriptionLabel": "Description",
+    "eventFromLabel": "From",
+    "eventToLabel": "To",
+    "eventLocationLabel": "Location",
+    "eventSelectClientLabel": "Select client (optional)",
+    "eventProductsLabel": "Products",
+    "addProductButton": "Add product",
+    "eventSelectDatesFirstHint": "Select From and To dates first",
+    "selectProductTitle": "Select Product",
+    "selectClientTitle": "Select Client",
+
+    "cancelEventButton": "Cancel Event",
+    "confirmCancelEvent": "Are you sure you want to cancel this event?",
+    "deleteEventButton": "Delete",
+    "confirmDeleteEvent": "Are you sure you want to delete this event? This cannot be undone.",
+    "saveChangesButton": "Save Changes",
+    "createEventButton": "Create Event",
+
+    "eventSavedToast": "Event saved",
+    "eventCancelledToast": "Event canceled",
+    "eventDeletedToast": "Event deleted"
 }

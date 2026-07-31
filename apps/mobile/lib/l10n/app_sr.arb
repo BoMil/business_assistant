@@ -27,6 +27,43 @@
     "emailInvalid": "Unesite ispravnu email adresu",
     "passwordRequired": "Lozinka je obavezna",
     "forgotPassword": "Zaboravili ste lozinku?",
+    "rememberMe": "Zapamti me",
     "fieldIsRequired": "Ovo polje je obavezno",
-    "fieldDoesntPassRegularExpressionValidation": "Ovo polje nije ispravno"
+    "fieldDoesntPassRegularExpressionValidation": "Ovo polje nije ispravno",
+    "noItemsAvailable": "Nema dostupnih stavki",
+    "yes": "Da",
+    "no": "Ne",
+    "genericErrorMessage": "Nešto je pošlo po zlu. Pokušajte ponovo.",
+
+    "eventStatusPending": "Na čekanju",
+    "eventStatusInProgress": "U toku",
+    "eventStatusFinished": "Završeno",
+    "eventStatusCanceled": "Otkazano",
+
+    "eventsSearchHint": "Pretraži događaje...",
+    "eventsEmptyStateText": "Još nema događaja",
+
+    "eventDetailsTitle": "Detalji događaja",
+    "eventTitleLabel": "Naziv",
+    "eventDescriptionLabel": "Opis",
+    "eventFromLabel": "Od",
+    "eventToLabel": "Do",
+    "eventLocationLabel": "Lokacija",
+    "eventSelectClientLabel": "Izaberi klijenta (opciono)",
+    "eventProductsLabel": "Proizvodi",
+    "addProductButton": "Dodaj proizvod",
+    "eventSelectDatesFirstHint": "Prvo izaberite datume Od i Do",
+    "selectProductTitle": "Izaberi proizvod",
+    "selectClientTitle": "Izaberi klijenta",
+
+    "cancelEventButton": "Otkaži događaj",
+    "confirmCancelEvent": "Da li ste sigurni da želite da otkažete ovaj događaj?",
+    "deleteEventButton": "Obriši",
+    "confirmDeleteEvent": "Da li ste sigurni da želite da obrišete ovaj događaj? Ova akcija je nepovratna.",
+    "saveChangesButton": "Sačuvaj izmene",
+    "createEventButton": "Kreiraj događaj",
+
+    "eventSavedToast": "Događaj sačuvan",
+    "eventCancelledToast": "Događaj otkazan",
+    "eventDeletedToast": "Događaj obrisan"
 }

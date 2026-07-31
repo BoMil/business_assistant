@@ -27,6 +27,8 @@ class RouterState {
       GlobalKey<NavigatorState>(debugLabel: 'inventoryNavigatorKey');
   GlobalKey<NavigatorState> clientsNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'clientsNavigatorKey');
+  GlobalKey<NavigatorState> accountNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'accountNavigatorKey');
 
   /// The initial route GoRouter starts at — set dynamically based on auth state.
   String initialRoute = RouteNames.initialScreen;
@@ -48,6 +50,8 @@ class RouterState {
         GlobalKey<NavigatorState>(debugLabel: 'inventoryNavigatorKey');
     clientsNavigatorKey =
         GlobalKey<NavigatorState>(debugLabel: 'clientsNavigatorKey');
+    accountNavigatorKey =
+        GlobalKey<NavigatorState>(debugLabel: 'accountNavigatorKey');
   }
 
   /// Maps the current auth state to the correct initial route:

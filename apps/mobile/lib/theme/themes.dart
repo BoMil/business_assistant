@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'theme_color.dart';
 
 /// Defines the light and dark ThemeData instances used by MaterialApp.router.
@@ -18,10 +17,15 @@ class Themes {
       },
     ),
     colorScheme: ThemeData.light().colorScheme.copyWith(
-      primary: TenantConfig().primaryColor,
-      secondary: TenantConfig().accentColor,
-      error: TenantConfig().errorColor,
+      primary: AppColors.brandPrimary,
+      secondary: AppColors.brandAccent,
+      error: AppColors.brandError,
+      // Material 3 tints elevated surfaces (Scaffold, BottomNavigationBar, ...)
+      // with colorScheme.primary by default — killing that so white stays white.
+      surfaceTint: Colors.transparent,
     ),
+    scaffoldBackgroundColor: AppColors.baseWhite,
+    textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Inter'),
     extensions: <ThemeExtension<dynamic>>[
       lightThemeColors,
     ],
@@ -35,10 +39,13 @@ class Themes {
       },
     ),
     colorScheme: ThemeData.dark().colorScheme.copyWith(
-      primary: TenantConfig().primaryColor,
-      secondary: TenantConfig().accentColor,
-      error: TenantConfig().errorColor,
+      primary: AppColors.brandPrimary,
+      secondary: AppColors.brandAccent,
+      error: AppColors.brandError,
+      surfaceTint: Colors.transparent,
     ),
+    scaffoldBackgroundColor: AppColors.baseWhiteDark,
+    textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Inter'),
     extensions: <ThemeExtension<dynamic>>[
       darkThemeColors,
     ],

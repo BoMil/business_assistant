@@ -23,12 +23,15 @@ public static class GetTransactions
         }
     }
 
-    public static async Task<Results<Ok<List<TransactionDto>>, ProblemHttpResult>> Handle(
+    public static async Task<Results<Ok<PagedResult<TransactionDto>>, ProblemHttpResult>> Handle(
         ClaimsPrincipal user,
         ISender sender,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        int page = 1,
+        int pageSize = 20,
+        string? search = null)
     {
-        var result = await sender.Send(new GetTransactionsQuery(user.GetTenantId()), cancellationToken);
+        var result = await sender.Send(new GetTransactionsQuery(user.GetTenantId(), page, pageSize, search), cancellationToken);
 
         if (result.IsSuccess)
             return TypedResults.Ok(result.Value);

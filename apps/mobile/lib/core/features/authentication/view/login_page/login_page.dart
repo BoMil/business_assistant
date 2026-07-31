@@ -1,3 +1,4 @@
+import 'package:business_assistant/config/routes/bottom_nav_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,13 +8,14 @@ import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/features/authentication/cubits/login/login_cubit.dart';
-import 'package:business_assistant/core/features/authentication/models/responses/login_response.dart';
+import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/button_with_loading_state.dart';
+import 'package:business_assistant/core/shared/widgets/checkboxes/custom_checkbox.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/primary_input_field.dart';
-import 'package:business_assistant/core/utils/api/api_response.dart';
 import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
+import 'package:business_assistant/theme/theme_constants.dart';
 
 /// Email / password login screen.
 ///
@@ -67,6 +69,18 @@ class _LoginPageContentState extends State<_LoginPageContent> {
   bool _autoValidate = false;
 
   @override
+  void initState() {
+    super.initState();
+    context.read<LoginCubit>().loadSavedCredentials().then((saved) {
+      if (!mounted) return;
+      setState(() {
+        _emailController.text = saved.email;
+        _passwordController.text = saved.password;
+      });
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -110,10 +124,10 @@ class _LoginPageContentState extends State<_LoginPageContent> {
   Widget build(BuildContext context) {
     final tenant = TenantConfig();
 
-    return BlocConsumer<LoginCubit, ApiResponse<LoginResponse>?>(
+    return BlocConsumer<LoginCubit, LoginState>(
       listener: _onStateChange,
       builder: (context, state) {
-        final isLoading = state?.isLoading ?? false;
+        final isLoading = state.currentState == CubitState.loading;
 
         return PageFrame(
           backButtonPressed: () => context.go(RouteNames.landingPage),
@@ -131,16 +145,17 @@ class _LoginPageContentState extends State<_LoginPageContent> {
                     _buildEmailField(),
                     const SizedBox(height: 16),
                     _buildPasswordField(isLoading),
-                    const SizedBox(height: 12),
-                    _buildForgotPasswordLink(),
-                    const SizedBox(height: 32),
-                    _buildSignInButton(tenant, isLoading),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 20),
+                    _buildRememberMeCheckbox(),
+                    // const SizedBox(height: 12),
+                    // _buildForgotPasswordLink(),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
           ),
+          pageBottomBar: _buildSignInButton(isLoading),
         );
       },
     );
@@ -148,18 +163,25 @@ class _LoginPageContentState extends State<_LoginPageContent> {
 
   // ── BlocListener callback ──────────────────────────────────────────────────
 
-  void _onStateChange(BuildContext context, ApiResponse<LoginResponse>? state) {
-    if (state == null) return;
-
-    if (state.isCompleted && state.data != null) {
+  void _onStateChange(BuildContext context, LoginState state) {
+    if (state.loginResponse != null) {
       // Persist tokens and emit Authenticated — GoRouter refreshListenable
       // will redirect to homePage once that route is implemented.
-      context.read<AuthCubit>().loginUserToApp(state.data!);
-      context.go(RouteNames.landingPage);
+      context.read<AuthCubit>().loginUserToApp(state.loginResponse!);
+
+      final loginCubit = context.read<LoginCubit>();
+      if (loginCubit.remember) {
+        loginCubit.rememberMe(email: _emailController.text.trim(), password: _passwordController.text);
+      } else {
+        loginCubit.deleteCredentials();
+      }
+
+      final String firstPageRoute = visibleBottomNavTabs().first.path;
+      context.go(firstPageRoute);
     }
 
-    if (state.isError) {
-      ToastMessage().showErrorToast(text: state.message);
+    if (state.errorMessage != null) {
+      ToastMessage().showErrorToast(text: state.errorMessage!);
     }
   }
 
@@ -176,7 +198,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: tenant.primaryColor,
+            color: context.colors.brandPrimary,
           ),
         ),
         const SizedBox(height: 6),
@@ -184,7 +206,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
           t.signInSubtitle,
           style: TextStyle(
             fontSize: 14,
-            color: context.colors.primaryText.withOpacity(0.55),
+            color: context.colors.primaryText.withValues(alpha: 0.55),
           ),
         ),
       ],
@@ -203,11 +225,11 @@ class _LoginPageContentState extends State<_LoginPageContent> {
       prefixIcon: Icon(
         Icons.email_outlined,
         size: 20,
-        color: context.colors.primaryText.withOpacity(0.45),
+        color: context.colors.primaryText.withValues(alpha: 0.45),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       inputBackgroundCollor: context.colors.secondaryBackground,
-      borderColor: context.colors.primaryText.withOpacity(0.15),
+      borderColor: context.colors.primaryText.withValues(alpha: 0.15),
       borderWidth: 1.2,
     );
   }
@@ -224,20 +246,38 @@ class _LoginPageContentState extends State<_LoginPageContent> {
       prefixIcon: Icon(
         Icons.lock_outline_rounded,
         size: 20,
-        color: context.colors.primaryText.withOpacity(0.45),
+        color: context.colors.primaryText.withValues(alpha: 0.45),
       ),
       sufixIcon: IconButton(
         icon: Icon(
           _isPasswordVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
           size: 20,
-          color: context.colors.primaryText.withOpacity(0.45),
+          color: context.colors.primaryText.withValues(alpha: 0.45),
         ),
         onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       inputBackgroundCollor: context.colors.secondaryBackground,
-      borderColor: context.colors.primaryText.withOpacity(0.15),
+      borderColor: context.colors.primaryText.withValues(alpha: 0.15),
       borderWidth: 1.2,
+    );
+  }
+
+  // ── Remember me checkbox ───────────────────────────────────────────────────
+
+  Widget _buildRememberMeCheckbox() {
+    final t = TranslationStorage.translation;
+    return CustomCheckbox(
+      labelWidget: Text(
+        t.rememberMe,
+        style: TextStyle(fontSize: 13, color: context.colors.primaryText),
+      ),
+      isChecked: context.watch<LoginCubit>().remember,
+      itemPressed: (value) {
+        setState(() {
+          context.read<LoginCubit>().remember = value;
+        });
+      },
     );
   }
 
@@ -257,7 +297,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: TenantConfig().primaryColor,
+            color: context.colors.brandPrimary,
           ),
         ),
       ),
@@ -266,15 +306,26 @@ class _LoginPageContentState extends State<_LoginPageContent> {
 
   // ── Sign In button ─────────────────────────────────────────────────────────
 
-  Widget _buildSignInButton(TenantConfig tenant, bool isLoading) {
+  Widget _buildSignInButton(bool isLoading) {
     final t = TranslationStorage.translation;
-    return ButtonWithLoadingState(
-      buttonText: t.signIn,
-      loading: isLoading,
-      buttonPressed: _submit,
-      backgroundColor: tenant.primaryColor,
-      textColor: Colors.white,
-      radius: 12,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          ThemeConstants.pagePadding,
+          12,
+          ThemeConstants.pagePadding,
+          16,
+        ),
+        child: ButtonWithLoadingState(
+          buttonText: t.signIn,
+          loading: isLoading,
+          buttonPressed: _submit,
+          backgroundColor: context.colors.brandPrimary,
+          textColor: Colors.white,
+          radius: 22,
+        ),
+      ),
     );
   }
 }

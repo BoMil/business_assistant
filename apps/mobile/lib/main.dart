@@ -2,14 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:toastification/toastification.dart';
 import 'package:business_assistant/config/environment/environment.dart';
+import 'package:business_assistant/config/routes/bottom_nav_tabs.dart';
 import 'package:business_assistant/config/routes/router_config.dart';
 import 'package:business_assistant/config/routes/routes.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/features/bottom_navigation/cubits/bottom_navigation/bottom_navigation_cubit.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
+import 'package:business_assistant/l10n/app_localizations.dart';
 import 'package:business_assistant/theme/theme_config.dart';
 import 'package:business_assistant/theme/themes.dart';
 
@@ -95,11 +97,18 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(
           create: (context) => RouterState().authCubit..initAuthState(),
         ),
+        // Global so any widget can request a bottom nav tab switch — see
+        // BottomNavigationCubit for why BottomNavigationFrame alone isn't enough.
+        BlocProvider(
+          create: (context) => BottomNavigationCubit(tabs: visibleBottomNavTabs()),
+        ),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
-          // Hook for side-effects on auth state changes (analytics, etc.)
-          // GoRouter handles the actual navigation via its redirect callback.
+          if (state is Unauthenticated) {
+            // Next login should start on the first tab, not wherever the user left off.
+            context.read<BottomNavigationCubit>().resetCurrentIndex();
+          }
         },
         // ToastificationWrapper must wrap MaterialApp so toastification.show()
         // works from anywhere in the app without a BuildContext
@@ -110,10 +119,8 @@ class _MyAppState extends State<MyApp> {
             themeMode: ThemeConfig().currentTheme,
             locale: TranslationStorage().selectedLanguage,
             routerDelegate: Routes().goRouterInstance.routerDelegate,
-            routeInformationProvider:
-                Routes().goRouterInstance.routeInformationProvider,
-            routeInformationParser:
-                Routes().goRouterInstance.routeInformationParser,
+            routeInformationProvider: Routes().goRouterInstance.routeInformationProvider,
+            routeInformationParser: Routes().goRouterInstance.routeInformationParser,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
           ),

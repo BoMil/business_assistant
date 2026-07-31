@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:business_assistant/config/tenant/tenant_config.dart';
 
 /// ThemeExtension that carries semantic color slots for light and dark themes.
 ///
@@ -18,6 +17,13 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
   Color brandPrimary;
   Color brandAccent;
   Color brandError;
+  Color baseWhite;
+
+  /// Event status colors — fixed semantic colors (not tenant-branded), used by
+  /// EventStatusBadge. InProgress reuses brandPrimary and Canceled reuses
+  /// brandError since those already carry the right meaning.
+  Color statusPending;
+  Color statusFinished;
 
   ThemeColor({
     required this.primaryBackground,
@@ -26,6 +32,9 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
     required this.brandPrimary,
     required this.brandAccent,
     required this.brandError,
+    required this.baseWhite,
+    required this.statusPending,
+    required this.statusFinished,
   });
 
   /// Required by ThemeExtension — creates a copy with overridden values.
@@ -37,6 +46,9 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
     Color? brandPrimary,
     Color? brandAccent,
     Color? brandError,
+    Color? baseWhite,
+    Color? statusPending,
+    Color? statusFinished,
   }) {
     return ThemeColor(
       primaryBackground: primaryBackground ?? this.primaryBackground,
@@ -45,6 +57,9 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
       brandPrimary: brandPrimary ?? this.brandPrimary,
       brandAccent: brandAccent ?? this.brandAccent,
       brandError: brandError ?? this.brandError,
+      baseWhite: baseWhite ?? this.baseWhite,
+      statusPending: statusPending ?? this.statusPending,
+      statusFinished: statusFinished ?? this.statusFinished,
     );
   }
 
@@ -63,6 +78,9 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
       brandPrimary: Color.lerp(brandPrimary, other.brandPrimary, t)!,
       brandAccent: Color.lerp(brandAccent, other.brandAccent, t)!,
       brandError: Color.lerp(brandError, other.brandError, t)!,
+      baseWhite: Color.lerp(baseWhite, other.baseWhite, t)!,
+      statusPending: Color.lerp(statusPending, other.statusPending, t)!,
+      statusFinished: Color.lerp(statusFinished, other.statusFinished, t)!,
     );
   }
 }
@@ -79,15 +97,35 @@ class AppColors {
   static const Color secondaryBackgroundDark = Color.fromRGBO(23, 23, 23, 1);
   static const Color primaryTextDark = Color.fromRGBO(255, 255, 255, 1);
 
-  // ── Tenant brand colors (delegated to TenantConfig at runtime) ────────────
-  static Color get baseYellow => TenantConfig().accentColor;
-  static Color get primaryRed => TenantConfig().errorColor;
+  // ── Tenant brand colors — injected at build time via --dart-define-from-file ──
+  // Color hex strings must be static const so they can be used in Color() at
+  // field initializer time (before any constructor body runs).
+  static const String _primaryColorHex =
+      String.fromEnvironment('PRIMARY_COLOR', defaultValue: 'FF1A237E');
+  static const String _accentColorHex =
+      String.fromEnvironment('ACCENT_COLOR', defaultValue: 'FF00BCD4');
+  static const String _errorColorHex =
+      String.fromEnvironment('ERROR_COLOR', defaultValue: 'FFEB2E25');
+
+  static final Color brandPrimary = Color(int.parse(_primaryColorHex, radix: 16));
+  static final Color brandAccent = Color(int.parse(_accentColorHex, radix: 16));
+  static final Color brandError = Color(int.parse(_errorColorHex, radix: 16));
+
+  static Color get baseYellow => brandAccent;
+  static Color get primaryRed => brandError;
   static Color get secondaryText => const Color.fromRGBO(15, 15, 15, 0.5);
-  static Color get textBlue => TenantConfig().primaryColor;
+  static Color get textBlue => brandPrimary;
 
   // ── Neutral colors — same across all tenants ──────────────────────────────
-  static const Color baseBlack01 = Color.fromRGBO(23, 23, 23, 0.1);
+  static const Color baseBlack01 = Color.fromRGBO(23, 23, 23, 0.4);
   static const Color baseWhite = Color.fromRGBO(255, 255, 255, 1);
+  static const Color baseWhiteDark = primaryText;
+
+  // ── Event status colors — fixed, not tenant-branded (see EventStatusBadge) ──
+  static const Color statusPending = Color.fromRGBO(217, 119, 6, 1);
+  static const Color statusPendingDark = Color.fromRGBO(251, 191, 36, 1);
+  static const Color statusFinished = Color.fromRGBO(22, 163, 74, 1);
+  static const Color statusFinishedDark = Color.fromRGBO(34, 197, 94, 1);
 
   // ── Shadow ────────────────────────────────────────────────────────────────
   static const Color primaryShadowColor = Color.fromRGBO(0, 0, 0, 0.25);
@@ -98,9 +136,12 @@ ThemeColor lightThemeColors = ThemeColor(
   primaryBackground: AppColors.primaryBackground,
   secondaryBackground: AppColors.secondaryBackground,
   primaryText: AppColors.primaryText,
-  brandPrimary: TenantConfig().primaryColor,
-  brandAccent: TenantConfig().accentColor,
-  brandError: TenantConfig().errorColor,
+  brandPrimary: AppColors.brandPrimary,
+  brandAccent: AppColors.brandAccent,
+  brandError: AppColors.brandError,
+  baseWhite: AppColors.baseWhite,
+  statusPending: AppColors.statusPending,
+  statusFinished: AppColors.statusFinished,
 );
 
 /// The dark theme's ThemeColor instance — registered as a ThemeExtension in Themes.dark.
@@ -108,9 +149,12 @@ ThemeColor darkThemeColors = ThemeColor(
   primaryBackground: AppColors.primaryBackgroundDark,
   secondaryBackground: AppColors.secondaryBackgroundDark,
   primaryText: AppColors.primaryTextDark,
-  brandPrimary: TenantConfig().primaryColor,
-  brandAccent: TenantConfig().accentColor,
-  brandError: TenantConfig().errorColor,
+  brandPrimary: AppColors.brandPrimary,
+  brandAccent: AppColors.brandAccent,
+  brandError: AppColors.brandError,
+  baseWhite: AppColors.baseWhiteDark,
+  statusPending: AppColors.statusPendingDark,
+  statusFinished: AppColors.statusFinishedDark,
 );
 
 /// Converts a Flutter Color to a CSS-style hex string for display.

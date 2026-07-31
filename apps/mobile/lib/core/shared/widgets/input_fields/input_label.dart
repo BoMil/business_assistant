@@ -12,7 +12,7 @@ class InputLabel extends StatelessWidget {
       text,
       textAlign: TextAlign.left,
       style: AppTextStyles().buttonsText(
-        color: context.colors.primaryText.withOpacity(0.7),
+        color: context.colors.primaryText.withValues(alpha: 0.7),
         fontSize: 13,
         fontWeight: FontWeight.w500,
       ),

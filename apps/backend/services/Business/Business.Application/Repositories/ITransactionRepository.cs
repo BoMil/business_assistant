@@ -5,8 +5,17 @@ namespace Business.Application.Repositories;
 public interface ITransactionRepository
 {
     Task<Transaction?> GetByIdAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default);
-    Task<List<Transaction>> GetAllAsync(Guid tenantId, CancellationToken cancellationToken = default);
     Task<List<Transaction>> GetByClientAsync(Guid clientId, Guid tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Page of transactions ordered most-recent-first (by From date), optionally filtered by
+    /// <paramref name="searchTerm"/> matching Title or the owned Location's Address (case
+    /// insensitive — translated to SQL LIKE/Contains by EF). Used by GetTransactions for the
+    /// mobile Events list's pagination + search.
+    /// </summary>
+    Task<(List<Transaction> Items, int TotalCount)> GetPagedAsync(
+        Guid tenantId, int page, int pageSize, string? searchTerm, CancellationToken cancellationToken = default);
+
     Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -7,6 +7,7 @@ import 'package:business_assistant/core/features/authentication/cubits/auth/auth
 import 'package:business_assistant/core/features/authentication/view/initial_screen.dart';
 import 'package:business_assistant/core/features/authentication/view/landing_page/landing_page.dart';
 import 'package:business_assistant/core/features/authentication/view/login_page/login_page.dart';
+import 'package:business_assistant/core/features/events/view/create_edit_event_page.dart';
 import 'package:business_assistant/core/shared/widgets/navigation/bottom_navigation_frame.dart';
 import 'package:business_assistant/core/utils/stream_to_listenable.dart';
 import 'package:go_router/go_router.dart';
@@ -43,8 +44,7 @@ class Routes {
         }
       }
 
-      if (context.read<AuthCubit>().state is Authenticated &&
-          context.read<AuthCubit>().redirectToHomeInitialy) {
+      if (context.read<AuthCubit>().state is Authenticated && context.read<AuthCubit>().redirectToHomeInitialy) {
         context.read<AuthCubit>().redirectToHomeInitialy = false;
         return defaultAuthenticatedRoute();
       }
@@ -101,12 +101,52 @@ class Routes {
         },
       ),
 
+      // Event create/edit — pushed full-screen on top of the Events tab
+      // (rootNavigatorKey via top-level placement), so it covers the bottom nav.
+      GoRoute(
+        path: RouteNames.createEventPage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: const CreateEditEventPage(),
+            transitionDuration: const Duration(milliseconds: 250),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(-1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '${RouteNames.editEventPage}/:id',
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: CreateEditEventPage(eventId: state.pathParameters['id']),
+            transitionDuration: const Duration(milliseconds: 250),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(-1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+
       // Bottom navigation shell — tabs shown depend on FeatureFlags, built once
       // from visibleBottomNavTabs() so the branches and the nav bar itself
       // (BottomNavigationFrame) never fall out of sync.
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            BottomNavigationFrame(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) => BottomNavigationFrame(navigationShell: navigationShell),
         branches: visibleBottomNavTabs()
             .map((tab) => StatefulShellBranch(
                   navigatorKey: tab.navigatorKey,
@@ -119,6 +159,35 @@ class Routes {
                 ))
             .toList(),
       ),
+
+      //     GoRoute(
+      //   path: RouteNames.bulkPaymentInitializationPage,
+      //   pageBuilder: (BuildContext context, GoRouterState state) {
+      //     BulkPaymentInitPageProps pageProperties = BulkPaymentInitPageProps.empty();
+      //     try {
+      //       pageProperties = state.extra as BulkPaymentInitPageProps;
+      //     } catch (e) {
+      //       debugPrint('No data in the route extra params');
+      //     }
+      //     return CustomTransitionPage<void>(
+      //       key: state.pageKey,
+      //       name: state.fullPath,
+      //       child: BulkPaymentInitializationPage(pageProps: pageProperties),
+      //       transitionDuration: const Duration(milliseconds: 250),
+      //       transitionsBuilder: (
+      //         BuildContext context,
+      //         Animation<double> animation,
+      //         Animation<double> secondaryAnimation,
+      //         Widget child,
+      //       ) {
+      //         return SlideTransition(
+      //           position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
+      //           child: child,
+      //         );
+      //       },
+      //     );
+      //   },
+      // ),
     ],
   );
 

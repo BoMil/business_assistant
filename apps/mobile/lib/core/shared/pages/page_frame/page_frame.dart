@@ -11,6 +11,8 @@ class PageFrame extends StatelessWidget {
   final Widget? title;
   final IconData? headerActionIcon;
   final Widget? pageBottomBar;
+  final Widget? pageHeader;
+  final Widget? floatingActionButton;
   final bool isHeaderVisible;
   final double pagePadding;
 
@@ -22,6 +24,8 @@ class PageFrame extends StatelessWidget {
     this.title,
     this.headerActionIcon = Icons.arrow_back_ios_new,
     this.pageBottomBar,
+    this.pageHeader,
+    this.floatingActionButton,
     this.isHeaderVisible = true,
     this.pagePadding = ThemeConstants.pagePadding,
   });
@@ -34,29 +38,36 @@ class PageFrame extends StatelessWidget {
         FocusScope.of(context).unfocus();
       },
       child: Container(
-        color: getSelectedThemeColors(context).primaryBackground,
+        color: getSelectedThemeColors(context).baseWhite,
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: isHeaderVisible
-              ? HeaderBar(
-                  icon: headerActionIcon ?? Icons.arrow_back_ios_new,
-                  actions: headerActions,
-                  title: title,
-                  backgroundColor: Colors.transparent,
-                  backButtonPressed: () {
-                    if (backButtonPressed == null) {
-                      context.pop();
-                      return;
-                    }
-                    backButtonPressed?.call();
-                  },
-                )
-              : null,
-          body: Padding(
-            padding: EdgeInsets.only(left: pagePadding, right: pagePadding),
-            child: pageBody,
+          appBar:
+              isHeaderVisible
+                  ? HeaderBar(
+                    icon: headerActionIcon ?? Icons.arrow_back_ios_new,
+                    actions: headerActions,
+                    title: title,
+                    backgroundColor: Colors.transparent,
+                    backButtonPressed: () {
+                      if (backButtonPressed == null) {
+                        context.pop();
+                        return;
+                      }
+                      backButtonPressed?.call();
+                    },
+                  )
+                  : null,
+          body: Column(
+            children: [
+              // Pinned above pageBody — scrolling inside pageBody never moves it.
+              if (pageHeader != null) SafeArea(bottom: false, child: pageHeader!),
+              Expanded(
+                child: Padding(padding: EdgeInsets.only(left: pagePadding, right: pagePadding), child: pageBody),
+              ),
+            ],
           ),
           bottomNavigationBar: pageBottomBar,
+          floatingActionButton: floatingActionButton,
         ),
       ),
     );

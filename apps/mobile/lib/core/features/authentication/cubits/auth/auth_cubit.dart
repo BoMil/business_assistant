@@ -27,6 +27,9 @@ class AuthCubit extends Cubit<AuthState> {
   /// on the very first Authenticated emission (avoids a redundant redirect loop).
   bool redirectToHomeInitialy = true;
 
+  /// First name parsed from the JWT's 'firstName' claim — used for header greetings.
+  String? currentUserFirstName;
+
   /// Called once in MyApp.initState() — checks the stored token and emits
   /// Authenticated or Unauthenticated accordingly.
   Future<void> initAuthState() async {
@@ -72,6 +75,7 @@ class AuthCubit extends Cubit<AuthState> {
   /// GoRouter's redirect will send the user to landing_page.
   Future<void> logout() async {
     redirectToHomeInitialy = true;
+    currentUserFirstName = null;
     await _clearStorage();
     emit(Unauthenticated());
   }
@@ -88,11 +92,12 @@ class AuthCubit extends Cubit<AuthState> {
   /// Returns true if a token exists in storage AND its 'exp' claim is in the future.
   ///
   /// JWT payload from the Identity service contains:
-  ///   sub      → user ID (GUID)
-  ///   email    → user email
-  ///   role     → user role string (e.g. "Owner")
-  ///   tenantId → tenant GUID
-  ///   exp      → Unix timestamp of expiry (standard JWT claim)
+  ///   sub       → user ID (GUID)
+  ///   email     → user email
+  ///   firstName → user's first name, shown in header greetings
+  ///   role      → user role string (e.g. "Owner")
+  ///   tenantId  → tenant GUID
+  ///   exp       → Unix timestamp of expiry (standard JWT claim)
   ///
   /// We only check existence + expiry here. Role-based access control is
   /// enforced by the API — the app trusts that any non-expired token is valid.
@@ -114,6 +119,12 @@ class AuthCubit extends Cubit<AuthState> {
       if (payload['sub'] == null) {
         debugPrint('[AuthCubit] Token missing sub claim.');
         return false;
+      }
+
+      try {
+        currentUserFirstName = payload['firstName'] as String?;
+      } catch (e) {
+        debugPrint('[AuthCubit] Failed to parse first name error: $e');
       }
 
       return true;

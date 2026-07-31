@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/theme/text_styles.dart';
 import 'package:business_assistant/theme/theme_color.dart';
 
@@ -44,7 +43,7 @@ class CustomOutlinedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = backgroundColor ?? TenantConfig().primaryColor;
+    Color bgColor = backgroundColor ?? AppColors.brandPrimary;
     return Container(
       height: height,
       width: width,
@@ -54,8 +53,8 @@ class CustomOutlinedButton extends StatelessWidget {
             ? (gradient ??
                 LinearGradient(
                   colors: [
-                    TenantConfig().primaryColor,
-                    TenantConfig().accentColor,
+                    AppColors.brandPrimary,
+                    AppColors.brandAccent,
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -69,7 +68,7 @@ class CustomOutlinedButton extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius ?? 5)),
           fixedSize: size,
           textStyle: AppTextStyles().buttonsText(),
-          backgroundColor: !isGradientVisible ? (onClick == null ? bgColor.withOpacity(0.4) : bgColor) : null,
+          backgroundColor: !isGradientVisible ? (onClick == null ? bgColor.withValues(alpha: 0.4) : bgColor) : null,
           padding: padding,
         ),
         child: child ??

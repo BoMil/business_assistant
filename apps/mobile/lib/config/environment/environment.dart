@@ -8,12 +8,25 @@
 /// 10.0.2.2 is the special Android emulator loopback that maps to the host machine's
 /// localhost — use this when running the backend locally with Docker.
 final class Environment {
-  /// Base URL for all API calls — no trailing slash.
+  /// Base URL for Identity microservice calls (auth) — no trailing slash.
   static const serverAddress =
       String.fromEnvironment('SERVER_ADDRESS', defaultValue: 'http://10.0.2.2:5100');
+
+  /// Base URL for Business microservice calls (events/transactions, assets, clients) —
+  /// a separate deployable from Identity, see docker-compose.override.yml (port 5101).
+  static const businessServerAddress = String.fromEnvironment(
+    'BUSINESS_SERVER_ADDRESS',
+    defaultValue: 'http://10.0.2.2:5101',
+  );
 
   /// One of 'DEV', 'STAGING', 'PRODUCTION' — used to suppress debug logs
   /// and enable/disable environment-specific behaviour.
   static const environment =
       String.fromEnvironment('ENVIRONMENT', defaultValue: 'DEV');
+
+  /// Google Places API key for LocationInputField's address autocomplete.
+  /// Empty by default — fill in your own key in .env/<tenant>.<environment>.json,
+  /// it is intentionally not committed with a real value.
+  static const googlePlacesApiKey =
+      String.fromEnvironment('GOOGLE_PLACES_API_KEY', defaultValue: '');
 }

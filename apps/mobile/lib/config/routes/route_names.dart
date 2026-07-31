@@ -20,4 +20,14 @@ class RouteNames {
   static const String eventsPage = '/events';
   static const String inventoryPage = '/inventory';
   static const String clientsPage = '/clients';
+
+  // Always visible regardless of TenantModules — see bottom_nav_tabs.dart.
+  static const String accountPage = '/account';
+
+  // ── Event detail (pushed full-screen on top of the Events tab) ───────────
+  static const String createEventPage = '/events/create';
+  // Appended with '/:id' in routes.dart — use editEventPagePath(id) to build a
+  // concrete path for navigation.
+  static const String editEventPage = '/events/edit';
+  static String editEventPagePath(String id) => '$editEventPage/$id';
 }

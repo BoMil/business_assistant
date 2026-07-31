@@ -14,4 +14,13 @@ class SecureStorageKeys {
 
   /// Persisted theme preference — value is ThemeMode.name ('light' or 'dark').
   static const String themeMode = 'theme_mode';
+
+  /// Saved login email — only written when the user checks "Remember me".
+  static const String email = 'email';
+
+  /// Saved login password — only written when the user checks "Remember me".
+  static const String password = 'password';
+
+  /// Whether the last login was saved with "Remember me" checked — value is 'true'/'false'.
+  static const String rememberMe = 'rememberMe';
 }

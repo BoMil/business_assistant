@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/routes/router_config.dart';
 import 'package:business_assistant/config/tenant/tenant_modules.dart';
+import 'package:business_assistant/core/features/account/view/account_page.dart';
 import 'package:business_assistant/core/features/clients/view/clients_page.dart';
 import 'package:business_assistant/core/features/events/view/events_page.dart';
 import 'package:business_assistant/core/features/inventory/view/inventory_page.dart';
@@ -9,14 +10,14 @@ import 'package:business_assistant/core/features/inventory/view/inventory_page.d
 /// One entry in the bottom navigation bar.
 class BottomNavTab {
   final String path;
-  final IconData icon;
+  final String svgIconPath;
   final String label;
   final GlobalKey<NavigatorState> navigatorKey;
   final WidgetBuilder pageBuilder;
 
   const BottomNavTab({
     required this.path,
-    required this.icon,
+    required this.svgIconPath,
     required this.label,
     required this.navigatorKey,
     required this.pageBuilder,
@@ -38,7 +39,7 @@ List<BottomNavTab> visibleBottomNavTabs() {
     if (modules.events)
       BottomNavTab(
         path: RouteNames.eventsPage,
-        icon: Icons.event,
+        svgIconPath: 'assets/svg/bottom_nav_events.svg',
         label: 'Events',
         navigatorKey: RouterState().eventsNavigatorKey,
         pageBuilder: (_) => const EventsPage(),
@@ -46,7 +47,7 @@ List<BottomNavTab> visibleBottomNavTabs() {
     if (modules.inventory)
       BottomNavTab(
         path: RouteNames.inventoryPage,
-        icon: Icons.inventory_2,
+        svgIconPath: 'assets/svg/bottom_nav_inventory.svg',
         label: 'Inventory',
         navigatorKey: RouterState().inventoryNavigatorKey,
         pageBuilder: (_) => const InventoryPage(),
@@ -54,11 +55,19 @@ List<BottomNavTab> visibleBottomNavTabs() {
     if (modules.clients)
       BottomNavTab(
         path: RouteNames.clientsPage,
-        icon: Icons.people,
+        svgIconPath: 'assets/svg/bottom_nav_clients.svg',
         label: 'Clients',
         navigatorKey: RouterState().clientsNavigatorKey,
         pageBuilder: (_) => const ClientsPage(),
       ),
+    // Always visible, regardless of TenantModules.
+    BottomNavTab(
+      path: RouteNames.accountPage,
+      svgIconPath: 'assets/svg/bottom_nav_account.svg',
+      label: 'Account',
+      navigatorKey: RouterState().accountNavigatorKey,
+      pageBuilder: (_) => const AccountPage(),
+    ),
   ];
 }
 

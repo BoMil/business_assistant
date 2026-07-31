@@ -31,7 +31,7 @@ class PrimaryInputField extends StatefulWidget {
   final bool floatLabelToTop;
   final bool enabled;
   final Function(bool)? onFocusChanged;
-  final Color borderColor;
+  final Color? borderColor;
   final double borderWidth;
   final double borderRadius;
   final bool isCurrency;
@@ -62,7 +62,7 @@ class PrimaryInputField extends StatefulWidget {
     this.floatLabelToTop = false,
     this.onFocusChanged,
     this.enabled = true,
-    this.borderColor = Colors.transparent,
+    this.borderColor,
     this.borderWidth = 1,
     this.borderRadius = 10,
     this.isCurrency = false,
@@ -107,18 +107,14 @@ class _PrimaryInputFieldState extends State<PrimaryInputField> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Label
-          if (widget.labelText != null) ...[
-            InputLabel(text: widget.labelText!),
-            const SizedBox(height: 4),
-          ],
+          if (widget.labelText != null) ...[InputLabel(text: widget.labelText!), const SizedBox(height: 4)],
 
           // Input field
           TextFormField(
             initialValue: widget.initialValue,
             enabled: widget.enabled,
             focusNode: _focusNode,
-            autovalidateMode:
-                widget.autoValidate ? AutovalidateMode.always : null,
+            autovalidateMode: widget.autoValidate ? AutovalidateMode.always : null,
             style: AppTextStyles().buttonsText(
               color: ThemeConfig().themeColor.primaryText,
               fontWeight: FontWeight.w500,
@@ -130,8 +126,7 @@ class _PrimaryInputFieldState extends State<PrimaryInputField> {
             // just-typed trailing space, making spaces impossible to enter.
             // Submitted values are trimmed server-side instead.
             inputFormatters: <TextInputFormatter>[
-              if (widget.keyboardType == TextInputType.number &&
-                  widget.isCurrency) ...[
+              if (widget.keyboardType == TextInputType.number && widget.isCurrency) ...[
                 FilteringTextInputFormatter.allow(RegExp(r'^[0-9.,]+$')),
               ] else if (widget.keyboardType == TextInputType.number) ...[
                 FilteringTextInputFormatter.allow(RegExp(r'^[^a-zA-Z]+$')),
@@ -144,38 +139,31 @@ class _PrimaryInputFieldState extends State<PrimaryInputField> {
             decoration: InputStyles.primaryInputDecoration(
               lableText: widget.placeholderText,
               hintText: widget.hintText,
-              fillColor: widget.inputBackgroundCollor ??
-                  ThemeConfig().themeColor.primaryText.withOpacity(0.05),
+              fillColor: widget.inputBackgroundCollor ?? ThemeConfig().themeColor.baseWhite,
               suffix: widget.sufixIcon,
               prefixIcon: widget.prefixIcon,
               contentPadding: widget.contentPadding,
               floatLabelToTop: widget.floatLabelToTop,
-              borderColor: widget.borderColor,
+              borderColor: widget.borderColor ?? ThemeConfig().themeColor.primaryText.withValues(alpha: 0.15),
               borderWidth: widget.borderWidth,
               borderRadius: widget.borderRadius,
             ).copyWith(
               // The custom error row below (icon + text) is our error display;
               // suppress TextFormField's own auto-rendered error text so it's
               // not shown twice.
-              errorStyle: widget.showValidationError
-                  ? const TextStyle(fontSize: 0, height: 0.01)
-                  : null,
+              errorStyle: widget.showValidationError ? const TextStyle(fontSize: 0, height: 0.01) : null,
             ),
             validator: (value) {
               String? error;
-              if (widget.regularExpression != null &&
-                  widget.regularExpression!.isNotEmpty) {
+              if (widget.regularExpression != null && widget.regularExpression!.isNotEmpty) {
                 final RegExp regExp = RegExp(widget.regularExpression!);
                 if (!regExp.hasMatch(value ?? '')) {
-                  error = widget.errorMsg ??
-                      TranslationStorage
-                          .translation.fieldDoesntPassRegularExpressionValidation;
+                  error = widget.errorMsg ?? TranslationStorage.translation.fieldDoesntPassRegularExpressionValidation;
                 }
               } else if (widget.customValidator != null) {
                 error = widget.customValidator!(value);
               } else if (value == null || value.isEmpty) {
-                error = widget.errorMsg ??
-                    TranslationStorage.translation.fieldIsRequired;
+                error = widget.errorMsg ?? TranslationStorage.translation.fieldIsRequired;
               }
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted && _currentError != error) {

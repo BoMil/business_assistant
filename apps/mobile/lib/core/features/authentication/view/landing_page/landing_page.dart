@@ -58,6 +58,7 @@ class _LandingPageState extends State<LandingPage> {
     final tenant = TenantConfig();
 
     return PageFrame(
+      isHeaderVisible: false,
       pageBody: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
           horizontal: ThemeConstants.pagePadding,
@@ -65,7 +66,7 @@ class _LandingPageState extends State<LandingPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 24),
+            const SizedBox(height: 100),
             _buildHeroSection(t, tenant),
             const SizedBox(height: 32),
             // Uncomment the sections only on dev mode
@@ -78,6 +79,7 @@ class _LandingPageState extends State<LandingPage> {
           ],
         ),
       ),
+      pageBottomBar: _buildSignInButton(t),
     );
   }
 
@@ -94,7 +96,7 @@ class _LandingPageState extends State<LandingPage> {
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: tenant.primaryColor,
+              color: context.colors.brandPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -103,33 +105,48 @@ class _LandingPageState extends State<LandingPage> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: context.colors.primaryText.withOpacity(0.6),
-            ),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: () => context.go(RouteNames.loginPage),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: tenant.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                t.signIn,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              color: context.colors.primaryText.withValues(alpha: 0.6),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ── Sign In button ─────────────────────────────────────────────────────────
+
+  Widget _buildSignInButton(dynamic t) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          ThemeConstants.pagePadding,
+          12,
+          ThemeConstants.pagePadding,
+          16,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            onPressed: () => context.go(RouteNames.loginPage),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.colors.brandPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              t.signIn,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -170,7 +187,7 @@ class _LandingPageState extends State<LandingPage> {
 
     if (showTheme && showLanguage) {
       rows.add(const SizedBox(height: 16));
-      rows.add(Divider(height: 1, color: context.colors.primaryText.withOpacity(0.1)));
+      rows.add(Divider(height: 1, color: context.colors.primaryText.withValues(alpha: 0.1)));
       rows.add(const SizedBox(height: 16));
     }
 
@@ -253,7 +270,6 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Widget _buildFeatureCard(IconData icon, String title, String desc) {
-    final tenant = TenantConfig();
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -266,10 +282,10 @@ class _LandingPageState extends State<LandingPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: tenant.primaryColor.withOpacity(0.1),
+              color: context.colors.brandPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 22, color: tenant.primaryColor),
+            child: Icon(icon, size: 22, color: context.colors.brandPrimary),
           ),
           const SizedBox(height: 10),
           Text(
@@ -286,7 +302,7 @@ class _LandingPageState extends State<LandingPage> {
               desc,
               style: TextStyle(
                 fontSize: 11,
-                color: context.colors.primaryText.withOpacity(0.5),
+                color: context.colors.primaryText.withValues(alpha: 0.5),
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -300,11 +316,10 @@ class _LandingPageState extends State<LandingPage> {
   // ── Color palette ──────────────────────────────────────────────────────────
 
   Widget _buildColorPaletteSection(dynamic t) {
-    final tenant = TenantConfig();
     final colors = [
-      (t.primary, tenant.primaryColor),
-      (t.accent, tenant.accentColor),
-      (t.error, tenant.errorColor),
+      (t.primary, context.colors.brandPrimary),
+      (t.accent, context.colors.brandAccent),
+      (t.error, context.colors.brandError),
     ];
 
     return Column(
@@ -331,7 +346,7 @@ class _LandingPageState extends State<LandingPage> {
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: context.colors.primaryText.withOpacity(0.1),
+                        color: context.colors.primaryText.withValues(alpha: 0.1),
                       ),
                     ),
                   ),
@@ -349,7 +364,7 @@ class _LandingPageState extends State<LandingPage> {
                     colorToHex(color),
                     style: TextStyle(
                       fontSize: 10,
-                      color: context.colors.primaryText.withOpacity(0.5),
+                      color: context.colors.primaryText.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -367,7 +382,6 @@ class _LandingPageState extends State<LandingPage> {
     required List<(String, bool)> options,
     required void Function(int) onTap,
   }) {
-    final tenant = TenantConfig();
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(options.length, (index) {
@@ -377,7 +391,7 @@ class _LandingPageState extends State<LandingPage> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: isActive ? tenant.primaryColor : context.colors.primaryText.withOpacity(0.08),
+              color: isActive ? context.colors.brandPrimary : context.colors.primaryText.withValues(alpha: 0.08),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(index == 0 ? 8 : 0),
                 bottomLeft: Radius.circular(index == 0 ? 8 : 0),
@@ -390,7 +404,7 @@ class _LandingPageState extends State<LandingPage> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isActive ? Colors.white : context.colors.primaryText.withOpacity(0.6),
+                color: isActive ? Colors.white : context.colors.primaryText.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -402,7 +416,7 @@ class _LandingPageState extends State<LandingPage> {
   Widget _sectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: context.colors.primaryText.withOpacity(0.5)),
+        Icon(icon, size: 18, color: context.colors.primaryText.withValues(alpha: 0.5)),
         const SizedBox(width: 8),
         Text(
           title,
