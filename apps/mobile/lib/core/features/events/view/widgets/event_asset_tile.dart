@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/events/cubits/create_edit_event/create_edit_event_cubit.dart';
+import 'package:business_assistant/core/shared/widgets/cards/card_frame.dart';
+import 'package:business_assistant/core/shared/widgets/input_fields/input_label.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/number_stepper_input_field.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/primary_input_field.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
@@ -41,59 +44,57 @@ class _EventAssetTileState extends State<EventAssetTile> {
   @override
   Widget build(BuildContext context) {
     final theme = context.colors;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.primaryText.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.item.assetName,
-                  style: TextStyle(color: theme.primaryText, fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-              ),
-              InkWell(
-                onTap: widget.onRemove,
-                borderRadius: BorderRadius.circular(20),
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Icon(Icons.close, size: 18, color: theme.primaryText.withValues(alpha: 0.5)),
-                ),
-              ),
-            ],
+    final t = TranslationStorage.translation;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: CardFrame(
+        headerSectionTtitle: widget.item.assetName,
+        headerSectionRightContent: InkWell(
+          onTap: widget.onRemove,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Icon(Icons.close, size: 18, color: theme.primaryText.withValues(alpha: 0.5)),
           ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: NumberStepperInputField(
-                  controller: _quantityController,
-                  onChanged: (value) => widget.onQuantityChanged(int.tryParse(value) ?? 1),
-                ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InputLabel(text: t.eventAssetQuantityLabel),
+                  const SizedBox(height: 4),
+                  NumberStepperInputField(
+                    controller: _quantityController,
+                    onChanged: (value) => widget.onQuantityChanged(int.tryParse(value) ?? 1),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 90,
-                child: PrimaryInputField(
-                  controller: _priceController,
-                  showValidationError: false,
-                  minContainerHeight: 0,
-                  keyboardType: TextInputType.number,
-                  isCurrency: true,
-                  onChanged: (value) => widget.onPriceChanged(double.tryParse(value) ?? 0),
-                ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 90,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InputLabel(text: t.eventAssetPriceLabel),
+                  const SizedBox(height: 4),
+                  PrimaryInputField(
+                    controller: _priceController,
+                    showValidationError: false,
+                    minContainerHeight: 0,
+                    keyboardType: TextInputType.number,
+                    isCurrency: true,
+                    onChanged: (value) => widget.onPriceChanged(double.tryParse(value) ?? 0),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -9,6 +9,7 @@ import 'package:business_assistant/core/shared/models/dropdowns/base_dropdown_it
 import 'package:business_assistant/core/shared/models/input_fields/date_input_field_props.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/button_with_loading_state.dart';
+import 'package:business_assistant/core/shared/widgets/cards/card_frame.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/date_input/date_input_field.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/date_input/date_input_time_selection.dart';
@@ -140,6 +141,8 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
   void _onStateChange(BuildContext context, CreateEditEventState state) {
     final t = TranslationStorage.translation;
 
+    _populateControllersOnce(state, context.read<CreateEditEventCubit>().isEditMode);
+
     if (state.saveSucceeded) {
       ToastMessage().showSuccessToast(text: t.eventSavedToast);
       context.pop();
@@ -171,13 +174,12 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
               previous.errorMessage != current.errorMessage ||
               previous.saveSucceeded != current.saveSucceeded ||
               previous.cancelSucceeded != current.cancelSucceeded ||
-              previous.deleteSucceeded != current.deleteSucceeded,
+              previous.deleteSucceeded != current.deleteSucceeded ||
+              previous.isEventPending != current.isEventPending,
       listener: _onStateChange,
       builder: (context, state) {
         final cubit = context.read<CreateEditEventCubit>();
         final isEditMode = cubit.isEditMode;
-
-        _populateControllersOnce(state, isEditMode);
 
         return PageFrame(
           headerActionIcon: Icons.close,
@@ -195,43 +197,43 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      PrimaryInputField(
-                        controller: _titleController,
-                        placeholderText: t.eventTitleLabel,
-                        hintText: t.eventTitleLabel,
-                        showValidationError: false,
-                        onChanged: cubit.setTitle,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      ),
-                      const SizedBox(height: 12),
-                      PrimaryInputField(
-                        controller: _descriptionController,
-                        placeholderText: t.eventDescriptionLabel,
-                        hintText: t.eventDescriptionLabel,
-                        areaField: 3,
-                        showValidationError: false,
-                        onChanged: cubit.setDescription,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      ),
-                      const SizedBox(height: 12),
-                      DateInputField(
-                        props: DateInputFieldProps(
-                          infoTitle: t.eventFromLabel,
-                          placeholderText: t.eventFromLabel,
-                          preselectedDate: state.from,
-                          includeTime: true,
-                          dateChanged: ({required date}) => cubit.setFrom(date.date),
+                      CardFrame(
+                        headerSectionTtitle: t.eventTitleLabel,
+                        child: PrimaryInputField(
+                          controller: _titleController,
+                          showValidationError: false,
+                          onChanged: cubit.setTitle,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         ),
                       ),
+
                       const SizedBox(height: 12),
-                      DateInputField(
-                        props: DateInputFieldProps(
-                          infoTitle: t.eventToLabel,
-                          placeholderText: t.eventToLabel,
-                          preselectedDate: state.to,
-                          firstDate: state.from,
-                          includeTime: true,
-                          dateChanged: ({required date}) => cubit.setTo(date.date),
+                      CardFrame(
+                        headerSectionTtitle: t.eventDateRangeLabel,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            DateInputField(
+                              props: DateInputFieldProps(
+                                infoTitle: t.eventFromLabel,
+                                placeholderText: t.eventFromLabel,
+                                preselectedDate: state.from,
+                                includeTime: true,
+                                dateChanged: ({required date}) => cubit.setFrom(date.date),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            DateInputField(
+                              props: DateInputFieldProps(
+                                infoTitle: t.eventToLabel,
+                                placeholderText: t.eventToLabel,
+                                preselectedDate: state.to,
+                                firstDate: state.from,
+                                includeTime: true,
+                                dateChanged: ({required date}) => cubit.setTo(date.date),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -254,26 +256,35 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
                       //   ),
                       // ),
                       // const SizedBox(height: 12),
-                      LocationInputField(
-                        controller: _locationController,
-                        hintText: t.eventLocationLabel,
-                        onLocationSelected: cubit.setLocation,
-                        language: TranslationStorage().selectedLanguage.languageCode,
+                      CardFrame(
+                        headerSectionTtitle: t.eventLocationLabel,
+                        child: LocationInputField(
+                          controller: _locationController,
+                          onLocationSelected: cubit.setLocation,
+                          language: TranslationStorage().selectedLanguage.languageCode,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 12),
-                Skeletonizer(
-                  enabled: state.isClientPending,
-                  child: _buildClientPicker(context, state, theme),
-                ),
+                Skeletonizer(enabled: state.isClientPending, child: _buildClientPicker(context, state, theme)),
                 const SizedBox(height: 24),
-                Skeletonizer(
-                  enabled: state.isAssetsPending,
-                  child: _buildProductsSection(context, state, theme),
+                Skeletonizer(enabled: state.isAssetsPending, child: _buildProductsSection(context, state, theme)),
+                const SizedBox(height: 12),
+
+                CardFrame(
+                  headerSectionTtitle: t.eventDescriptionLabel,
+                  child: PrimaryInputField(
+                    controller: _descriptionController,
+                    areaField: 3,
+                    showValidationError: false,
+                    onChanged: cubit.setDescription,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
                 ),
                 const SizedBox(height: 28),
+
                 if (isEditMode && !state.isCancelled) ...[
                   CustomOutlinedButton(
                     title: t.cancelEventButton,
@@ -312,16 +323,11 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
 
   Widget _buildClientPicker(BuildContext context, CreateEditEventState state, ThemeColor theme) {
     final t = TranslationStorage.translation;
-    return InkWell(
-      onTap: () => _openClientPicker(context, state),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        decoration: BoxDecoration(
-          color: theme.baseWhite,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: theme.primaryText.withValues(alpha: 0.15)),
-        ),
+    return CardFrame(
+      headerSectionTtitle: t.eventClientLabel,
+      child: InkWell(
+        onTap: () => _openClientPicker(context, state),
+        borderRadius: BorderRadius.circular(12),
         child: Row(
           children: [
             Icon(Icons.person_outline, color: theme.primaryText.withValues(alpha: 0.5), size: 20),

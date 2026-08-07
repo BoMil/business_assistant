@@ -54,3 +54,9 @@ android/key.properties
 # Generated branding files (created at build time by set_tenant_branding.sh)
 flutter_launcher_icons.yaml
 flutter_native_splash.yaml
+
+# Generated l10n output (created by `flutter gen-l10n` from lib/l10n/*.arb) —
+# regenerated automatically on `flutter pub get`/build since generate: true
+# is set in pubspec.yaml. Only the .arb source files are committed.
+lib/l10n/app_localizations.dart
+lib/l10n/app_localizations_*.dart
