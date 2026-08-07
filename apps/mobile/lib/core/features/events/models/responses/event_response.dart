@@ -1,5 +1,5 @@
 import 'package:business_assistant/core/features/events/models/enums/event_status.dart';
-import 'package:business_assistant/core/features/events/models/responses/event_line_item_response.dart';
+import 'package:business_assistant/core/features/events/models/responses/event_asset_response.dart';
 
 /// Mirrors the Business API's TransactionDto. `status` is only meaningful for
 /// TransactionType.Rental (the only type this app creates) — it is derived
@@ -15,7 +15,7 @@ class EventResponse {
   final double? locationLongitude;
   final String? clientId;
   final EventStatus? status;
-  final List<EventLineItemResponse> lineItems;
+  final List<EventAssetResponse> eventAssets;
 
   EventResponse({
     required this.id,
@@ -28,11 +28,11 @@ class EventResponse {
     this.locationLongitude,
     this.clientId,
     this.status,
-    this.lineItems = const [],
+    this.eventAssets = const [],
   });
 
-  /// Sum of quantity * price across all line items — shown as the event's price.
-  double get totalPrice => lineItems.fold(0, (sum, li) => sum + li.quantity * li.price);
+  /// Sum of quantity * price across all event assets — shown as the event's price.
+  double get totalPrice => eventAssets.fold(0, (sum, asset) => sum + asset.quantity * asset.price);
 
   factory EventResponse.fromJson(Map<String, dynamic> json) {
     return EventResponse(
@@ -46,8 +46,9 @@ class EventResponse {
       locationLongitude: (json['locationLongitude'] as num?)?.toDouble(),
       clientId: json['clientId'] as String?,
       status: eventStatusFromJson(json['status'] as String?),
-      lineItems: (json['lineItems'] as List? ?? [])
-          .map((li) => EventLineItemResponse.fromJson(li as Map<String, dynamic>))
+      // Wire key is 'assets' — mirrors the Business API's TransactionDto.Assets.
+      eventAssets: (json['assets'] as List? ?? [])
+          .map((asset) => EventAssetResponse.fromJson(asset as Map<String, dynamic>))
           .toList(),
     );
   }

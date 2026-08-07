@@ -7,16 +7,16 @@ namespace Business.Domain.Entities;
 /// A single Transaction can carry multiple line items — this is what lets an Event on the
 /// Rental UI include several products at once.
 /// </summary>
-public class TransactionLineItem : Entity<Guid>
+public class TransactionAsset : Entity<Guid>
 {
     public Guid TransactionId { get; private set; }
     public Guid AssetId { get; private set; }
     public int Quantity { get; private set; }
     public decimal Price { get; private set; }
 
-    private TransactionLineItem() { }
+    private TransactionAsset() { }
 
-    public static TransactionLineItem Create(Guid transactionId, Guid assetId, int quantity, decimal price) =>
+    public static TransactionAsset Create(Guid transactionId, Guid assetId, int quantity, decimal price) =>
         new()
         {
             Id = Guid.NewGuid(),

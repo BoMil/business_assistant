@@ -10,9 +10,9 @@ internal static class StockAvailabilityChecker
     public static async Task<Result> EnsureAvailableAsync(
         IAssetRepository assetRepository, ITransactionRepository transactionRepository,
         Guid tenantId, DateTime from, DateTime to,
-        List<TransactionLineItemInput> lineItems, Guid? excludeTransactionId, CancellationToken cancellationToken)
+        List<TransactionAssetInput> assets, Guid? excludeTransactionId, CancellationToken cancellationToken)
     {
-        foreach (var item in lineItems)
+        foreach (var item in assets)
         {
             var asset = await assetRepository.GetByIdAsync(item.AssetId, tenantId, cancellationToken);
             if (asset is null)

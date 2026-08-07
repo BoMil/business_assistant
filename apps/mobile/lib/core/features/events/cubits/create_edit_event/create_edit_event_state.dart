@@ -1,22 +1,22 @@
 part of 'create_edit_event_cubit.dart';
 
 /// A product line as edited on the form — quantity/price are user-editable,
-/// unlike EventLineItemResponse which only reflects what the server has saved.
-class EventFormLineItem {
+/// unlike EventAssetResponse which only reflects what the server has saved.
+class EventFormAsset {
   final String assetId;
   final String assetName;
   final int quantity;
   final double price;
 
-  const EventFormLineItem({
+  const EventFormAsset({
     required this.assetId,
     required this.assetName,
     required this.quantity,
     required this.price,
   });
 
-  EventFormLineItem copyWith({int? quantity, double? price}) {
-    return EventFormLineItem(
+  EventFormAsset copyWith({int? quantity, double? price}) {
+    return EventFormAsset(
       assetId: assetId,
       assetName: assetName,
       quantity: quantity ?? this.quantity,
@@ -26,7 +26,11 @@ class EventFormLineItem {
 }
 
 class CreateEditEventState {
+  /// getEventById status (edit mode only) — CubitState.loaded immediately in
+  /// create mode, since there's no event to fetch.
   final CubitState currentState;
+  final CubitState assetsState;
+  final CubitState clientState;
   final bool isSaving;
   final bool isCancelling;
   final bool isDeleting;
@@ -43,8 +47,7 @@ class CreateEditEventState {
   final double? locationLatitude;
   final double? locationLongitude;
   final String? clientId;
-  final String? clientName;
-  final List<EventFormLineItem> lineItems;
+  final List<EventFormAsset> eventAssets;
   final EventStatus? status;
   final bool isDirty;
 
@@ -53,6 +56,8 @@ class CreateEditEventState {
 
   const CreateEditEventState({
     this.currentState = CubitState.initial,
+    this.assetsState = CubitState.initial,
+    this.clientState = CubitState.initial,
     this.isSaving = false,
     this.isCancelling = false,
     this.isDeleting = false,
@@ -68,13 +73,30 @@ class CreateEditEventState {
     this.locationLatitude,
     this.locationLongitude,
     this.clientId,
-    this.clientName,
-    this.lineItems = const [],
+    this.eventAssets = const [],
     this.status,
     this.isDirty = false,
     this.availableAssets = const [],
     this.availableClients = const [],
   });
+
+  /// The selected client's name, looked up from availableClients — kept as a
+  /// derived value instead of a stored field so it's always correct regardless
+  /// of whether the event or the client list finishes loading first.
+  String? get clientName {
+    for (final client in availableClients) {
+      if (client.id == clientId) return client.name;
+    }
+    return null;
+  }
+
+  /// Whether each independent form-data load (event, assets, clients) is
+  /// still in flight — used to gate each section's Skeletonizer.
+  bool get isEventPending => _isPending(currentState);
+  bool get isAssetsPending => _isPending(assetsState);
+  bool get isClientPending => _isPending(clientState);
+
+  static bool _isPending(CubitState state) => state == CubitState.loading || state == CubitState.initial;
 
   /// "Add product" is disabled until both dates are picked — an event's
   /// line-item availability depends on the rental date range.
@@ -92,6 +114,8 @@ class CreateEditEventState {
 
   CreateEditEventState copyWith({
     CubitState? currentState,
+    CubitState? assetsState,
+    CubitState? clientState,
     bool? isSaving,
     bool? isCancelling,
     bool? isDeleting,
@@ -110,9 +134,8 @@ class CreateEditEventState {
     double? locationLatitude,
     double? locationLongitude,
     String? clientId,
-    String? clientName,
     bool clearClient = false,
-    List<EventFormLineItem>? lineItems,
+    List<EventFormAsset>? eventAssets,
     EventStatus? status,
     bool? isDirty,
     List<AssetResponse>? availableAssets,
@@ -120,6 +143,8 @@ class CreateEditEventState {
   }) {
     return CreateEditEventState(
       currentState: currentState ?? this.currentState,
+      assetsState: assetsState ?? this.assetsState,
+      clientState: clientState ?? this.clientState,
       isSaving: isSaving ?? this.isSaving,
       isCancelling: isCancelling ?? this.isCancelling,
       isDeleting: isDeleting ?? this.isDeleting,
@@ -135,8 +160,7 @@ class CreateEditEventState {
       locationLatitude: locationLatitude ?? this.locationLatitude,
       locationLongitude: locationLongitude ?? this.locationLongitude,
       clientId: clearClient ? null : (clientId ?? this.clientId),
-      clientName: clearClient ? null : (clientName ?? this.clientName),
-      lineItems: lineItems ?? this.lineItems,
+      eventAssets: eventAssets ?? this.eventAssets,
       status: status ?? this.status,
       isDirty: isDirty ?? this.isDirty,
       availableAssets: availableAssets ?? this.availableAssets,

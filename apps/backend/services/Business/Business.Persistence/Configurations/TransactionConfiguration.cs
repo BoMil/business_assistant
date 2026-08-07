@@ -32,12 +32,12 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
             loc.Property(l => l.Longitude).HasColumnName("LocationLongitude");
         });
 
-        builder.Metadata.FindNavigation(nameof(Transaction.LineItems))!
+        builder.Metadata.FindNavigation(nameof(Transaction.Assets))!
             .SetPropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasMany(t => t.LineItems)
+        builder.HasMany(t => t.Assets)
             .WithOne()
-            .HasForeignKey(li => li.TransactionId)
+            .HasForeignKey(asset => asset.TransactionId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

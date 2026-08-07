@@ -23,15 +23,15 @@ internal sealed class CreateTransactionCommandHandler(IUnitOfWorkBusiness unitOf
         {
             var availability = await StockAvailabilityChecker.EnsureAvailableAsync(
                 unitOfWork.Assets, unitOfWork.Transactions, request.TenantId,
-                request.From.Value, request.To.Value, request.LineItems, excludeTransactionId: null, cancellationToken);
+                request.From.Value, request.To.Value, request.Assets, excludeTransactionId: null, cancellationToken);
 
             if (availability.IsFailed)
                 return availability.ToResult<Guid>();
         }
 
         var transaction = Transaction.Create(request.TenantId, request.Type, request.Title, request.Description, request.From, request.To, location, request.ClientId);
-        foreach (var item in request.LineItems)
-            transaction.AddLineItem(item.AssetId, item.Quantity, item.Price);
+        foreach (var item in request.Assets)
+            transaction.AddAsset(item.AssetId, item.Quantity, item.Price);
 
         await unitOfWork.Transactions.AddAsync(transaction, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -25,7 +25,7 @@ class EventCard extends StatelessWidget {
     final lines = [
       if ((event.locationAddress ?? '').isNotEmpty) event.locationAddress,
       if (_dateRange.isNotEmpty) _dateRange,
-      if (event.lineItems.isNotEmpty) event.lineItems.map((li) => li.assetName).join(', '),
+      if (event.eventAssets.isNotEmpty) event.eventAssets.map((asset) => asset.assetName).join(', '),
     ];
     return lines.join('\n');
   }

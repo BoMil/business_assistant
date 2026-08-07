@@ -1,4 +1,4 @@
-import 'package:business_assistant/core/features/events/models/requests/event_line_item_request.dart';
+import 'package:business_assistant/core/features/events/models/requests/event_asset_request.dart';
 
 /// JSON body for POST /transactions — mirrors the Business API's
 /// CreateTransactionRequest. This app only ever creates TransactionType.Rental
@@ -15,7 +15,7 @@ class CreateEventRequest {
   final double? locationLatitude;
   final double? locationLongitude;
   final String? clientId;
-  final List<EventLineItemRequest> lineItems;
+  final List<EventAssetRequest> eventAssets;
 
   const CreateEventRequest({
     required this.title,
@@ -26,7 +26,7 @@ class CreateEventRequest {
     this.locationLatitude,
     this.locationLongitude,
     this.clientId,
-    this.lineItems = const [],
+    this.eventAssets = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -39,6 +39,7 @@ class CreateEventRequest {
         'locationLatitude': locationLatitude,
         'locationLongitude': locationLongitude,
         'clientId': clientId,
-        'lineItems': lineItems.map((li) => li.toJson()).toList(),
+        // Wire key is 'assets' — mirrors the Business API's CreateTransactionRequest.Assets.
+        'assets': eventAssets.map((asset) => asset.toJson()).toList(),
       };
 }

@@ -1,4 +1,4 @@
-import 'package:business_assistant/core/features/events/models/requests/event_line_item_request.dart';
+import 'package:business_assistant/core/features/events/models/requests/event_asset_request.dart';
 
 /// JSON body for PUT /transactions/{id} — mirrors the Business API's
 /// UpdateTransactionRequest (no `type`, it can't change after creation).
@@ -11,7 +11,7 @@ class UpdateEventRequest {
   final double? locationLatitude;
   final double? locationLongitude;
   final String? clientId;
-  final List<EventLineItemRequest> lineItems;
+  final List<EventAssetRequest> eventAssets;
 
   const UpdateEventRequest({
     required this.title,
@@ -22,7 +22,7 @@ class UpdateEventRequest {
     this.locationLatitude,
     this.locationLongitude,
     this.clientId,
-    this.lineItems = const [],
+    this.eventAssets = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -34,6 +34,7 @@ class UpdateEventRequest {
         'locationLatitude': locationLatitude,
         'locationLongitude': locationLongitude,
         'clientId': clientId,
-        'lineItems': lineItems.map((li) => li.toJson()).toList(),
+        // Wire key is 'assets' — mirrors the Business API's UpdateTransactionRequest.Assets.
+        'assets': eventAssets.map((asset) => asset.toJson()).toList(),
       };
 }

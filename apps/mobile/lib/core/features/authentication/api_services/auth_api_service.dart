@@ -19,11 +19,10 @@ class AuthApiService {
 
   Future<ApiResponse<LoginResponse>> login(LoginRequest request) async {
     try {
-      // await Future.delayed(const Duration(seconds: 2));
-      // return ApiResponse.completed(LoginResponse.fromJson({
-      //   'accessToken': _mockAccessToken(),
-      //   'refreshToken': 'mock-refresh-token',
-      // }));
+      await Future.delayed(const Duration(seconds: 2));
+      return ApiResponse.completed(
+        LoginResponse.fromJson({'accessToken': _mockAccessToken(), 'refreshToken': 'mock-refresh-token'}),
+      );
       final response = await dio.post(APIEndpoints.login, data: request.toJson());
       return ApiResponse.completed(LoginResponse.fromJson(response.data));
     } on DioException catch (e) {

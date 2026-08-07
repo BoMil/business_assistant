@@ -2,7 +2,7 @@ using Business.Domain.Enums;
 
 namespace Business.Application.UseCases.Common;
 
-public record TransactionLineItemDto(Guid AssetId, string AssetName, int Quantity, decimal Price);
+public record TransactionAssetDto(Guid AssetId, string AssetName, int Quantity, decimal Price);
 
 /// <summary>
 /// <see cref="Status"/> is derived at query time (Transaction.GetStatus in the Domain project) —
@@ -21,4 +21,4 @@ public record TransactionDto(
     double? LocationLongitude,
     Guid? ClientId,
     TransactionStatus? Status,
-    List<TransactionLineItemDto> LineItems);
+    List<TransactionAssetDto> Assets);

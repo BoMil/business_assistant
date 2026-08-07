@@ -143,7 +143,7 @@ namespace Business.Persistence.Migrations
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("Business.Domain.Entities.TransactionLineItem", b =>
+            modelBuilder.Entity("Business.Domain.Entities.TransactionAsset", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -168,7 +168,7 @@ namespace Business.Persistence.Migrations
 
                     b.HasIndex("TransactionId");
 
-                    b.ToTable("TransactionLineItems");
+                    b.ToTable("TransactionAssets");
                 });
 
             modelBuilder.Entity("Business.Domain.Entities.Client", b =>
@@ -235,10 +235,10 @@ namespace Business.Persistence.Migrations
                     b.Navigation("Location");
                 });
 
-            modelBuilder.Entity("Business.Domain.Entities.TransactionLineItem", b =>
+            modelBuilder.Entity("Business.Domain.Entities.TransactionAsset", b =>
                 {
                     b.HasOne("Business.Domain.Entities.Transaction", null)
-                        .WithMany("LineItems")
+                        .WithMany("Assets")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -246,7 +246,7 @@ namespace Business.Persistence.Migrations
 
             modelBuilder.Entity("Business.Domain.Entities.Transaction", b =>
                 {
-                    b.Navigation("LineItems");
+                    b.Navigation("Assets");
                 });
 #pragma warning restore 612, 618
         }

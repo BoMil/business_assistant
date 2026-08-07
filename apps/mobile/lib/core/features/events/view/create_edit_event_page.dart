@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/events/cubits/create_edit_event/create_edit_event_cubit.dart';
-import 'package:business_assistant/core/features/events/view/widgets/event_line_item_tile.dart';
-import 'package:business_assistant/core/shared/enums/cubit_state.dart';
+import 'package:business_assistant/core/features/events/view/widgets/event_asset_tile.dart';
 import 'package:business_assistant/core/shared/models/dropdowns/base_dropdown_item.dart';
 import 'package:business_assistant/core/shared/models/input_fields/date_input_field_props.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
@@ -62,8 +62,11 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
     super.dispose();
   }
 
-  void _populateControllersOnce(CreateEditEventState state) {
+  void _populateControllersOnce(CreateEditEventState state, bool isEditMode) {
     if (_controllersPopulated) return;
+    // In edit mode, wait for the event to actually load — otherwise this
+    // fires once with the still-empty defaults and never gets to run again.
+    if (isEditMode && state.isEventPending) return;
     _controllersPopulated = true;
     _titleController.text = state.title;
     _descriptionController.text = state.description;
@@ -88,7 +91,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
 
   void _openProductPicker(BuildContext context, CreateEditEventState state) {
     final cubit = context.read<CreateEditEventCubit>();
-    final addedIds = state.lineItems.map((li) => li.assetId).toSet();
+    final addedIds = state.eventAssets.map((ea) => ea.assetId).toSet();
     final items =
         state.availableAssets
             .where((asset) => !addedIds.contains(asset.id))
@@ -105,7 +108,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
             items: items,
             onItemSelected: (item) {
               final asset = state.availableAssets.firstWhere((asset) => asset.id == item.value);
-              cubit.addLineItem(asset);
+              cubit.addEventAsset(asset);
             },
           ),
     );
@@ -174,18 +177,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
         final cubit = context.read<CreateEditEventCubit>();
         final isEditMode = cubit.isEditMode;
 
-        if (state.currentState == CubitState.loading || state.currentState == CubitState.initial) {
-          return PageFrame(
-            headerActionIcon: Icons.close,
-            title: Text(
-              t.eventDetailsTitle,
-              style: TextStyle(color: theme.primaryText, fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            pageBody: const Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        _populateControllersOnce(state);
+        _populateControllersOnce(state, isEditMode);
 
         return PageFrame(
           headerActionIcon: Icons.close,
@@ -198,75 +190,89 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 16),
-                PrimaryInputField(
-                  controller: _titleController,
-                  placeholderText: t.eventTitleLabel,
-                  hintText: t.eventTitleLabel,
-                  showValidationError: false,
-                  onChanged: cubit.setTitle,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-                const SizedBox(height: 12),
-                PrimaryInputField(
-                  controller: _descriptionController,
-                  placeholderText: t.eventDescriptionLabel,
-                  hintText: t.eventDescriptionLabel,
-                  areaField: 3,
-                  showValidationError: false,
-                  onChanged: cubit.setDescription,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-                const SizedBox(height: 12),
-                DateInputField(
-                  props: DateInputFieldProps(
-                    infoTitle: t.eventFromLabel,
-                    placeholderText: t.eventFromLabel,
-                    preselectedDate: state.from,
-                    includeTime: true,
-                    dateChanged: ({required date}) => cubit.setFrom(date.date),
+                Skeletonizer(
+                  enabled: isEditMode && state.isEventPending,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      PrimaryInputField(
+                        controller: _titleController,
+                        placeholderText: t.eventTitleLabel,
+                        hintText: t.eventTitleLabel,
+                        showValidationError: false,
+                        onChanged: cubit.setTitle,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                      const SizedBox(height: 12),
+                      PrimaryInputField(
+                        controller: _descriptionController,
+                        placeholderText: t.eventDescriptionLabel,
+                        hintText: t.eventDescriptionLabel,
+                        areaField: 3,
+                        showValidationError: false,
+                        onChanged: cubit.setDescription,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                      const SizedBox(height: 12),
+                      DateInputField(
+                        props: DateInputFieldProps(
+                          infoTitle: t.eventFromLabel,
+                          placeholderText: t.eventFromLabel,
+                          preselectedDate: state.from,
+                          includeTime: true,
+                          dateChanged: ({required date}) => cubit.setFrom(date.date),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DateInputField(
+                        props: DateInputFieldProps(
+                          infoTitle: t.eventToLabel,
+                          placeholderText: t.eventToLabel,
+                          preselectedDate: state.to,
+                          firstDate: state.from,
+                          includeTime: true,
+                          dateChanged: ({required date}) => cubit.setTo(date.date),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // DateInputTimeSelection(
+                      //   props: DateInputFieldProps(
+                      //     infoTitle: '${t.eventFromLabel} (test)',
+                      //     placeholderText: '${t.eventFromLabel} (test)',
+                      //     preselectedDate: _testFrom,
+                      //     dateChanged: ({required date}) => setState(() => _testFrom = date.date),
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 12),
+                      // DateInputTimeSelection(
+                      //   props: DateInputFieldProps(
+                      //     infoTitle: '${t.eventToLabel} (test)',
+                      //     placeholderText: '${t.eventToLabel} (test)',
+                      //     preselectedDate: _testTo,
+                      //     firstDate: _testFrom,
+                      //     dateChanged: ({required date}) => setState(() => _testTo = date.date),
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 12),
+                      LocationInputField(
+                        controller: _locationController,
+                        hintText: t.eventLocationLabel,
+                        onLocationSelected: cubit.setLocation,
+                        language: TranslationStorage().selectedLanguage.languageCode,
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
-                DateInputField(
-                  props: DateInputFieldProps(
-                    infoTitle: t.eventToLabel,
-                    placeholderText: t.eventToLabel,
-                    preselectedDate: state.to,
-                    firstDate: state.from,
-                    includeTime: true,
-                    dateChanged: ({required date}) => cubit.setTo(date.date),
-                  ),
+                Skeletonizer(
+                  enabled: state.isClientPending,
+                  child: _buildClientPicker(context, state, theme),
                 ),
-                const SizedBox(height: 12),
-                // DateInputTimeSelection(
-                //   props: DateInputFieldProps(
-                //     infoTitle: '${t.eventFromLabel} (test)',
-                //     placeholderText: '${t.eventFromLabel} (test)',
-                //     preselectedDate: _testFrom,
-                //     dateChanged: ({required date}) => setState(() => _testFrom = date.date),
-                //   ),
-                // ),
-                // const SizedBox(height: 12),
-                // DateInputTimeSelection(
-                //   props: DateInputFieldProps(
-                //     infoTitle: '${t.eventToLabel} (test)',
-                //     placeholderText: '${t.eventToLabel} (test)',
-                //     preselectedDate: _testTo,
-                //     firstDate: _testFrom,
-                //     dateChanged: ({required date}) => setState(() => _testTo = date.date),
-                //   ),
-                // ),
-                // const SizedBox(height: 12),
-                LocationInputField(
-                  controller: _locationController,
-                  hintText: t.eventLocationLabel,
-                  onLocationSelected: cubit.setLocation,
-                  language: TranslationStorage().selectedLanguage.languageCode,
-                ),
-                const SizedBox(height: 12),
-                _buildClientPicker(context, state, theme),
                 const SizedBox(height: 24),
-                _buildProductsSection(context, state, theme),
+                Skeletonizer(
+                  enabled: state.isAssetsPending,
+                  child: _buildProductsSection(context, state, theme),
+                ),
                 const SizedBox(height: 28),
                 if (isEditMode && !state.isCancelled) ...[
                   CustomOutlinedButton(
@@ -371,14 +377,14 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
           ),
           const SizedBox(height: 8),
         ],
-        if (state.lineItems.isNotEmpty) const SizedBox(height: 8),
-        ...state.lineItems.map(
-          (item) => EventLineItemTile(
+        if (state.eventAssets.isNotEmpty) const SizedBox(height: 8),
+        ...state.eventAssets.map(
+          (item) => EventAssetTile(
             key: ValueKey(item.assetId),
             item: item,
-            onQuantityChanged: (quantity) => cubit.updateLineItemQuantity(item.assetId, quantity),
-            onPriceChanged: (price) => cubit.updateLineItemPrice(item.assetId, price),
-            onRemove: () => cubit.removeLineItem(item.assetId),
+            onQuantityChanged: (quantity) => cubit.updateEventAssetQuantity(item.assetId, quantity),
+            onPriceChanged: (price) => cubit.updateEventAssetPrice(item.assetId, price),
+            onRemove: () => cubit.removeEventAsset(item.assetId),
           ),
         ),
       ],

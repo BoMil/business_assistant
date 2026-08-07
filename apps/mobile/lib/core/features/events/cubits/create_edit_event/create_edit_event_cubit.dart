@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/core/features/clients/api_services/client_api_service.dart';
 import 'package:business_assistant/core/features/clients/models/responses/client_response.dart';
 import 'package:business_assistant/core/features/events/api_services/event_api_service.dart';
 import 'package:business_assistant/core/features/events/models/enums/event_status.dart';
 import 'package:business_assistant/core/features/events/models/requests/create_event_request.dart';
-import 'package:business_assistant/core/features/events/models/requests/event_line_item_request.dart';
+import 'package:business_assistant/core/features/events/models/requests/event_asset_request.dart';
 import 'package:business_assistant/core/features/events/models/requests/update_event_request.dart';
 import 'package:business_assistant/core/features/inventory/api_services/asset_api_service.dart';
 import 'package:business_assistant/core/features/inventory/models/responses/asset_response.dart';
@@ -35,54 +37,50 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
 
   bool get isEditMode => eventId != null;
 
-  /// Loads the asset/client pickers' options, and — in edit mode — the
-  /// existing event's data to pre-fill the form.
+  /// Kicks off the asset/client pickers' options and — in edit mode — the
+  /// existing event's data, as three independent calls: one failing doesn't
+  /// stop or delay the others.
   Future<void> loadFormData() async {
+    unawaited(_loadAssets());
+    unawaited(_loadClients());
+    if (isEditMode) {
+      unawaited(_loadEvent());
+    } else {
+      emit(state.copyWith(currentState: CubitState.loaded));
+    }
+  }
+
+  Future<void> _loadAssets() async {
+    emit(state.copyWith(assetsState: CubitState.loading));
+    final response = await assetApiService.getAssets();
+    if (response.status == ResponseStatus.error) {
+      emit(state.copyWith(assetsState: CubitState.error, errorMessage: response.message));
+      return;
+    }
+    emit(state.copyWith(assetsState: CubitState.loaded, availableAssets: response.data ?? []));
+  }
+
+  Future<void> _loadClients() async {
+    emit(state.copyWith(clientState: CubitState.loading));
+    final response = await clientApiService.getClients();
+    if (response.status == ResponseStatus.error) {
+      emit(state.copyWith(clientState: CubitState.error, errorMessage: response.message));
+      return;
+    }
+    emit(state.copyWith(clientState: CubitState.loaded, availableClients: response.data ?? []));
+  }
+
+  Future<void> _loadEvent() async {
     emit(state.copyWith(currentState: CubitState.loading));
-
-    final assetsResponse = await assetApiService.getAssets();
-    if (assetsResponse.status == ResponseStatus.error) {
-      emit(state.copyWith(currentState: CubitState.error, errorMessage: assetsResponse.message));
+    final response = await eventApiService.getEventById(eventId!);
+    if (response.status == ResponseStatus.error) {
+      emit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
       return;
     }
 
-    final clientsResponse = await clientApiService.getClients();
-    if (clientsResponse.status == ResponseStatus.error) {
-      emit(state.copyWith(currentState: CubitState.error, errorMessage: clientsResponse.message));
-      return;
-    }
-
-    final availableAssets = assetsResponse.data ?? [];
-    final availableClients = clientsResponse.data ?? [];
-
-    if (!isEditMode) {
-      emit(state.copyWith(
-        currentState: CubitState.loaded,
-        availableAssets: availableAssets,
-        availableClients: availableClients,
-      ));
-      return;
-    }
-
-    final eventResponse = await eventApiService.getEventById(eventId!);
-    if (eventResponse.status == ResponseStatus.error) {
-      emit(state.copyWith(currentState: CubitState.error, errorMessage: eventResponse.message));
-      return;
-    }
-
-    final event = eventResponse.data!;
-    ClientResponse? matchedClient;
-    for (final client in availableClients) {
-      if (client.id == event.clientId) {
-        matchedClient = client;
-        break;
-      }
-    }
-
+    final event = response.data!;
     emit(state.copyWith(
       currentState: CubitState.loaded,
-      availableAssets: availableAssets,
-      availableClients: availableClients,
       title: event.title,
       description: event.description ?? '',
       from: event.from,
@@ -91,9 +89,8 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
       locationLatitude: event.locationLatitude,
       locationLongitude: event.locationLongitude,
       clientId: event.clientId,
-      clientName: matchedClient?.name,
-      lineItems: event.lineItems
-          .map((li) => EventFormLineItem(assetId: li.assetId, assetName: li.assetName, quantity: li.quantity, price: li.price))
+      eventAssets: event.eventAssets
+          .map((asset) => EventFormAsset(assetId: asset.assetId, assetName: asset.assetName, quantity: asset.quantity, price: asset.price))
           .toList(),
       status: event.status,
     ));
@@ -117,39 +114,38 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
 
   void selectClient(ClientResponse? client) => emit(state.copyWith(
         clientId: client?.id,
-        clientName: client?.name,
         clearClient: client == null,
         isDirty: true,
       ));
 
-  void addLineItem(AssetResponse asset) {
-    if (state.lineItems.any((li) => li.assetId == asset.id)) return;
-    final newItem = EventFormLineItem(
+  void addEventAsset(AssetResponse asset) {
+    if (state.eventAssets.any((ea) => ea.assetId == asset.id)) return;
+    final newAsset = EventFormAsset(
       assetId: asset.id,
       assetName: asset.name,
       quantity: 1,
       price: asset.rentalPrice ?? 0,
     );
-    emit(state.copyWith(lineItems: [...state.lineItems, newItem], isDirty: true));
+    emit(state.copyWith(eventAssets: [...state.eventAssets, newAsset], isDirty: true));
   }
 
-  void removeLineItem(String assetId) {
+  void removeEventAsset(String assetId) {
     emit(state.copyWith(
-      lineItems: state.lineItems.where((li) => li.assetId != assetId).toList(),
+      eventAssets: state.eventAssets.where((ea) => ea.assetId != assetId).toList(),
       isDirty: true,
     ));
   }
 
-  void updateLineItemQuantity(String assetId, int quantity) {
+  void updateEventAssetQuantity(String assetId, int quantity) {
     emit(state.copyWith(
-      lineItems: state.lineItems.map((li) => li.assetId == assetId ? li.copyWith(quantity: quantity) : li).toList(),
+      eventAssets: state.eventAssets.map((ea) => ea.assetId == assetId ? ea.copyWith(quantity: quantity) : ea).toList(),
       isDirty: true,
     ));
   }
 
-  void updateLineItemPrice(String assetId, double price) {
+  void updateEventAssetPrice(String assetId, double price) {
     emit(state.copyWith(
-      lineItems: state.lineItems.map((li) => li.assetId == assetId ? li.copyWith(price: price) : li).toList(),
+      eventAssets: state.eventAssets.map((ea) => ea.assetId == assetId ? ea.copyWith(price: price) : ea).toList(),
       isDirty: true,
     ));
   }
@@ -165,8 +161,8 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
 
     emit(state.copyWith(isSaving: true, clearError: true));
 
-    final lineItems = state.lineItems
-        .map((li) => EventLineItemRequest(assetId: li.assetId, quantity: li.quantity, price: li.price))
+    final eventAssets = state.eventAssets
+        .map((asset) => EventAssetRequest(assetId: asset.assetId, quantity: asset.quantity, price: asset.price))
         .toList();
     final description = state.description.trim().isEmpty ? null : state.description.trim();
 
@@ -183,7 +179,7 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
           locationLatitude: state.locationLatitude,
           locationLongitude: state.locationLongitude,
           clientId: state.clientId,
-          lineItems: lineItems,
+          eventAssets: eventAssets,
         ),
       );
     } else {
@@ -197,7 +193,7 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
           locationLatitude: state.locationLatitude,
           locationLongitude: state.locationLongitude,
           clientId: state.clientId,
-          lineItems: lineItems,
+          eventAssets: eventAssets,
         ),
       );
     }

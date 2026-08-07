@@ -72,7 +72,7 @@ namespace Business.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TransactionLineItems",
+                name: "TransactionAssets",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -83,9 +83,9 @@ namespace Business.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TransactionLineItems", x => x.Id);
+                    table.PrimaryKey("PK_TransactionAssets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TransactionLineItems_Transactions_TransactionId",
+                        name: "FK_TransactionAssets_Transactions_TransactionId",
                         column: x => x.TransactionId,
                         principalTable: "Transactions",
                         principalColumn: "Id",
@@ -103,13 +103,13 @@ namespace Business.Persistence.Migrations
                 column: "TenantId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TransactionLineItems_AssetId",
-                table: "TransactionLineItems",
+                name: "IX_TransactionAssets_AssetId",
+                table: "TransactionAssets",
                 column: "AssetId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TransactionLineItems_TransactionId",
-                table: "TransactionLineItems",
+                name: "IX_TransactionAssets_TransactionId",
+                table: "TransactionAssets",
                 column: "TransactionId");
 
             migrationBuilder.CreateIndex(
@@ -133,7 +133,7 @@ namespace Business.Persistence.Migrations
                 name: "Clients");
 
             migrationBuilder.DropTable(
-                name: "TransactionLineItems");
+                name: "TransactionAssets");
 
             migrationBuilder.DropTable(
                 name: "Transactions");

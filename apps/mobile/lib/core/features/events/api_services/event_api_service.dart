@@ -4,7 +4,7 @@ import 'package:business_assistant/core/features/events/models/enums/event_statu
 import 'package:business_assistant/core/features/events/models/requests/create_event_request.dart';
 import 'package:business_assistant/core/features/events/models/requests/events_request.dart';
 import 'package:business_assistant/core/features/events/models/requests/update_event_request.dart';
-import 'package:business_assistant/core/features/events/models/responses/event_line_item_response.dart';
+import 'package:business_assistant/core/features/events/models/responses/event_asset_response.dart';
 import 'package:business_assistant/core/features/events/models/responses/event_response.dart';
 import 'package:business_assistant/core/features/events/models/responses/events_paged_response.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
@@ -24,8 +24,8 @@ class EventApiService {
   Future<ApiResponse<EventsPagedResponse>> getEvents(EventsRequest request) async {
     // TODO: temporary mock data for UI testing — remove and let the real
     // Dio call below run once the Business API is reachable.
-    // await Future.delayed(const Duration(milliseconds: 500));
-    // return ApiResponse.completed(_mockPagedEvents(request));
+    await Future.delayed(const Duration(milliseconds: 500));
+    return ApiResponse.completed(_mockPagedEvents(request));
 
     try {
       final response = await dio.get(APIEndpoints.transactions, queryParameters: request.toQueryParameters());
@@ -40,9 +40,9 @@ class EventApiService {
   Future<ApiResponse<EventResponse>> getEventById(String id) async {
     // TODO: temporary mock data for UI testing — remove and let the real
     // Dio call below run once the Business API is reachable.
-    // await Future.delayed(const Duration(milliseconds: 500));
-    // final event = _mockEvents().firstWhere((e) => e.id == id, orElse: () => _mockEvents().first);
-    // return ApiResponse.completed(event);
+    await Future.delayed(const Duration(milliseconds: 500));
+    final event = _mockEvents().firstWhere((e) => e.id == id, orElse: () => _mockEvents().first);
+    return ApiResponse.completed(event);
 
     try {
       final response = await dio.get(APIEndpoints.transactionById(id));
@@ -97,9 +97,9 @@ class EventApiService {
         locationLatitude: 45.2551,
         locationLongitude: 19.8451,
         status: EventStatus.pending,
-        lineItems: [
-          EventLineItemResponse(assetId: 'a1', assetName: 'Tiffany Stolice', quantity: 25, price: 50),
-          EventLineItemResponse(assetId: 'a2', assetName: 'Barski Stolovi', quantity: 5, price: 30),
+        eventAssets: [
+          EventAssetResponse(assetId: 'a1', assetName: 'Tiffany Stolice', quantity: 25, price: 50),
+          EventAssetResponse(assetId: 'a2', assetName: 'Barski Stolovi', quantity: 5, price: 30),
         ],
       ),
       EventResponse(
@@ -112,7 +112,7 @@ class EventApiService {
         locationLatitude: 45.2496,
         locationLongitude: 19.8419,
         status: EventStatus.inProgress,
-        lineItems: [EventLineItemResponse(assetId: 'a2', assetName: 'Barski Stolovi', quantity: 10, price: 30)],
+        eventAssets: [EventAssetResponse(assetId: 'a2', assetName: 'Barski Stolovi', quantity: 10, price: 30)],
       ),
       EventResponse(
         id: '33333333-3333-3333-3333-333333333333',
@@ -124,7 +124,7 @@ class EventApiService {
         locationLatitude: 45.2671,
         locationLongitude: 19.8335,
         status: EventStatus.finished,
-        lineItems: [EventLineItemResponse(assetId: 'a1', assetName: 'Tiffany Stolice', quantity: 50, price: 50)],
+        eventAssets: [EventAssetResponse(assetId: 'a1', assetName: 'Tiffany Stolice', quantity: 50, price: 50)],
       ),
       EventResponse(
         id: '44444444-4444-4444-4444-444444444444',
@@ -136,7 +136,7 @@ class EventApiService {
         locationLatitude: 45.2603,
         locationLongitude: 19.8394,
         status: EventStatus.canceled,
-        lineItems: const [],
+        eventAssets: const [],
       ),
     ];
   }

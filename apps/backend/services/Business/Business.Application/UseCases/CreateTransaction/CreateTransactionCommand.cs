@@ -17,7 +17,7 @@ public record CreateTransactionCommand(
     double? LocationLatitude,
     double? LocationLongitude,
     Guid? ClientId,
-    List<TransactionLineItemInput> LineItems
+    List<TransactionAssetInput> Assets
 ) : ICommand<Result<Guid>>;
 
 public sealed class CreateTransactionCommandValidator : AbstractValidator<CreateTransactionCommand>
@@ -25,10 +25,10 @@ public sealed class CreateTransactionCommandValidator : AbstractValidator<Create
     public CreateTransactionCommandValidator()
     {
         RuleFor(x => x.Title).NotEmpty().WithMessage("Title is required");
-        RuleFor(x => x.LineItems).NotEmpty().WithMessage("At least one line item is required");
-        RuleForEach(x => x.LineItems).ChildRules(item =>
+        RuleFor(x => x.Assets).NotEmpty().WithMessage("At least one line item is required");
+        RuleForEach(x => x.Assets).ChildRules(item =>
         {
-            item.RuleFor(li => li.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than zero");
+            item.RuleFor(asset => asset.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than zero");
         });
     }
 }

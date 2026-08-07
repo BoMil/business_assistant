@@ -1,3 +1,5 @@
+import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/features/bottom_navigation/cubits/bottom_navigation/bottom_navigation_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -45,70 +47,81 @@ class _EventsPageContent extends StatelessWidget {
     final t = TranslationStorage.translation;
     final theme = context.colors;
 
-    return PageFrame(
-      isHeaderVisible: false,
-      pageHeader: const MainHeader(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openCreateEvent(context),
-        backgroundColor: theme.brandPrimary,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      pageBody: GenericPaginationTrigger<EventsCubit>(
-        fixedContent: SliverAppBar(
-          toolbarHeight: 70,
-          collapsedHeight: 70,
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-          pinned: true,
-          flexibleSpace: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: TextSearch(
-              hintText: t.eventsSearchHint,
-              onTypingComplete: (query) => context.read<EventsCubit>().changeSearch(query),
+    return BlocListener<BottomNavigationCubit, BottomNavigationState>(
+      listener: (context, state) {
+        bool isAuthanticated = context.read<AuthCubit>().state is Authenticated;
+        if (isAuthanticated && context.read<BottomNavigationCubit>().isTabSelected(RouteNames.eventsPage)) {
+          context.read<EventsCubit>().resetState();
+        }
+      },
+      child: PageFrame(
+        isHeaderVisible: false,
+        pageHeader: const MainHeader(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _openCreateEvent(context),
+          backgroundColor: theme.brandPrimary,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
+        pageBody: GenericPaginationTrigger<EventsCubit>(
+          fixedContent: SliverAppBar(
+            toolbarHeight: 70,
+            collapsedHeight: 70,
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            pinned: true,
+            flexibleSpace: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: TextSearch(
+                hintText: t.eventsSearchHint,
+                onTypingComplete: (query) => context.read<EventsCubit>().changeSearch(query),
+              ),
             ),
           ),
-        ),
-        child: BlocBuilder<EventsCubit, EventsState>(
-          builder: (context, state) {
-            final items = state.eventsResponse.items;
+          child: BlocBuilder<EventsCubit, EventsState>(
+            builder: (context, state) {
+              final items = state.eventsResponse.items;
 
-            if (state.currentState == CubitState.loading && items.isEmpty) {
-              return const EventCardSkeleton();
-            }
+              if (state.currentState == CubitState.loading && items.isEmpty) {
+                return const EventCardSkeleton();
+              }
 
-            if (state.currentState == CubitState.error && items.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                child: Center(
-                  child: Text(state.errorMessage ?? t.genericErrorMessage, style: TextStyle(color: theme.brandError)),
-                ),
-              );
-            }
-
-            if (items.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                child: Center(
-                  child: Text(t.eventsEmptyStateText, style: TextStyle(color: theme.primaryText.withValues(alpha: 0.5))),
-                ),
-              );
-            }
-
-            return Column(
-              children: [
-                ...items.map(
-                  (event) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: EventCard(event: event, onTap: () => _openEditEvent(context, event.id)),
+              if (state.currentState == CubitState.error && items.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: Text(state.errorMessage ?? t.genericErrorMessage, style: TextStyle(color: theme.brandError)),
                   ),
-                ),
-                // "Load more" placeholder — only shown once page 1 already has items.
-                if (state.currentState == CubitState.loading) const EventCardSkeleton(),
-              ],
-            );
-          },
+                );
+              }
+
+              if (items.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: Text(
+                      t.eventsEmptyStateText,
+                      style: TextStyle(color: theme.primaryText.withValues(alpha: 0.5)),
+                    ),
+                  ),
+                );
+              }
+
+              return Column(
+                children: [
+                  ...items.map(
+                    (event) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: EventCard(event: event, onTap: () => _openEditEvent(context, event.id)),
+                    ),
+                  ),
+                  // "Load more" placeholder — only shown once page 1 already has items.
+                  if (state.currentState == CubitState.loading) const EventCardSkeleton(),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

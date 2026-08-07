@@ -7,13 +7,13 @@ import 'package:business_assistant/theme/get_theme_color.dart';
 /// One added product row on CreateEditEventPage — editable quantity + price,
 /// plus a remove button. Keep this widget keyed by assetId in its parent
 /// ListView so its controllers survive cubit rebuilds.
-class EventLineItemTile extends StatefulWidget {
-  final EventFormLineItem item;
+class EventAssetTile extends StatefulWidget {
+  final EventFormAsset item;
   final ValueChanged<int> onQuantityChanged;
   final ValueChanged<double> onPriceChanged;
   final VoidCallback onRemove;
 
-  const EventLineItemTile({
+  const EventAssetTile({
     super.key,
     required this.item,
     required this.onQuantityChanged,
@@ -22,10 +22,10 @@ class EventLineItemTile extends StatefulWidget {
   });
 
   @override
-  State<EventLineItemTile> createState() => _EventLineItemTileState();
+  State<EventAssetTile> createState() => _EventAssetTileState();
 }
 
-class _EventLineItemTileState extends State<EventLineItemTile> {
+class _EventAssetTileState extends State<EventAssetTile> {
   late final TextEditingController _quantityController =
       TextEditingController(text: widget.item.quantity.toString());
   late final TextEditingController _priceController =

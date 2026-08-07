@@ -9,12 +9,12 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
 {
     public Task<Transaction?> GetByIdAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default) =>
         context.Transactions
-            .Include(t => t.LineItems)
+            .Include(t => t.Assets)
             .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == tenantId, cancellationToken);
 
     public Task<List<Transaction>> GetByClientAsync(Guid clientId, Guid tenantId, CancellationToken cancellationToken = default) =>
         context.Transactions
-            .Include(t => t.LineItems)
+            .Include(t => t.Assets)
             .Where(t => t.TenantId == tenantId && t.ClientId == clientId)
             .ToListAsync(cancellationToken);
 
@@ -22,7 +22,7 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
         Guid tenantId, int page, int pageSize, string? searchTerm, CancellationToken cancellationToken = default)
     {
         var query = context.Transactions
-            .Include(t => t.LineItems)
+            .Include(t => t.Assets)
             .Where(t => t.TenantId == tenantId);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -59,9 +59,9 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
             query = query.Where(t => t.Id != excludeTransactionId);
 
         return query
-            .SelectMany(t => t.LineItems)
-            .Where(li => li.AssetId == assetId)
-            .SumAsync(li => (int?)li.Quantity, cancellationToken)
+            .SelectMany(t => t.Assets)
+            .Where(asset => asset.AssetId == assetId)
+            .SumAsync(asset => (int?)asset.Quantity, cancellationToken)
             .ContinueWith(t => t.Result ?? 0, cancellationToken);
     }
 }

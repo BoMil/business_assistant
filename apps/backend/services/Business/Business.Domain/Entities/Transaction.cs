@@ -8,7 +8,7 @@ namespace Business.Domain.Entities;
 /// A generic "movement of one or more Assets" — deliberately not called "Event" because the
 /// same shape serves multiple tenant types without new code:
 ///   - Rental tenant: <see cref="TransactionType.Rental"/> is the "Event" from the Rental UI —
-///     From/To/Location/ClientId are all set, LineItems are the products being rented out.
+///     From/To/Location/ClientId are all set, Assets are the products being rented out.
 ///   - Farming tenant (future): <see cref="TransactionType.Production"/> (egg collection) and
 ///     <see cref="TransactionType.Consumption"/> (feed usage) have no ClientId/From/To — they're
 ///     just a stock adjustment. <see cref="TransactionType.Sale"/> (selling produce) has a
@@ -30,8 +30,8 @@ public class Transaction : Entity<Guid>
     public Guid? ClientId { get; private set; }
     public bool IsCancelled { get; private set; }
 
-    private readonly List<TransactionLineItem> _lineItems = [];
-    public IReadOnlyCollection<TransactionLineItem> LineItems => _lineItems;
+    private readonly List<TransactionAsset> _assets = [];
+    public IReadOnlyCollection<TransactionAsset> Assets => _assets;
 
     private Transaction() { }
 
@@ -63,10 +63,10 @@ public class Transaction : Entity<Guid>
         ClientId = clientId;
     }
 
-    public void AddLineItem(Guid assetId, int quantity, decimal price) =>
-        _lineItems.Add(TransactionLineItem.Create(Id, assetId, quantity, price));
+    public void AddAsset(Guid assetId, int quantity, decimal price) =>
+        _assets.Add(TransactionAsset.Create(Id, assetId, quantity, price));
 
-    public void ClearLineItems() => _lineItems.Clear();
+    public void ClearAssets() => _assets.Clear();
 
     public void Cancel() => IsCancelled = true;
 

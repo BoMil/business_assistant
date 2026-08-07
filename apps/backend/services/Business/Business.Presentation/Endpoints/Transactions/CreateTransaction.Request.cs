@@ -13,4 +13,4 @@ public record CreateTransactionRequest(
     double? LocationLatitude,
     double? LocationLongitude,
     Guid? ClientId,
-    List<TransactionLineItemRequest> LineItems);
+    List<TransactionAssetRequest> Assets);

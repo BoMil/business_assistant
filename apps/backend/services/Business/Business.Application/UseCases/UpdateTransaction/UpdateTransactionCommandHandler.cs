@@ -25,7 +25,7 @@ internal sealed class UpdateTransactionCommandHandler(IUnitOfWorkBusiness unitOf
             // Exclude this transaction's own current reservation, since we're about to replace it.
             var availability = await StockAvailabilityChecker.EnsureAvailableAsync(
                 unitOfWork.Assets, unitOfWork.Transactions, request.TenantId,
-                request.From.Value, request.To.Value, request.LineItems, excludeTransactionId: transaction.Id, cancellationToken);
+                request.From.Value, request.To.Value, request.Assets, excludeTransactionId: transaction.Id, cancellationToken);
 
             if (availability.IsFailed)
                 return availability;
@@ -37,9 +37,9 @@ internal sealed class UpdateTransactionCommandHandler(IUnitOfWorkBusiness unitOf
 
         transaction.Update(request.Title, request.Description, request.From, request.To, location, request.ClientId);
 
-        transaction.ClearLineItems();
-        foreach (var item in request.LineItems)
-            transaction.AddLineItem(item.AssetId, item.Quantity, item.Price);
+        transaction.ClearAssets();
+        foreach (var item in request.Assets)
+            transaction.AddAsset(item.AssetId, item.Quantity, item.Price);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

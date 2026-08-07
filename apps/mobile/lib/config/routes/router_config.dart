@@ -15,20 +15,15 @@ class RouterState {
   late AuthCubit authCubit;
 
   /// Root navigator key — used by GoRouter for top-level navigation.
-  GlobalKey<NavigatorState> rootNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'rootNavigatorKey');
+  GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rootNavigatorKey');
 
   /// Shell navigator keys — one per bottom navigation tab's nested navigator.
   /// Not every tab is necessarily shown (see bottom_nav_tabs.dart) — unused
   /// keys are simply never attached to a StatefulShellBranch.
-  GlobalKey<NavigatorState> eventsNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'eventsNavigatorKey');
-  GlobalKey<NavigatorState> inventoryNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'inventoryNavigatorKey');
-  GlobalKey<NavigatorState> clientsNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'clientsNavigatorKey');
-  GlobalKey<NavigatorState> accountNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'accountNavigatorKey');
+  GlobalKey<NavigatorState> eventsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'eventsNavigatorKey');
+  GlobalKey<NavigatorState> inventoryNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'inventoryNavigatorKey');
+  GlobalKey<NavigatorState> clientsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'clientsNavigatorKey');
+  GlobalKey<NavigatorState> accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'accountNavigatorKey');
 
   /// The initial route GoRouter starts at — set dynamically based on auth state.
   String initialRoute = RouteNames.initialScreen;
@@ -42,16 +37,11 @@ class RouterState {
   /// throw "Multiple widgets used the same GlobalKey". Re-creating keys on each
   /// initializeRouteState() call prevents this during development.
   void _resetKeys() {
-    rootNavigatorKey =
-        GlobalKey<NavigatorState>(debugLabel: 'rootNavigatorKey');
-    eventsNavigatorKey =
-        GlobalKey<NavigatorState>(debugLabel: 'eventsNavigatorKey');
-    inventoryNavigatorKey =
-        GlobalKey<NavigatorState>(debugLabel: 'inventoryNavigatorKey');
-    clientsNavigatorKey =
-        GlobalKey<NavigatorState>(debugLabel: 'clientsNavigatorKey');
-    accountNavigatorKey =
-        GlobalKey<NavigatorState>(debugLabel: 'accountNavigatorKey');
+    rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rootNavigatorKey');
+    eventsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'eventsNavigatorKey');
+    inventoryNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'inventoryNavigatorKey');
+    clientsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'clientsNavigatorKey');
+    accountNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'accountNavigatorKey');
   }
 
   /// Maps the current auth state to the correct initial route:

@@ -34,7 +34,7 @@ public static class UpdateTransaction
             id, user.GetTenantId(), request.Title, request.Description,
             request.From, request.To, request.LocationAddress, request.LocationLatitude, request.LocationLongitude,
             request.ClientId,
-            request.LineItems.Select(li => new TransactionLineItemInput(li.AssetId, li.Quantity, li.Price)).ToList());
+            request.Assets.Select(asset => new TransactionAssetInput(asset.AssetId, asset.Quantity, asset.Price)).ToList());
 
         var result = await sender.Send(command, cancellationToken);
 
