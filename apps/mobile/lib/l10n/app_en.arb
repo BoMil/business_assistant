@@ -35,6 +35,20 @@
     "no": "No",
     "genericErrorMessage": "Something went wrong. Please try again.",
 
+    "navEvents": "Events",
+    "navInventory": "Inventory",
+    "navClients": "Clients",
+    "navAccount": "Account",
+
+    "welcomeUser": "Welcome, {name}",
+    "@welcomeUser": {
+        "placeholders": {
+            "name": {"type": "String"}
+        }
+    },
+    "welcomeGeneric": "Welcome",
+    "notificationsComingSoonToast": "Coming soon",
+
     "eventStatusPending": "Pending",
     "eventStatusInProgress": "In Progress",
     "eventStatusFinished": "Finished",
@@ -49,7 +63,9 @@
     "eventFromLabel": "From",
     "eventToLabel": "To",
     "eventDateRangeLabel": "Date & Time",
+    "eventAllDayLabel": "All day",
     "eventLocationLabel": "Location",
+    "eventViewOnMapLabel": "View on map",
     "eventClientLabel": "Client",
     "eventSelectClientLabel": "Select client (optional)",
     "eventProductsLabel": "Products",

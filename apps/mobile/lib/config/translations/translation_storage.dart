@@ -26,7 +26,7 @@ class TranslationStorage {
   late AppLocalizations _translation;
 
   /// The locale currently displayed in the app. Starts with English.
-  Locale selectedLanguage = const Locale('en');
+  Locale selectedLanguage = const Locale('sr');
 
   /// Context-free access to the current translations.
   static AppLocalizations get translation => _singleton._translation;

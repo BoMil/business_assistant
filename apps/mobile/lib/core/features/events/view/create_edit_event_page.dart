@@ -6,16 +6,15 @@ import 'package:business_assistant/config/translations/translation_storage.dart'
 import 'package:business_assistant/core/features/events/cubits/create_edit_event/create_edit_event_cubit.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_asset_tile.dart';
 import 'package:business_assistant/core/shared/models/dropdowns/base_dropdown_item.dart';
-import 'package:business_assistant/core/shared/models/input_fields/date_input_field_props.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/button_with_loading_state.dart';
 import 'package:business_assistant/core/shared/widgets/cards/card_frame.dart';
+import 'package:business_assistant/core/shared/widgets/cards/date_selection_card.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
-import 'package:business_assistant/core/shared/widgets/input_fields/date_input/date_input_field.dart';
-import 'package:business_assistant/core/shared/widgets/input_fields/date_input/date_input_time_selection.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/location_input_field.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/primary_input_field.dart';
 import 'package:business_assistant/core/shared/widgets/modals/selection_bottom_modal.dart';
+import 'package:business_assistant/core/utils/launcher.dart';
 import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
 import 'package:business_assistant/theme/theme_color.dart';
@@ -49,11 +48,6 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
   bool _controllersPopulated = false;
-
-  // Test-only fields for trying out DateInputTimeSelection (sequential native
-  // date + time pickers) side by side with DateInputField's combined picker.
-  DateTime? _testFrom;
-  DateTime? _testTo;
 
   @override
   void dispose() {
@@ -93,10 +87,24 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
   void _openProductPicker(BuildContext context, CreateEditEventState state) {
     final cubit = context.read<CreateEditEventCubit>();
     final addedIds = state.eventAssets.map((ea) => ea.assetId).toSet();
+    final theme = context.colors;
     final items =
         state.availableAssets
             .where((asset) => !addedIds.contains(asset.id))
-            .map((asset) => BaseDropdownItem(text: asset.name, value: asset.id, subtitle: asset.category))
+            .map(
+              (asset) => BaseDropdownItem(
+                text: asset.name,
+                value: asset.id,
+                subtitle: asset.category,
+                rightContent:
+                    asset.rentalPrice != null
+                        ? Text(
+                          asset.rentalPrice!.toStringAsFixed(0),
+                          style: TextStyle(color: theme.statusFinished, fontSize: 15, fontWeight: FontWeight.w600),
+                        )
+                        : null,
+              ),
+            )
             .toList();
 
     showModalBottomSheet(
@@ -112,7 +120,13 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
               cubit.addEventAsset(asset);
             },
           ),
-    );
+    ).then((_) => FocusManager.instance.primaryFocus?.unfocus());
+  }
+
+  void _openInMaps(double? latitude, double? longitude, String address) {
+    final query = latitude != null && longitude != null ? '$latitude,$longitude' : address;
+    final uri = Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': query});
+    launchWebUrl(uri.toString());
   }
 
   void _openClientPicker(BuildContext context, CreateEditEventState state) {
@@ -135,7 +149,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
               cubit.selectClient(client);
             },
           ),
-    );
+    ).then((_) => FocusManager.instance.primaryFocus?.unfocus());
   }
 
   void _onStateChange(BuildContext context, CreateEditEventState state) {
@@ -208,60 +222,46 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
                       ),
 
                       const SizedBox(height: 12),
-                      CardFrame(
-                        headerSectionTtitle: t.eventDateRangeLabel,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            DateInputField(
-                              props: DateInputFieldProps(
-                                infoTitle: t.eventFromLabel,
-                                placeholderText: t.eventFromLabel,
-                                preselectedDate: state.from,
-                                includeTime: true,
-                                dateChanged: ({required date}) => cubit.setFrom(date.date),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            DateInputField(
-                              props: DateInputFieldProps(
-                                infoTitle: t.eventToLabel,
-                                placeholderText: t.eventToLabel,
-                                preselectedDate: state.to,
-                                firstDate: state.from,
-                                includeTime: true,
-                                dateChanged: ({required date}) => cubit.setTo(date.date),
-                              ),
-                            ),
-                          ],
-                        ),
+                      DateSelectionCard(
+                        title: t.eventDateRangeLabel,
+                        allDayLabel: t.eventAllDayLabel,
+                        fromLabel: t.eventFromLabel,
+                        toLabel: t.eventToLabel,
+                        from: state.from,
+                        to: state.to,
+                        onFromChanged: cubit.setFrom,
+                        onToChanged: cubit.setTo,
                       ),
+
                       const SizedBox(height: 12),
-                      // DateInputTimeSelection(
-                      //   props: DateInputFieldProps(
-                      //     infoTitle: '${t.eventFromLabel} (test)',
-                      //     placeholderText: '${t.eventFromLabel} (test)',
-                      //     preselectedDate: _testFrom,
-                      //     dateChanged: ({required date}) => setState(() => _testFrom = date.date),
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 12),
-                      // DateInputTimeSelection(
-                      //   props: DateInputFieldProps(
-                      //     infoTitle: '${t.eventToLabel} (test)',
-                      //     placeholderText: '${t.eventToLabel} (test)',
-                      //     preselectedDate: _testTo,
-                      //     firstDate: _testFrom,
-                      //     dateChanged: ({required date}) => setState(() => _testTo = date.date),
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 12),
                       CardFrame(
                         headerSectionTtitle: t.eventLocationLabel,
-                        child: LocationInputField(
-                          controller: _locationController,
-                          onLocationSelected: cubit.setLocation,
-                          language: TranslationStorage().selectedLanguage.languageCode,
+                        child: Column(
+                          // crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            LocationInputField(
+                              controller: _locationController,
+                              onLocationSelected: cubit.setLocation,
+                              language: TranslationStorage().selectedLanguage.languageCode,
+                            ),
+
+                            if (state.locationAddress.trim().isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  onPressed:
+                                      () => _openInMaps(
+                                        state.locationLatitude,
+                                        state.locationLongitude,
+                                        state.locationAddress,
+                                      ),
+                                  icon: const Icon(Icons.map_outlined, size: 18),
+                                  label: Text(t.eventViewOnMapLabel),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ],
@@ -377,10 +377,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
           ],
         ),
         if (!state.canAddProduct) ...[
-          Text(
-            t.eventSelectDatesFirstHint,
-            style: TextStyle(color: theme.primaryText.withValues(alpha: 0.4), fontSize: 12),
-          ),
+          Text(t.eventSelectDatesFirstHint, style: TextStyle(color: theme.brandError, fontSize: 12)),
           const SizedBox(height: 8),
         ],
         if (state.eventAssets.isNotEmpty) const SizedBox(height: 8),

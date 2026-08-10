@@ -56,7 +56,8 @@ class CardFrame extends StatelessWidget {
         ),
         border: Border.all(color: borderColor ?? colors.primaryText.withValues(alpha: 0.08), width: 1),
         shape: BoxShape.rectangle,
-        color: colors.secondaryBackground,
+        color: colors.baseWhite,
+        // color: colors.secondaryBackground,
         boxShadow: [BoxShadow(color: Colors.black.withAlpha(6), blurRadius: 8, offset: const Offset(0, 4))],
       ),
       child: Padding(

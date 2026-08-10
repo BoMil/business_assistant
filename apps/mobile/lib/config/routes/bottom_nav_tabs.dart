@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/routes/router_config.dart';
 import 'package:business_assistant/config/tenant/tenant_modules.dart';
+import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/account/view/account_page.dart';
 import 'package:business_assistant/core/features/clients/view/clients_page.dart';
 import 'package:business_assistant/core/features/events/view/events_page.dart';
@@ -34,13 +35,14 @@ class BottomNavTab {
 /// at runtime.
 List<BottomNavTab> visibleBottomNavTabs() {
   final modules = TenantModules();
+  final t = TranslationStorage.translation;
 
   return [
     if (modules.events)
       BottomNavTab(
         path: RouteNames.eventsPage,
         svgIconPath: 'assets/svg/bottom_nav_events.svg',
-        label: 'Events',
+        label: t.navEvents,
         navigatorKey: RouterState().eventsNavigatorKey,
         pageBuilder: (_) => const EventsPage(),
       ),
@@ -48,7 +50,7 @@ List<BottomNavTab> visibleBottomNavTabs() {
       BottomNavTab(
         path: RouteNames.inventoryPage,
         svgIconPath: 'assets/svg/bottom_nav_inventory.svg',
-        label: 'Inventory',
+        label: t.navInventory,
         navigatorKey: RouterState().inventoryNavigatorKey,
         pageBuilder: (_) => const InventoryPage(),
       ),
@@ -56,7 +58,7 @@ List<BottomNavTab> visibleBottomNavTabs() {
       BottomNavTab(
         path: RouteNames.clientsPage,
         svgIconPath: 'assets/svg/bottom_nav_clients.svg',
-        label: 'Clients',
+        label: t.navClients,
         navigatorKey: RouterState().clientsNavigatorKey,
         pageBuilder: (_) => const ClientsPage(),
       ),
@@ -64,7 +66,7 @@ List<BottomNavTab> visibleBottomNavTabs() {
     BottomNavTab(
       path: RouteNames.accountPage,
       svgIconPath: 'assets/svg/bottom_nav_account.svg',
-      label: 'Account',
+      label: t.navAccount,
       navigatorKey: RouterState().accountNavigatorKey,
       pageBuilder: (_) => const AccountPage(),
     ),

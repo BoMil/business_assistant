@@ -18,6 +18,7 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
   Color brandAccent;
   Color brandError;
   Color baseWhite;
+  Color secondaryGray;
 
   /// Event status colors — fixed semantic colors (not tenant-branded), used by
   /// EventStatusBadge. InProgress reuses brandPrimary and Canceled reuses
@@ -33,6 +34,7 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
     required this.brandAccent,
     required this.brandError,
     required this.baseWhite,
+    required this.secondaryGray,
     required this.statusPending,
     required this.statusFinished,
   });
@@ -47,6 +49,7 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
     Color? brandAccent,
     Color? brandError,
     Color? baseWhite,
+    Color? secondaryGray,
     Color? statusPending,
     Color? statusFinished,
   }) {
@@ -58,6 +61,7 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
       brandAccent: brandAccent ?? this.brandAccent,
       brandError: brandError ?? this.brandError,
       baseWhite: baseWhite ?? this.baseWhite,
+      secondaryGray: secondaryGray ?? this.secondaryGray,
       statusPending: statusPending ?? this.statusPending,
       statusFinished: statusFinished ?? this.statusFinished,
     );
@@ -66,19 +70,17 @@ class ThemeColor extends ThemeExtension<ThemeColor> {
   /// Required by ThemeExtension — interpolates between two ThemeColor instances
   /// during theme animations (e.g. when switching light ↔ dark with a transition).
   @override
-  ThemeExtension<ThemeColor> lerp(
-      covariant ThemeExtension<ThemeColor>? other, double t) {
+  ThemeExtension<ThemeColor> lerp(covariant ThemeExtension<ThemeColor>? other, double t) {
     if (other is! ThemeColor) return this;
     return ThemeColor(
-      primaryBackground:
-          Color.lerp(primaryBackground, other.primaryBackground, t)!,
-      secondaryBackground:
-          Color.lerp(secondaryBackground, other.secondaryBackground, t)!,
+      primaryBackground: Color.lerp(primaryBackground, other.primaryBackground, t)!,
+      secondaryBackground: Color.lerp(secondaryBackground, other.secondaryBackground, t)!,
       primaryText: Color.lerp(primaryText, other.primaryText, t)!,
       brandPrimary: Color.lerp(brandPrimary, other.brandPrimary, t)!,
       brandAccent: Color.lerp(brandAccent, other.brandAccent, t)!,
       brandError: Color.lerp(brandError, other.brandError, t)!,
       baseWhite: Color.lerp(baseWhite, other.baseWhite, t)!,
+      secondaryGray: Color.lerp(secondaryGray, other.secondaryGray, t)!,
       statusPending: Color.lerp(statusPending, other.statusPending, t)!,
       statusFinished: Color.lerp(statusFinished, other.statusFinished, t)!,
     );
@@ -100,12 +102,9 @@ class AppColors {
   // ── Tenant brand colors — injected at build time via --dart-define-from-file ──
   // Color hex strings must be static const so they can be used in Color() at
   // field initializer time (before any constructor body runs).
-  static const String _primaryColorHex =
-      String.fromEnvironment('PRIMARY_COLOR', defaultValue: 'FF1A237E');
-  static const String _accentColorHex =
-      String.fromEnvironment('ACCENT_COLOR', defaultValue: 'FF00BCD4');
-  static const String _errorColorHex =
-      String.fromEnvironment('ERROR_COLOR', defaultValue: 'FFEB2E25');
+  static const String _primaryColorHex = String.fromEnvironment('PRIMARY_COLOR', defaultValue: 'FF1A237E');
+  static const String _accentColorHex = String.fromEnvironment('ACCENT_COLOR', defaultValue: 'FF00BCD4');
+  static const String _errorColorHex = String.fromEnvironment('ERROR_COLOR', defaultValue: 'FFEB2E25');
 
   static final Color brandPrimary = Color(int.parse(_primaryColorHex, radix: 16));
   static final Color brandAccent = Color(int.parse(_accentColorHex, radix: 16));
@@ -120,6 +119,10 @@ class AppColors {
   static const Color baseBlack01 = Color.fromRGBO(23, 23, 23, 0.4);
   static const Color baseWhite = Color.fromRGBO(255, 255, 255, 1);
   static const Color baseWhiteDark = primaryText;
+  static const Color switchRed = Color.fromRGBO(219, 68, 58, 1);
+  static const Color darkOrange = Color.fromRGBO(228, 133, 18, 1);
+  static const Color secondaryGray = Color.fromRGBO(242, 242, 242, 1);
+  static const Color secondaryGrayDark = Color.fromRGBO(255, 255, 255, 0.05);
 
   // ── Event status colors — fixed, not tenant-branded (see EventStatusBadge) ──
   static const Color statusPending = Color.fromRGBO(217, 119, 6, 1);
@@ -140,6 +143,7 @@ ThemeColor lightThemeColors = ThemeColor(
   brandAccent: AppColors.brandAccent,
   brandError: AppColors.brandError,
   baseWhite: AppColors.baseWhite,
+  secondaryGray: AppColors.secondaryGray,
   statusPending: AppColors.statusPending,
   statusFinished: AppColors.statusFinished,
 );
@@ -153,6 +157,7 @@ ThemeColor darkThemeColors = ThemeColor(
   brandAccent: AppColors.brandAccent,
   brandError: AppColors.brandError,
   baseWhite: AppColors.baseWhiteDark,
+  secondaryGray: AppColors.secondaryGrayDark,
   statusPending: AppColors.statusPendingDark,
   statusFinished: AppColors.statusFinishedDark,
 );

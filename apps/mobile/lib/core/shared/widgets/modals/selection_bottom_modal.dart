@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/shared/models/dropdowns/base_dropdown_item.dart';
+import 'package:business_assistant/core/shared/widgets/cards/selectable_item.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
 
 /// A bottom sheet listing [items] for the user to pick one from — used by
@@ -74,16 +75,13 @@ class SelectionBottomModal extends StatelessWidget {
                       itemCount: items.length,
                       itemBuilder: (context, index) {
                         final item = items[index];
-                        return ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                          title: Text(
-                            item.text,
-                            style: TextStyle(fontSize: 15, color: theme.primaryText, fontWeight: FontWeight.w500),
-                          ),
-                          subtitle: item.subtitle != null
-                              ? Text(item.subtitle!, style: TextStyle(fontSize: 13, color: theme.primaryText.withValues(alpha: 0.5)))
-                              : null,
-                          onTap: () {
+                        return SelectableItem(
+                          title: item.text,
+                          subtitle: item.subtitle,
+                          textColor: theme.primaryText,
+                          fontSize: 15,
+                          rightContent: item.rightContent,
+                          itemPressed: () {
                             onItemSelected(item);
                             Navigator.of(context).pop();
                           },

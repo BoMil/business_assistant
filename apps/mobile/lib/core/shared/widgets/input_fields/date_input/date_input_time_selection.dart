@@ -8,7 +8,8 @@ import 'package:business_assistant/theme/get_theme_color.dart';
 
 /// A tap-to-open date+time field — opens the native date picker, then
 /// immediately the native time picker, and combines both into one DateTime.
-/// Reports the result via [props.dateChanged].
+/// Reports the result via [props.dateChanged]. If [DateInputFieldProps.includeTime]
+/// is false, the time picker step is skipped and the time is zeroed out.
 class DateInputTimeSelection extends StatefulWidget {
   final DateInputFieldProps props;
   const DateInputTimeSelection({super.key, required this.props});
@@ -58,6 +59,11 @@ class _DateInputTimeSelectionState extends State<DateInputTimeSelection> {
     );
     if (pickedDate == null || !mounted) return;
 
+    if (!widget.props.includeTime) {
+      _changeDate(DateTime(pickedDate.year, pickedDate.month, pickedDate.day));
+      return;
+    }
+
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_selectedDate ?? now),
@@ -89,7 +95,9 @@ class _DateInputTimeSelectionState extends State<DateInputTimeSelection> {
           borderColor: _isInvalid ? context.colors.brandError : null,
           title:
               _selectedDate != null
-                  ? (widget.props.dateFormat ?? DateFormat('dd/MM/yyyy HH:mm')).format(_selectedDate!)
+                  ? (widget.props.dateFormat ??
+                          DateFormat(widget.props.includeTime ? 'dd/MM/yyyy HH:mm' : 'dd/MM/yyyy'))
+                      .format(_selectedDate!)
                   : widget.props.placeholderText ?? '',
           infoTitle: widget.props.infoTitle ?? '',
           itemPressed: _showDateThenTimePicker,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:business_assistant/config/tenant/tenant_config.dart';
+import 'package:business_assistant/config/translations/translation_storage.dart';
+import 'package:business_assistant/config/translations/view/language_switcher.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/selectable_icon.dart';
 import 'package:business_assistant/core/shared/widgets/images/loaded_image.dart';
@@ -26,42 +28,30 @@ class MainHeader extends StatelessWidget {
     final tenant = TenantConfig();
     final theme = context.colors;
     final firstName = context.watch<AuthCubit>().currentUserFirstName;
+    final t = TranslationStorage.translation;
 
     return Container(
       decoration: BoxDecoration(
         color: theme.baseWhite,
         border: Border(bottom: BorderSide(color: theme.primaryText.withValues(alpha: 0.08))),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, 3))],
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: ThemeConstants.headerPadding,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: ThemeConstants.headerPadding, vertical: 12),
       child: Row(
         children: [
           SvgPicture.asset(tenant.logoPath, height: 32),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              firstName != null ? 'Welcome, $firstName' : 'Welcome',
+              firstName != null ? t.welcomeUser(firstName) : t.welcomeGeneric,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: theme.primaryText,
-              ),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: theme.primaryText),
             ),
           ),
           const SizedBox(width: 10),
           SelectableIcon(
             padding: const EdgeInsets.all(8),
-            itemPressed: () => ToastMessage().showInfoToast(text: 'Coming soon'),
+            itemPressed: () => ToastMessage().showInfoToast(text: t.notificationsComingSoonToast),
             iconWidget: SvgPicture.asset(
               'assets/svg/notification_bell.svg',
               width: 20,
@@ -81,6 +71,8 @@ class MainHeader extends StatelessWidget {
               child: Icon(Icons.person, size: 20, color: theme.primaryText.withValues(alpha: 0.5)),
             ),
           ),
+          const SizedBox(width: 10),
+          const LanguageSwitcher(),
         ],
       ),
     );

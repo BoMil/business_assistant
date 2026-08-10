@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">
+  <clipPath id="englishFlagClip">
+    <rect width="60" height="60" />
+  </clipPath>
+  <g clip-path="url(#englishFlagClip)">
+    <rect width="60" height="60" fill="#00247d" />
+    <path d="M0,0 60,60 M60,0 0,60" stroke="#ffffff" stroke-width="12" />
+    <path d="M0,0 24,24 M60,0 36,24 M0,60 24,36 M60,60 36,36" stroke="#cf142b" stroke-width="8" />
+    <path d="M30,0 v60 M0,30 h60" stroke="#ffffff" stroke-width="20" />
+    <path d="M30,0 v60 M0,30 h60" stroke="#cf142b" stroke-width="12" />
+  </g>
+</svg>

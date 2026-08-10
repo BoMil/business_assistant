@@ -48,6 +48,9 @@ dependencies:
   # Combined date + time wheel picker — used by DateInputField when includeTime is set
   flutter_datetime_picker_plus: ^2.4.0
 
+  # Opens external apps/browser — used to open a selected event location in Google Maps
+  url_launcher: ^6.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -70,6 +73,8 @@ flutter:
   assets:
     # SVG vector assets (shared across tenants)
     - assets/svg/
+    # Language flag icons, used by LanguageSwitcher
+    - assets/svg/flags/
     # GIF assets (e.g. the shared button loading spinner)
     - assets/gifs/
     # Demo tenant assets: logo.svg, app_icon.png, splash_logo.png
