@@ -41,6 +41,11 @@ internal sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasConversion<int>()
             .IsRequired();
 
+        // ISO 4217 code (e.g. "EUR", "RSD") — display-only, no conversion logic.
+        builder.Property(t => t.Currency)
+            .IsRequired()
+            .HasMaxLength(3);
+
         // FeatureFlags/Modules are each stored as a JSON column in a single SQL column.
         // EF Core 8 handles serialization/deserialization automatically.
         // This avoids a separate table for simple per-tenant config objects.

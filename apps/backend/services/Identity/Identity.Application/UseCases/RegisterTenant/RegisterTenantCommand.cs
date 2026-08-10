@@ -16,7 +16,8 @@ public record RegisterTenantCommand(
     string OwnerLastName,
     string OwnerEmail,
     string OwnerPhoneNumber,
-    string OwnerPassword
+    string OwnerPassword,
+    string Currency = "EUR"
 ) : ICommand<Result<RegisterTenantResult>>;
 
 public record RegisterTenantResult(Guid TenantId, Guid OwnerId);
@@ -30,6 +31,7 @@ public sealed class RegisterTenantCommandValidator : AbstractValidator<RegisterT
         RuleFor(x => x.PrimaryColor).NotEmpty().WithMessage("PrimaryColor is required");
         RuleFor(x => x.AccentColor).NotEmpty().WithMessage("AccentColor is required");
         RuleFor(x => x.ErrorColor).NotEmpty().WithMessage("ErrorColor is required");
+        RuleFor(x => x.Currency).NotEmpty().WithMessage("Currency is required");
         RuleFor(x => x.OwnerFirstName).NotEmpty().WithMessage("OwnerFirstName is required");
         RuleFor(x => x.OwnerLastName).NotEmpty().WithMessage("OwnerLastName is required");
         RuleFor(x => x.OwnerEmail).NotEmpty().EmailAddress().WithMessage("A valid OwnerEmail is required");

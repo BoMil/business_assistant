@@ -23,6 +23,7 @@ internal sealed class GetTenantConfigQueryHandler(IUnitOfWorkIdentity unitOfWork
             tenant.AccentColor,
             tenant.ErrorColor,
             tenant.Type,
+            tenant.Currency,
             tenant.Modules.Events,
             tenant.Modules.Inventory,
             tenant.Modules.Clients,

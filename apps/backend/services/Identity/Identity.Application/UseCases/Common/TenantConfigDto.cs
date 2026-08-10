@@ -14,6 +14,7 @@ public record TenantConfigDto(
     string AccentColor,
     string ErrorColor,
     TenantType Type,
+    string Currency,
     bool Events,
     bool Inventory,
     bool Clients,

@@ -38,6 +38,7 @@ internal sealed class LoginCommandHandler(
             user.Tenant.AccentColor,
             user.Tenant.ErrorColor,
             user.Tenant.Type,
+            user.Tenant.Currency,
             user.Tenant.Modules.Events,
             user.Tenant.Modules.Inventory,
             user.Tenant.Modules.Clients,

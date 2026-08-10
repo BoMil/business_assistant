@@ -5,6 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/events/cubits/create_edit_event/create_edit_event_cubit.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_asset_tile.dart';
+import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
 import 'package:business_assistant/core/shared/models/dropdowns/base_dropdown_item.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/button_with_loading_state.dart';
@@ -88,6 +89,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
     final cubit = context.read<CreateEditEventCubit>();
     final addedIds = state.eventAssets.map((ea) => ea.assetId).toSet();
     final theme = context.colors;
+    final currencySymbol = context.read<TenantConfigCubit>().state.currencySymbol;
     final items =
         state.availableAssets
             .where((asset) => !addedIds.contains(asset.id))
@@ -99,7 +101,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
                 rightContent:
                     asset.rentalPrice != null
                         ? Text(
-                          asset.rentalPrice!.toStringAsFixed(0),
+                          '${asset.rentalPrice!.toStringAsFixed(0)} $currencySymbol',
                           style: TextStyle(color: theme.statusFinished, fontSize: 15, fontWeight: FontWeight.w600),
                         )
                         : null,
@@ -194,9 +196,22 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
       builder: (context, state) {
         final cubit = context.read<CreateEditEventCubit>();
         final isEditMode = cubit.isEditMode;
+        final totalValue = state.eventAssets.fold<double>(0, (sum, ea) => sum + ea.price * ea.quantity);
+        final currencySymbol = context.read<TenantConfigCubit>().state.currencySymbol;
 
         return PageFrame(
           headerActionIcon: Icons.close,
+          headerActions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
+                child: Text(
+                  '${totalValue.toStringAsFixed(0)} $currencySymbol',
+                  style: TextStyle(color: theme.statusFinished, fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ],
           title: Text(
             t.eventDetailsTitle,
             style: TextStyle(color: theme.primaryText, fontSize: 16, fontWeight: FontWeight.w600),

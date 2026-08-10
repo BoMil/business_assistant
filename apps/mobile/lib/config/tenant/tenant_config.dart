@@ -32,6 +32,10 @@ class TenantConfig {
   /// Path to the tenant's SVG logo inside the Flutter asset bundle.
   String get logoPath => 'assets/tenants/$tenantId/logo.svg';
 
+  /// ISO 4217 currency code shown next to prices (e.g. "EUR", "RSD").
+  final String currency =
+      const String.fromEnvironment('CURRENCY', defaultValue: 'EUR');
+
   /// What kind of business this tenant runs — see tenant_type.dart.
   static const String _tenantTypeRaw =
       String.fromEnvironment('TENANT_TYPE', defaultValue: 'Rental');

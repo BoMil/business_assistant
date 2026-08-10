@@ -10,6 +10,7 @@ import 'package:business_assistant/config/routes/routes.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/features/bottom_navigation/cubits/bottom_navigation/bottom_navigation_cubit.dart';
+import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
 import 'package:business_assistant/l10n/app_localizations.dart';
 import 'package:business_assistant/theme/theme_config.dart';
@@ -94,14 +95,12 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         // AuthCubit is global — GoRouter's redirect and all screens can read it
-        BlocProvider(
-          create: (context) => RouterState().authCubit..initAuthState(),
-        ),
+        BlocProvider(create: (context) => RouterState().authCubit..initAuthState()),
         // Global so any widget can request a bottom nav tab switch — see
         // BottomNavigationCubit for why BottomNavigationFrame alone isn't enough.
-        BlocProvider(
-          create: (context) => BottomNavigationCubit(tabs: visibleBottomNavTabs()),
-        ),
+        BlocProvider(create: (context) => BottomNavigationCubit(tabs: visibleBottomNavTabs())),
+        // Global so any widget can read the tenant's currency/symbol for display.
+        BlocProvider(create: (context) => TenantConfigCubit()),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {

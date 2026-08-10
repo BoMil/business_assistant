@@ -14,4 +14,5 @@ public record RegisterTenantRequest(
     string OwnerLastName,
     string OwnerEmail,
     string OwnerPhoneNumber,
-    string OwnerPassword);
+    string OwnerPassword,
+    string Currency = "EUR");

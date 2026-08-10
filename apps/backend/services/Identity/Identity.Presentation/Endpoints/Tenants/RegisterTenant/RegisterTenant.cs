@@ -45,7 +45,8 @@ public static class RegisterTenant
             request.OwnerLastName,
             request.OwnerEmail,
             request.OwnerPhoneNumber,
-            request.OwnerPassword);
+            request.OwnerPassword,
+            request.Currency);
 
         var result = await sender.Send(command, cancellationToken);
 

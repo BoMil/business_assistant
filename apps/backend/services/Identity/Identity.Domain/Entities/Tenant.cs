@@ -14,6 +14,7 @@ public class Tenant : Entity<Guid>
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public TenantType Type { get; private set; }
+    public string Currency { get; private set; } = string.Empty;
     public FeatureFlags FeatureFlags { get; private set; } = new();
     public TenantModules Modules { get; private set; } = new();
 
@@ -21,7 +22,7 @@ public class Tenant : Entity<Guid>
 
     private Tenant() { }
 
-    public static Tenant Create(string name, string slug, string primaryColor, string accentColor, string errorColor, TenantType type)
+    public static Tenant Create(string name, string slug, string primaryColor, string accentColor, string errorColor, TenantType type, string currency)
     {
         return new Tenant
         {
@@ -34,6 +35,7 @@ public class Tenant : Entity<Guid>
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             Type = type,
+            Currency = currency,
             Modules = TenantModules.CreateDefaults(type)
         };
     }

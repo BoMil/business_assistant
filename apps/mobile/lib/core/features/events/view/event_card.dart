@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:business_assistant/core/features/events/models/responses/event_response.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_status_badge.dart';
+import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
 import 'package:business_assistant/core/shared/widgets/cards/selectable_item.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
 
@@ -46,7 +48,7 @@ class EventCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                event.totalPrice.toStringAsFixed(0),
+                '${event.totalPrice.toStringAsFixed(0)} ${context.read<TenantConfigCubit>().state.currencySymbol}',
                 style: TextStyle(color: context.colors.primaryText, fontSize: 15, fontWeight: FontWeight.w700),
               ),
               if (event.status != null) ...[const SizedBox(height: 6), EventStatusBadge(status: event.status!)],

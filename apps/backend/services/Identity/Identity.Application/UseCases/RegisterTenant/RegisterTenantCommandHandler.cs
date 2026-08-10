@@ -22,7 +22,7 @@ internal sealed class RegisterTenantCommandHandler(
         if (emailTaken)
             return Result.Fail($"Email '{request.OwnerEmail}' is already registered.");
 
-        var tenant = Tenant.Create(request.TenantName, request.Slug, request.PrimaryColor, request.AccentColor, request.ErrorColor, request.Type);
+        var tenant = Tenant.Create(request.TenantName, request.Slug, request.PrimaryColor, request.AccentColor, request.ErrorColor, request.Type, request.Currency);
 
         var passwordHash = passwordHasher.Hash(request.OwnerPassword);
         var owner = User.Create(request.OwnerFirstName, request.OwnerLastName, request.OwnerEmail, request.OwnerPhoneNumber, passwordHash, tenant.Id, UserRole.Owner);

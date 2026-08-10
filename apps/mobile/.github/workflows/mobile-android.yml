@@ -130,6 +130,7 @@ jobs:
             ACCENT_COLOR: ("FF" + (.accentColor | ltrimstr("#") | ascii_upcase)),
             ERROR_COLOR: ("FF" + (.errorColor | ltrimstr("#") | ascii_upcase)),
             TENANT_TYPE: .type,
+            CURRENCY: .currency,
             MODULE_EVENTS: (.events | tostring),
             MODULE_INVENTORY: (.inventory | tostring),
             MODULE_CLIENTS: (.clients | tostring),
