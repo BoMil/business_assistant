@@ -13,7 +13,7 @@ internal sealed class GetAssetsQueryHandler(IUnitOfWorkBusiness unitOfWork) : IR
 
         var dtos = assets
             .Where(a => a.IsActive)
-            .Select(a => new AssetDto(a.Id, a.Name, a.Category, a.Description, a.SalePrice, a.RentalPrice, a.StockCount))
+            .Select(a => new AssetDto(a.Id, a.Name, a.Category, a.Description, a.SalePrice, a.RentalPrice, a.StockCount, a.ImgUrl))
             .ToList();
 
         return Result.Ok(dtos);

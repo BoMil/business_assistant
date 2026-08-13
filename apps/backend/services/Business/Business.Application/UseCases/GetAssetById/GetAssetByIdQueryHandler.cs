@@ -19,6 +19,6 @@ internal sealed class GetAssetByIdQueryHandler(IUnitOfWorkBusiness unitOfWork)
         var now = DateTime.UtcNow;
         var currentlyReserved = await unitOfWork.Transactions.GetReservedQuantityAsync(asset.Id, now, now, excludeTransactionId: null, cancellationToken);
 
-        return Result.Ok(new AssetDetailDto(asset.Id, asset.Name, asset.Category, asset.Description, asset.SalePrice, asset.RentalPrice, asset.StockCount, currentlyReserved));
+        return Result.Ok(new AssetDetailDto(asset.Id, asset.Name, asset.Category, asset.Description, asset.SalePrice, asset.RentalPrice, asset.StockCount, currentlyReserved, asset.ImgUrl));
     }
 }

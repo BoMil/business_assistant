@@ -31,7 +31,7 @@ public static class UpdateAsset
     {
         var command = new UpdateAssetCommand(
             id, user.GetTenantId(), request.Name, request.Category, request.Description,
-            request.SalePrice, request.RentalPrice, request.StockCount);
+            request.SalePrice, request.RentalPrice, request.StockCount, request.ImgUrl);
 
         var result = await sender.Send(command, cancellationToken);
 

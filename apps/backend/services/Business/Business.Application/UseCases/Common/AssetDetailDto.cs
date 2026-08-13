@@ -14,4 +14,5 @@ public record AssetDetailDto(
     decimal? SalePrice,
     decimal? RentalPrice,
     int StockCount,
-    int CurrentlyReserved);
+    int CurrentlyReserved,
+    string? ImgUrl);

@@ -85,5 +85,25 @@
 
     "eventSavedToast": "Event saved",
     "eventCancelledToast": "Event canceled",
-    "eventDeletedToast": "Event deleted"
+    "eventDeletedToast": "Event deleted",
+
+    "productsSearchHint": "Search products...",
+    "productsEmptyStateText": "No products yet",
+
+    "productDetailsTitle": "Product Details",
+    "productNameLabel": "Name",
+    "productCategoryLabel": "Category",
+    "productDescriptionLabel": "Description",
+    "productRentalPriceLabel": "Rental Price",
+    "productSalePriceLabel": "Product Price",
+    "productStockCountLabel": "Stock Count",
+    "productStockUnitLabel": "pcs",
+    "productCurrentlyReservedLabel": "Currently Rented/Reserved",
+
+    "removeProductButton": "Remove Product",
+    "confirmDeleteProduct": "Are you sure you want to remove this product? This cannot be undone.",
+    "createProductButton": "Create Product",
+
+    "productSavedToast": "Product saved",
+    "productDeletedToast": "Product deleted"
 }

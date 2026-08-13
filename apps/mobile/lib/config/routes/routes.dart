@@ -8,6 +8,7 @@ import 'package:business_assistant/core/features/authentication/view/initial_scr
 import 'package:business_assistant/core/features/authentication/view/landing_page/landing_page.dart';
 import 'package:business_assistant/core/features/authentication/view/login_page/login_page.dart';
 import 'package:business_assistant/core/features/events/view/create_edit_event_page.dart';
+import 'package:business_assistant/core/features/inventory/view/create_edit_asset_page.dart';
 import 'package:business_assistant/core/shared/widgets/navigation/bottom_navigation_frame.dart';
 import 'package:business_assistant/core/utils/stream_to_listenable.dart';
 import 'package:go_router/go_router.dart';
@@ -128,6 +129,47 @@ class Routes {
           return CustomTransitionPage<void>(
             key: state.pageKey,
             child: CreateEditEventPage(eventId: state.pathParameters['id']),
+            transitionDuration: const Duration(milliseconds: 250),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(-1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+
+      // Product create/edit — pushed full-screen on top of the Inventory tab
+      // (rootNavigatorKey via top-level placement), so it covers the bottom nav.
+      GoRoute(
+        path: RouteNames.createAssetPage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: const CreateEditAssetPage(),
+            transitionDuration: const Duration(milliseconds: 250),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(-1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '${RouteNames.editAssetPage}/:id',
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: CreateEditAssetPage(assetId: state.pathParameters['id']),
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(

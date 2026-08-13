@@ -7,4 +7,5 @@ public record AssetDto(
     string? Description,
     decimal? SalePrice,
     decimal? RentalPrice,
-    int StockCount);
+    int StockCount,
+    string? ImgUrl);

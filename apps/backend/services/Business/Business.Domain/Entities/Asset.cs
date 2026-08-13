@@ -22,11 +22,12 @@ public class Asset : Entity<Guid>
     public decimal? SalePrice { get; private set; }
     public decimal? RentalPrice { get; private set; }
     public int StockCount { get; private set; }
+    public string? ImgUrl { get; private set; }
     public bool IsActive { get; private set; }
 
     private Asset() { }
 
-    public static Asset Create(Guid tenantId, string name, string category, string? description, decimal? salePrice, decimal? rentalPrice, int stockCount)
+    public static Asset Create(Guid tenantId, string name, string category, string? description, decimal? salePrice, decimal? rentalPrice, int stockCount, string? imgUrl)
     {
         return new Asset
         {
@@ -38,11 +39,12 @@ public class Asset : Entity<Guid>
             SalePrice = salePrice,
             RentalPrice = rentalPrice,
             StockCount = stockCount,
+            ImgUrl = imgUrl,
             IsActive = true
         };
     }
 
-    public void Update(string name, string category, string? description, decimal? salePrice, decimal? rentalPrice, int stockCount)
+    public void Update(string name, string category, string? description, decimal? salePrice, decimal? rentalPrice, int stockCount, string? imgUrl)
     {
         Name = name;
         Category = category;
@@ -50,6 +52,7 @@ public class Asset : Entity<Guid>
         SalePrice = salePrice;
         RentalPrice = rentalPrice;
         StockCount = stockCount;
+        ImgUrl = imgUrl;
     }
 
     public void Remove() => IsActive = false;

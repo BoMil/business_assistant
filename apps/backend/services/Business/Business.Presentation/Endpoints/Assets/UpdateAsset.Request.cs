@@ -7,4 +7,5 @@ public record UpdateAssetRequest(
     string? Description,
     decimal? SalePrice,
     decimal? RentalPrice,
-    int StockCount);
+    int StockCount,
+    string? ImgUrl);

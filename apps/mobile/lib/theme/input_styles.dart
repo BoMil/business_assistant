@@ -44,11 +44,15 @@ class InputStyles {
         fontWeight: FontWeight.w500,
       ),
       suffixIcon: suffix,
+      // Without this, suffixIcon claims a default 48x48 box, inflating the
+      // field and vertically centering small suffixes (e.g. a currency
+      // symbol) away from the input text's baseline.
+      suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
       contentPadding: contentPadding,
       // Focused border uses the accent color (tenant-branded highlight)
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(borderRadius),
-        borderSide: BorderSide(color: AppColors.baseYellow, width: borderWidth),
+        borderSide: BorderSide(color: AppColors.brandPrimary, width: borderWidth),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(borderRadius),

@@ -1,6 +1,7 @@
-/// Response body for a single item in GET /assets — mirrors the Business API's
-/// AssetDto. Used by the Events feature's "Add product" picker.
-class AssetResponse {
+/// Response body for GET /assets/{id} — mirrors the Business API's
+/// AssetDetailDto. Same fields as AssetResponse plus currentlyReserved
+/// (view-only, derived server-side, only shown on the detail view).
+class AssetDetailResponse {
   final String id;
   final String name;
   final String category;
@@ -8,21 +9,23 @@ class AssetResponse {
   final double? salePrice;
   final double? rentalPrice;
   final int stockCount;
+  final int currentlyReserved;
   final String? imgUrl;
 
-  AssetResponse({
+  AssetDetailResponse({
     required this.id,
     required this.name,
     required this.category,
     required this.stockCount,
+    required this.currentlyReserved,
     this.description,
     this.salePrice,
     this.rentalPrice,
     this.imgUrl,
   });
 
-  factory AssetResponse.fromJson(Map<String, dynamic> json) {
-    return AssetResponse(
+  factory AssetDetailResponse.fromJson(Map<String, dynamic> json) {
+    return AssetDetailResponse(
       id: json['id'] as String,
       name: json['name'] as String? ?? '',
       category: json['category'] as String? ?? '',
@@ -30,6 +33,7 @@ class AssetResponse {
       salePrice: (json['salePrice'] as num?)?.toDouble(),
       rentalPrice: (json['rentalPrice'] as num?)?.toDouble(),
       stockCount: json['stockCount'] as int? ?? 0,
+      currentlyReserved: json['currentlyReserved'] as int? ?? 0,
       imgUrl: json['imgUrl'] as String?,
     );
   }

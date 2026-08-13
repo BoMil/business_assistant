@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:business_assistant/config/constants/secure_storage_keys.dart';
+import 'package:business_assistant/core/features/authentication/models/enums/user_role.dart';
 import 'package:business_assistant/core/features/authentication/models/responses/login_response.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 part 'auth_state.dart';
@@ -29,6 +30,12 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// First name parsed from the JWT's 'firstName' claim — used for header greetings.
   String? currentUserFirstName;
+
+  /// Role parsed from the JWT's 'role' claim — used to gate Owner/Admin-only actions.
+  UserRole? currentUserRole;
+
+  /// Owner and Admin can add/edit/delete Inventory products — Member is view-only.
+  bool get canManageInventory => currentUserRole == UserRole.owner || currentUserRole == UserRole.admin;
 
   /// Called once in MyApp.initState() — checks the stored token and emits
   /// Authenticated or Unauthenticated accordingly.
@@ -76,6 +83,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> logout() async {
     redirectToHomeInitialy = true;
     currentUserFirstName = null;
+    currentUserRole = null;
     await _clearStorage();
     emit(Unauthenticated());
   }
@@ -125,6 +133,12 @@ class AuthCubit extends Cubit<AuthState> {
         currentUserFirstName = payload['firstName'] as String?;
       } catch (e) {
         debugPrint('[AuthCubit] Failed to parse first name error: $e');
+      }
+
+      try {
+        currentUserRole = userRoleFromString(payload['role'] as String?);
+      } catch (e) {
+        debugPrint('[AuthCubit] Failed to parse role error: $e');
       }
 
       return true;

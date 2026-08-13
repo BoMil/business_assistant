@@ -13,7 +13,8 @@
 ///   GET/PUT    /transactions/{id}          → get / update a single event
 ///   POST       /transactions/{id}/cancel   → soft-cancel an event
 ///   DELETE     /transactions/{id}          → hard-delete an event (not yet implemented server-side)
-///   GET        /assets                     → list assets, for the "Add product" picker
+///   GET/POST   /assets                     → list / create an asset (product)
+///   GET/PUT/DELETE /assets/{id}            → get / update / remove a single asset
 ///   GET        /clients                    → list clients, for the "Select client" picker
 class APIEndpoints {
   static String login = '/auth/login';
@@ -24,5 +25,6 @@ class APIEndpoints {
   static String cancelTransaction(String id) => '/transactions/$id/cancel';
 
   static String assets = '/assets';
+  static String assetById(String id) => '/assets/$id';
   static String clients = '/clients';
 }

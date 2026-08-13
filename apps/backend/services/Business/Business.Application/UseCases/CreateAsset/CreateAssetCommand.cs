@@ -11,7 +11,8 @@ public record CreateAssetCommand(
     string? Description,
     decimal? SalePrice,
     decimal? RentalPrice,
-    int StockCount
+    int StockCount,
+    string? ImgUrl
 ) : ICommand<Result<Guid>>;
 
 public sealed class CreateAssetCommandValidator : AbstractValidator<CreateAssetCommand>

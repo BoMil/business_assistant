@@ -30,4 +30,11 @@ class RouteNames {
   // concrete path for navigation.
   static const String editEventPage = '/events/edit';
   static String editEventPagePath(String id) => '$editEventPage/$id';
+
+  // ── Product detail (pushed full-screen on top of the Inventory tab) ─────
+  static const String createAssetPage = '/inventory/create';
+  // Appended with '/:id' in routes.dart — use editAssetPagePath(id) to build a
+  // concrete path for navigation.
+  static const String editAssetPage = '/inventory/edit';
+  static String editAssetPagePath(String id) => '$editAssetPage/$id';
 }

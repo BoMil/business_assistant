@@ -80,5 +80,25 @@
 
     "eventSavedToast": "Догађај сачуван",
     "eventCancelledToast": "Догађај отказан",
-    "eventDeletedToast": "Догађај обрисан"
+    "eventDeletedToast": "Догађај обрисан",
+
+    "productsSearchHint": "Претражи производе...",
+    "productsEmptyStateText": "Још нема производа",
+
+    "productDetailsTitle": "Детаљи производа",
+    "productNameLabel": "Назив",
+    "productCategoryLabel": "Категорија",
+    "productDescriptionLabel": "Опис",
+    "productRentalPriceLabel": "Цена изнајмљивања",
+    "productSalePriceLabel": "Продајна цена",
+    "productStockCountLabel": "Количина на стању",
+    "productStockUnitLabel": "ком",
+    "productCurrentlyReservedLabel": "Тренутно изнајмљено/резервисано",
+
+    "removeProductButton": "Уклони производ",
+    "confirmDeleteProduct": "Да ли сте сигурни да желите да уклоните овај производ? Ова акција је неповратна.",
+    "createProductButton": "Креирај производ",
+
+    "productSavedToast": "Производ сачуван",
+    "productDeletedToast": "Производ обрисан"
 }

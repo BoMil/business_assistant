@@ -24,6 +24,9 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
         builder.Property(a => a.Description)
             .HasMaxLength(1000);
 
+        builder.Property(a => a.ImgUrl)
+            .HasMaxLength(2000);
+
         builder.Property(a => a.SalePrice).HasPrecision(18, 2);
         builder.Property(a => a.RentalPrice).HasPrecision(18, 2);
     }

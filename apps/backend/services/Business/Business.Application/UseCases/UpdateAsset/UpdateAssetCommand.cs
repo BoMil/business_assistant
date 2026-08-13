@@ -12,7 +12,8 @@ public record UpdateAssetCommand(
     string? Description,
     decimal? SalePrice,
     decimal? RentalPrice,
-    int StockCount
+    int StockCount,
+    string? ImgUrl
 ) : ICommand<Result>;
 
 public sealed class UpdateAssetCommandValidator : AbstractValidator<UpdateAssetCommand>

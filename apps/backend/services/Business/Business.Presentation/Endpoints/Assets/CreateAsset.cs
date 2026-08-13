@@ -30,7 +30,7 @@ public static class CreateAsset
     {
         var command = new CreateAssetCommand(
             user.GetTenantId(), request.Name, request.Category, request.Description,
-            request.SalePrice, request.RentalPrice, request.StockCount);
+            request.SalePrice, request.RentalPrice, request.StockCount, request.ImgUrl);
 
         var result = await sender.Send(command, cancellationToken);
 

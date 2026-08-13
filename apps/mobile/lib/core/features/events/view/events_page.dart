@@ -58,6 +58,7 @@ class _EventsPageContent extends StatelessWidget {
         isHeaderVisible: false,
         pageHeader: const MainHeader(),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'eventsFab',
           onPressed: () => _openCreateEvent(context),
           backgroundColor: theme.brandPrimary,
           child: const Icon(Icons.add, color: Colors.white),

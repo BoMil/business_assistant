@@ -14,7 +14,7 @@ internal sealed class UpdateAssetCommandHandler(IUnitOfWorkBusiness unitOfWork)
         if (asset is null)
             return Result.Fail(new NotFoundError($"Asset '{request.Id}' not found."));
 
-        asset.Update(request.Name, request.Category, request.Description, request.SalePrice, request.RentalPrice, request.StockCount);
+        asset.Update(request.Name, request.Category, request.Description, request.SalePrice, request.RentalPrice, request.StockCount, request.ImgUrl);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

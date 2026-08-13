@@ -10,7 +10,7 @@ internal sealed class CreateAssetCommandHandler(IUnitOfWorkBusiness unitOfWork)
 {
     public async Task<Result<Guid>> Handle(CreateAssetCommand request, CancellationToken cancellationToken)
     {
-        var asset = Asset.Create(request.TenantId, request.Name, request.Category, request.Description, request.SalePrice, request.RentalPrice, request.StockCount);
+        var asset = Asset.Create(request.TenantId, request.Name, request.Category, request.Description, request.SalePrice, request.RentalPrice, request.StockCount, request.ImgUrl);
 
         await unitOfWork.Assets.AddAsync(asset, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

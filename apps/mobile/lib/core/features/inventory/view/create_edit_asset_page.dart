@@ -1,0 +1,340 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:business_assistant/config/translations/translation_storage.dart';
+import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/features/inventory/cubits/create_edit_asset/create_edit_asset_cubit.dart';
+import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
+import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
+import 'package:business_assistant/core/shared/widgets/buttons/button_with_loading_state.dart';
+import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
+import 'package:business_assistant/core/shared/widgets/cards/card_frame.dart';
+import 'package:business_assistant/core/shared/widgets/images/loaded_image.dart';
+import 'package:business_assistant/core/shared/widgets/input_fields/input_label.dart';
+import 'package:business_assistant/core/shared/widgets/input_fields/primary_input_field.dart';
+import 'package:business_assistant/core/utils/toast_message.dart';
+import 'package:business_assistant/theme/get_theme_color.dart';
+
+/// Create/edit form for an Inventory product (Asset) — reused for both flows
+/// since the fields and validation are identical; only assetId (null →
+/// create) and the Remove action (edit-mode only) differ.
+class CreateEditAssetPage extends StatelessWidget {
+  final String? assetId;
+
+  const CreateEditAssetPage({super.key, this.assetId});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<CreateEditAssetCubit>(
+      create: (_) => CreateEditAssetCubit(assetId: assetId)..loadFormData(),
+      child: const _CreateEditAssetPageContent(),
+    );
+  }
+}
+
+class _CreateEditAssetPageContent extends StatefulWidget {
+  const _CreateEditAssetPageContent();
+
+  @override
+  State<_CreateEditAssetPageContent> createState() => _CreateEditAssetPageContentState();
+}
+
+class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent> {
+  final _nameController = TextEditingController();
+  final _categoryController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _rentalPriceController = TextEditingController();
+  final _salePriceController = TextEditingController();
+  final _stockCountController = TextEditingController();
+  bool _controllersPopulated = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _categoryController.dispose();
+    _descriptionController.dispose();
+    _rentalPriceController.dispose();
+    _salePriceController.dispose();
+    _stockCountController.dispose();
+    super.dispose();
+  }
+
+  void _populateControllersOnce(CreateEditAssetState state, bool isEditMode) {
+    if (_controllersPopulated) return;
+    // In edit mode, wait for the asset to actually load — otherwise this
+    // fires once with the still-empty defaults and never gets to run again.
+    if (isEditMode && state.isPending) return;
+    _controllersPopulated = true;
+    _nameController.text = state.name;
+    _categoryController.text = state.category;
+    _descriptionController.text = state.description;
+    _rentalPriceController.text = state.rentalPrice?.toStringAsFixed(0) ?? '';
+    _salePriceController.text = state.salePrice?.toStringAsFixed(0) ?? '';
+    _stockCountController.text = state.stockCount.toString();
+  }
+
+  Future<void> _confirm(BuildContext context, {required String message, required VoidCallback onConfirm}) async {
+    final t = TranslationStorage.translation;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            content: Text(message),
+            actions: [
+              TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: Text(t.no)),
+              TextButton(onPressed: () => Navigator.of(dialogContext).pop(true), child: Text(t.yes)),
+            ],
+          ),
+    );
+    if (confirmed == true) onConfirm();
+  }
+
+  void _onStateChange(BuildContext context, CreateEditAssetState state) {
+    final t = TranslationStorage.translation;
+
+    _populateControllersOnce(state, context.read<CreateEditAssetCubit>().isEditMode);
+
+    if (state.saveSucceeded) {
+      ToastMessage().showSuccessToast(text: t.productSavedToast);
+      context.pop();
+      return;
+    }
+    if (state.deleteSucceeded) {
+      ToastMessage().showSuccessToast(text: t.productDeletedToast);
+      context.pop();
+      return;
+    }
+    if (state.errorMessage != null) {
+      ToastMessage().showErrorToast(text: state.errorMessage!);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = TranslationStorage.translation;
+    final theme = context.colors;
+
+    return BlocConsumer<CreateEditAssetCubit, CreateEditAssetState>(
+      listenWhen:
+          (previous, current) =>
+              previous.errorMessage != current.errorMessage ||
+              previous.saveSucceeded != current.saveSucceeded ||
+              previous.deleteSucceeded != current.deleteSucceeded ||
+              previous.isPending != current.isPending,
+      listener: _onStateChange,
+      builder: (context, state) {
+        final cubit = context.read<CreateEditAssetCubit>();
+        final isEditMode = cubit.isEditMode;
+        final canManageInventory = context.read<AuthCubit>().canManageInventory;
+        final currencySymbol = context.read<TenantConfigCubit>().state.currencySymbol;
+
+        return PageFrame(
+          headerActionIcon: Icons.close,
+          title: Text(
+            t.productDetailsTitle,
+            style: TextStyle(color: theme.primaryText, fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          pageBody: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 16),
+                Skeletonizer(
+                  enabled: isEditMode && state.isPending,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      CardFrame(
+                        padding: EdgeInsets.zero,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: SizedBox(
+                            height: 180,
+                            width: double.infinity,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                LoadedImage(
+                                  imageUrl: state.imgUrl ?? '',
+                                  fit: BoxFit.cover,
+                                  alternativeWidget: Container(
+                                    color: theme.secondaryBackground,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.image_outlined,
+                                        size: 48,
+                                        color: theme.primaryText.withValues(alpha: 0.3),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 12,
+                                  right: 12,
+                                  child: InkWell(
+                                    // TODO: wire up an image picker once the upload flow is added.
+                                    onTap: () {},
+                                    customBorder: const CircleBorder(),
+                                    child: CircleAvatar(
+                                      radius: 18,
+                                      backgroundColor: theme.baseWhite,
+                                      child: Icon(Icons.edit, size: 18, color: theme.primaryText),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      CardFrame(
+                        headerSectionTtitle: t.productNameLabel,
+                        child: PrimaryInputField(
+                          controller: _nameController,
+                          showValidationError: false,
+                          onChanged: cubit.setName,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      CardFrame(
+                        headerSectionTtitle: t.productCategoryLabel,
+                        child: PrimaryInputField(
+                          controller: _categoryController,
+                          showValidationError: false,
+                          onChanged: cubit.setCategory,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      CardFrame(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  InputLabel(text: t.productRentalPriceLabel),
+                                  const SizedBox(height: 4),
+                                  PrimaryInputField(
+                                    controller: _rentalPriceController,
+                                    showValidationError: false,
+                                    minContainerHeight: 0,
+                                    keyboardType: TextInputType.number,
+                                    isCurrency: true,
+                                    sufixIcon: Padding(
+                                      padding: const EdgeInsets.only(right: 12),
+                                      child: Text(
+                                        currencySymbol,
+                                        style: TextStyle(
+                                          color: theme.primaryText,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    onChanged: (value) => cubit.setRentalPrice(double.tryParse(value)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  InputLabel(text: t.productSalePriceLabel),
+                                  const SizedBox(height: 4),
+                                  PrimaryInputField(
+                                    controller: _salePriceController,
+                                    showValidationError: false,
+                                    minContainerHeight: 0,
+                                    keyboardType: TextInputType.number,
+                                    isCurrency: true,
+                                    sufixIcon: Padding(
+                                      padding: const EdgeInsets.only(right: 12),
+                                      child: Text(
+                                        currencySymbol,
+                                        style: TextStyle(
+                                          color: theme.primaryText,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    onChanged: (value) => cubit.setSalePrice(double.tryParse(value)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      CardFrame(
+                        headerSectionTtitle: t.productStockCountLabel,
+                        child: PrimaryInputField(
+                          controller: _stockCountController,
+                          showValidationError: false,
+                          minContainerHeight: 0,
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) => cubit.setStockCount(int.tryParse(value) ?? 0),
+                        ),
+                      ),
+                      if (isEditMode) ...[
+                        const SizedBox(height: 12),
+                        CardFrame(
+                          headerSectionTtitle: t.productCurrentlyReservedLabel,
+                          child: Text(
+                            '${state.currentlyReserved ?? 0} ${t.productStockUnitLabel}',
+                            style: TextStyle(color: theme.primaryText.withValues(alpha: 0.7), fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                CardFrame(
+                  headerSectionTtitle: t.productDescriptionLabel,
+                  child: PrimaryInputField(
+                    controller: _descriptionController,
+                    areaField: 3,
+                    showValidationError: false,
+                    onChanged: cubit.setDescription,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                if (canManageInventory) ...[
+                  if (isEditMode) ...[
+                    CustomOutlinedButton(
+                      title: t.removeProductButton,
+                      backgroundColor: Colors.transparent,
+                      borderColor: theme.brandError,
+                      color: theme.brandError,
+                      onClick: () => _confirm(context, message: t.confirmDeleteProduct, onConfirm: cubit.deleteAsset),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  ButtonWithLoadingState(
+                    buttonText: isEditMode ? t.saveChangesButton : t.createProductButton,
+                    loading: state.isSaving,
+                    buttonPressed: state.canSave(isEditMode) ? cubit.save : null,
+                    backgroundColor: theme.brandPrimary,
+                    textColor: Colors.white,
+                  ),
+                ],
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

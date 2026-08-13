@@ -7,4 +7,5 @@ public record CreateAssetRequest(
     string? Description,
     decimal? SalePrice,
     decimal? RentalPrice,
-    int StockCount);
+    int StockCount,
+    string? ImgUrl);
