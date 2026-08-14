@@ -18,7 +18,11 @@ public static class UploadImage
         {
             app.MapPost(EndpointGroups.Images, Handle)
                 .WithTags(EndpointTags.Images)
-                .RequireAuthorization();
+                .RequireAuthorization()
+                // Minimal APIs auto-require antiforgery (CSRF) validation for any endpoint
+                // binding IFormFile — that protection is for cookie-based browser auth.
+                // We use Bearer JWT, not cookies, so CSRF doesn't apply here.
+                .DisableAntiforgery();
         }
     }
 
