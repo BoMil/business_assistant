@@ -169,12 +169,16 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
                                     ),
                                   ),
                                 ),
+                                if (state.isUploadingImage)
+                                  Container(
+                                    color: Colors.black.withValues(alpha: 0.3),
+                                    child: const Center(child: CircularProgressIndicator()),
+                                  ),
                                 Positioned(
                                   bottom: 12,
                                   right: 12,
                                   child: InkWell(
-                                    // TODO: wire up an image picker once the upload flow is added.
-                                    onTap: () {},
+                                    onTap: state.isUploadingImage ? null : cubit.pickAndUploadImage,
                                     customBorder: const CircleBorder(),
                                     child: CircleAvatar(
                                       radius: 18,

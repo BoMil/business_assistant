@@ -16,6 +16,7 @@
 ///   GET/POST   /assets                     → list / create an asset (product)
 ///   GET/PUT/DELETE /assets/{id}            → get / update / remove a single asset
 ///   GET        /clients                    → list clients, for the "Select client" picker
+///   POST       /images                     → upload an image, returns its blob URL
 class APIEndpoints {
   static String login = '/auth/login';
   static String refreshToken = '/auth/refresh-token';
@@ -27,4 +28,5 @@ class APIEndpoints {
   static String assets = '/assets';
   static String assetById(String id) => '/assets/$id';
   static String clients = '/clients';
+  static String images = '/images';
 }

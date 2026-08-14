@@ -50,6 +50,7 @@ dependencies:
 
   # Opens external apps/browser — used to open a selected event location in Google Maps
   url_launcher: ^6.3.1
+  image_picker: ^1.2.3
 
 dev_dependencies:
   flutter_test:

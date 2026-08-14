@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:business_assistant/core/features/inventory/api_services/asset_api_service.dart';
+import 'package:business_assistant/core/features/inventory/api_services/image_api_service.dart';
 import 'package:business_assistant/core/features/inventory/models/requests/create_asset_request.dart';
 import 'package:business_assistant/core/features/inventory/models/requests/update_asset_request.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
@@ -13,9 +16,11 @@ part 'create_edit_asset_state.dart';
 class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
   final String? assetId;
   final AssetApiService assetApiService;
+  final ImageApiService imageApiService;
 
-  CreateEditAssetCubit({this.assetId, AssetApiService? assetApiService})
+  CreateEditAssetCubit({this.assetId, AssetApiService? assetApiService, ImageApiService? imageApiService})
       : assetApiService = assetApiService ?? AssetApiService(),
+        imageApiService = imageApiService ?? ImageApiService(),
         super(const CreateEditAssetState());
 
   bool get isEditMode => assetId != null;
@@ -60,6 +65,21 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
       emit(state.copyWith(rentalPrice: value, clearRentalPrice: value == null, isDirty: true));
 
   void setStockCount(int value) => emit(state.copyWith(stockCount: value, isDirty: true));
+
+  Future<void> pickAndUploadImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
+
+    emit(state.copyWith(isUploadingImage: true, clearError: true));
+
+    final response = await imageApiService.uploadImage(File(pickedFile.path));
+
+    if (response.status == ResponseStatus.completed) {
+      emit(state.copyWith(isUploadingImage: false, imgUrl: response.data, isDirty: true));
+    } else {
+      emit(state.copyWith(isUploadingImage: false, errorMessage: response.message));
+    }
+  }
 
   Future<void> save() async {
     if (state.name.trim().isEmpty || state.category.trim().isEmpty) {

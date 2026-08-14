@@ -48,6 +48,9 @@ services:
       - Jwt__Secret=dev-super-secret-key-minimum-32-characters-long-for-hmacsha256
       - Jwt__Issuer=identity-api
       - Jwt__Audience=business-assistant-clients
+      # Pravi Azure Storage connection string (real cloud credential — ne sme u appsettings/git).
+      # Ucitava se iz lokalnog .env fajla (gitignored) — vidi .env.example.
+      - BlobStorage__ConnectionString=${BLOB_STORAGE_CONNECTION_STRING}
     ports:
       # Business API dostupan na: http://localhost:5101
       # Swagger UI: http://localhost:5101/swagger

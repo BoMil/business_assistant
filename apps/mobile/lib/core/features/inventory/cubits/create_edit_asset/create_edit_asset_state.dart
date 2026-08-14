@@ -19,6 +19,7 @@ class CreateEditAssetState {
   final int? currentlyReserved;
   final String? imgUrl;
   final bool isDirty;
+  final bool isUploadingImage;
 
   const CreateEditAssetState({
     this.currentState = CubitState.initial,
@@ -36,6 +37,7 @@ class CreateEditAssetState {
     this.currentlyReserved,
     this.imgUrl,
     this.isDirty = false,
+    this.isUploadingImage = false,
   });
 
   /// getAssetById is still in flight (edit mode only) — gates the form's Skeletonizer.
@@ -66,6 +68,7 @@ class CreateEditAssetState {
     int? currentlyReserved,
     String? imgUrl,
     bool? isDirty,
+    bool? isUploadingImage,
   }) {
     return CreateEditAssetState(
       currentState: currentState ?? this.currentState,
@@ -83,6 +86,7 @@ class CreateEditAssetState {
       currentlyReserved: currentlyReserved ?? this.currentlyReserved,
       imgUrl: imgUrl ?? this.imgUrl,
       isDirty: isDirty ?? this.isDirty,
+      isUploadingImage: isUploadingImage ?? this.isUploadingImage,
     );
   }
 }
