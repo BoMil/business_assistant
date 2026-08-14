@@ -56,6 +56,18 @@ services:
       # Swagger UI: http://localhost:5101/swagger
       - "5101:8080"
 
+  gateway.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      # Container-network adrese (Docker DNS razresava ime servisa) — YARP destinacije.
+      - ReverseProxy__Clusters__identityCluster__Destinations__destination1__Address=http://identity.api:8080
+      - ReverseProxy__Clusters__businessCluster__Destinations__destination1__Address=http://business.api:8080
+    ports:
+      # Gateway dostupan na: http://localhost:5099 — JEDINA adresa koju mobilna aplikacija zna
+      # (port 5000 je na Mac-u obicno zauzet od strane AirPlay Receiver-a / ControlCenter-a)
+      - "5099:8080"
+
   ba-db:
     ports:
       # SQL Server dostupan na host masini za direktno spajanje iz IDE-a ili SSMS

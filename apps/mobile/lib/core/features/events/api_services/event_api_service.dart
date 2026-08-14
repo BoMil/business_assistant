@@ -19,7 +19,7 @@ import 'package:business_assistant/core/utils/api/app_interceptor.dart';
 class EventApiService {
   final Dio dio;
 
-  EventApiService({Dio? dio}) : dio = dio ?? AppInterceptor().businessDio;
+  EventApiService({Dio? dio}) : dio = dio ?? AppInterceptor().dio;
 
   Future<ApiResponse<EventsPagedResponse>> getEvents(EventsRequest request) async {
     // TODO: temporary mock data for UI testing — remove and let the real

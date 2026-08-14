@@ -9,7 +9,7 @@ import 'package:business_assistant/core/utils/api/app_interceptor.dart';
 class ClientApiService {
   final Dio dio;
 
-  ClientApiService({Dio? dio}) : dio = dio ?? AppInterceptor().businessDio;
+  ClientApiService({Dio? dio}) : dio = dio ?? AppInterceptor().dio;
 
   Future<ApiResponse<List<ClientResponse>>> getClients() async {
     // TODO: temporary mock data for UI testing — remove and let the real

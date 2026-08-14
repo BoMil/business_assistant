@@ -78,5 +78,5 @@ List<BottomNavTab> visibleBottomNavTabs() {
 /// are enabled at all.
 String defaultAuthenticatedRoute() {
   final tabs = visibleBottomNavTabs();
-  return tabs.isEmpty ? RouteNames.landingPage : tabs.first.path;
+  return tabs.isEmpty ? RouteNames.loginPage : tabs.first.path;
 }

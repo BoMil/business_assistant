@@ -36,12 +36,12 @@ class Routes {
         switch (state.fullPath) {
           case RouteNames.signupPage:
             return RouteNames.signupPage;
-          case RouteNames.loginPage:
-            return RouteNames.loginPage;
           case RouteNames.resetPassword:
             return RouteNames.resetPassword;
-          default:
+          case RouteNames.landingPage:
             return RouteNames.landingPage;
+          default:
+            return RouteNames.loginPage;
         }
       }
 
@@ -55,10 +55,7 @@ class Routes {
     initialLocation: RouterState().initialRoute,
     routes: <RouteBase>[
       // Blank white splash shown during the token check (AuthInitial state)
-      GoRoute(
-        path: RouteNames.initialScreen,
-        builder: (context, state) => const InitialScreen(),
-      ),
+      GoRoute(path: RouteNames.initialScreen, builder: (context, state) => const InitialScreen()),
 
       // Landing page — entry point for unauthenticated users
       GoRoute(
@@ -70,10 +67,7 @@ class Routes {
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
                 child: child,
               );
             },
@@ -91,10 +85,7 @@ class Routes {
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
                 child: child,
               );
             },
@@ -113,10 +104,7 @@ class Routes {
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
                 child: child,
               );
             },
@@ -132,10 +120,7 @@ class Routes {
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
                 child: child,
               );
             },
@@ -154,10 +139,7 @@ class Routes {
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
                 child: child,
               );
             },
@@ -173,10 +155,7 @@ class Routes {
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
                 child: child,
               );
             },
@@ -189,17 +168,15 @@ class Routes {
       // (BottomNavigationFrame) never fall out of sync.
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => BottomNavigationFrame(navigationShell: navigationShell),
-        branches: visibleBottomNavTabs()
-            .map((tab) => StatefulShellBranch(
-                  navigatorKey: tab.navigatorKey,
-                  routes: [
-                    GoRoute(
-                      path: tab.path,
-                      builder: (context, state) => tab.pageBuilder(context),
-                    ),
-                  ],
-                ))
-            .toList(),
+        branches:
+            visibleBottomNavTabs()
+                .map(
+                  (tab) => StatefulShellBranch(
+                    navigatorKey: tab.navigatorKey,
+                    routes: [GoRoute(path: tab.path, builder: (context, state) => tab.pageBuilder(context))],
+                  ),
+                )
+                .toList(),
       ),
 
       //     GoRoute(

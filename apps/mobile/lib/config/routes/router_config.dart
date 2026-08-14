@@ -52,7 +52,7 @@ class RouterState {
     if (authCubit.state is Authenticated) {
       initialRoute = defaultAuthenticatedRoute();
     } else if (authCubit.state is Unauthenticated) {
-      initialRoute = RouteNames.landingPage;
+      initialRoute = RouteNames.loginPage;
     } else {
       initialRoute = RouteNames.initialScreen;
     }

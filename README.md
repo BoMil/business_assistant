@@ -35,7 +35,7 @@ business_assistant/
 
 **Prerequisites**: Docker Desktop, .NET 8 SDK. [Azure Data Studio](https://azure.microsoft.com/products/data-studio) is recommended for inspecting the database on Mac/Linux (no SSMS there).
 
-### Whole backend stack (DB + both APIs)
+### Whole backend stack (DB + both APIs + Gateway)
 
 First time only — Docker containers can't read your `dotnet user-secrets`, so Business's Blob Storage connection string is passed in via a gitignored `.env` file instead:
 
@@ -48,8 +48,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-- Identity API: http://localhost:5100/swagger
-- Business API: http://localhost:5101/swagger
+- API Gateway: http://localhost:5099 — **this is the only address the mobile/web app needs to know.** It routes `/identity/**` → Identity and `/business/**` → Business (see `apps/backend/gateway/Gateway.API`).
+- Identity API (direct, for its own Swagger): http://localhost:5100/swagger
+- Business API (direct, for its own Swagger): http://localhost:5101/swagger
 - Stop: `docker compose down` (add `-v` to also wipe the DB data)
 
 ### Running a single microservice (DB in Docker, API on host)
@@ -68,6 +69,13 @@ dotnet run
 ```
 
 (or hit Run/Debug in your IDE). Each service's `appsettings.Development.json` already points at `localhost,1433` with the `ba-db` container's SQL auth credentials, so no extra config is needed. EF Core migrations are applied automatically on startup.
+
+If you also want to go through the Gateway while running services this way, run it the same way — its `appsettings.Development.json` already points at `http://localhost:5100`/`5101`:
+
+```bash
+cd apps/backend/gateway/Gateway.API
+dotnet run
+```
 
 ### Inspecting the database (Azure Data Studio)
 

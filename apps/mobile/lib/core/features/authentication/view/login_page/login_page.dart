@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
@@ -39,10 +38,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Provide LoginCubit locally so it's scoped to this page only
-    return BlocProvider<LoginCubit>(
-      create: (_) => LoginCubit(),
-      child: const _LoginPageContent(),
-    );
+    return BlocProvider<LoginCubit>(create: (_) => LoginCubit(), child: const _LoginPageContent());
   }
 }
 
@@ -112,10 +108,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
     if (!_autoValidate) setState(() => _autoValidate = true);
     if (!_formKey.currentState!.validate()) return;
 
-    context.read<LoginCubit>().login(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+    context.read<LoginCubit>().login(email: _emailController.text.trim(), password: _passwordController.text);
   }
 
   // ── Build ──────────────────────────────────────────────────────────────────
@@ -130,7 +123,6 @@ class _LoginPageContentState extends State<_LoginPageContent> {
         final isLoading = state.currentState == CubitState.loading;
 
         return PageFrame(
-          backButtonPressed: () => context.go(RouteNames.landingPage),
           pageBody: SafeArea(
             child: SingleChildScrollView(
               child: Form(
@@ -195,19 +187,12 @@ class _LoginPageContentState extends State<_LoginPageContent> {
         const SizedBox(height: 12),
         Text(
           tenant.appName,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: context.colors.brandPrimary,
-          ),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.colors.brandPrimary),
         ),
         const SizedBox(height: 6),
         Text(
           t.signInSubtitle,
-          style: TextStyle(
-            fontSize: 14,
-            color: context.colors.primaryText.withValues(alpha: 0.55),
-          ),
+          style: TextStyle(fontSize: 14, color: context.colors.primaryText.withValues(alpha: 0.55)),
         ),
       ],
     );
@@ -222,11 +207,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
       keyboardType: TextInputType.emailAddress,
       placeholderText: t.email,
       customValidator: _validateEmail,
-      prefixIcon: Icon(
-        Icons.email_outlined,
-        size: 20,
-        color: context.colors.primaryText.withValues(alpha: 0.45),
-      ),
+      prefixIcon: Icon(Icons.email_outlined, size: 20, color: context.colors.primaryText.withValues(alpha: 0.45)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       inputBackgroundCollor: context.colors.secondaryBackground,
       borderColor: context.colors.primaryText.withValues(alpha: 0.15),
@@ -243,11 +224,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
       passwordFieldVisible: !_isPasswordVisible,
       customValidator: _validatePassword,
       placeholderText: t.password,
-      prefixIcon: Icon(
-        Icons.lock_outline_rounded,
-        size: 20,
-        color: context.colors.primaryText.withValues(alpha: 0.45),
-      ),
+      prefixIcon: Icon(Icons.lock_outline_rounded, size: 20, color: context.colors.primaryText.withValues(alpha: 0.45)),
       sufixIcon: IconButton(
         icon: Icon(
           _isPasswordVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -268,10 +245,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
   Widget _buildRememberMeCheckbox() {
     final t = TranslationStorage.translation;
     return CustomCheckbox(
-      labelWidget: Text(
-        t.rememberMe,
-        style: TextStyle(fontSize: 13, color: context.colors.primaryText),
-      ),
+      labelWidget: Text(t.rememberMe, style: TextStyle(fontSize: 13, color: context.colors.primaryText)),
       isChecked: context.watch<LoginCubit>().remember,
       itemPressed: (value) {
         setState(() {
@@ -294,11 +268,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
         },
         child: Text(
           t.forgotPassword,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: context.colors.brandPrimary,
-          ),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.colors.brandPrimary),
         ),
       ),
     );
@@ -311,12 +281,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          ThemeConstants.pagePadding,
-          12,
-          ThemeConstants.pagePadding,
-          16,
-        ),
+        padding: const EdgeInsets.fromLTRB(ThemeConstants.pagePadding, 12, ThemeConstants.pagePadding, 16),
         child: ButtonWithLoadingState(
           buttonText: t.signIn,
           loading: isLoading,

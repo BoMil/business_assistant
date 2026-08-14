@@ -27,21 +27,13 @@ class AppInterceptor {
 
   factory AppInterceptor() => _instance;
 
-  /// The shared Dio instance used by all Identity (auth) calls.
+  /// The single shared Dio instance used by every API call — points at the
+  /// API Gateway. Which microservice actually handles a request is determined
+  /// by the path prefix (see APIEndpoints), not by the Dio instance.
   var dio = Dio(
     BaseOptions(
       contentType: Headers.jsonContentType,
       baseUrl: Environment.serverAddress,
-    ),
-  );
-
-  /// The shared Dio instance used by all Business calls (events, assets, clients) —
-  /// a separate deployable from Identity, so it needs its own base URL, but shares
-  /// the same token-injection/refresh interceptor logic below.
-  var businessDio = Dio(
-    BaseOptions(
-      contentType: Headers.jsonContentType,
-      baseUrl: Environment.businessServerAddress,
     ),
   );
 
@@ -55,7 +47,7 @@ class AppInterceptor {
   void initializeInterceptor() {
     _isTokenRefreshing = false;
 
-    // Allow self-signed certificates in development (the Identity API runs over HTTP
+    // Allow self-signed certificates in development (the API Gateway runs over HTTP
     // locally via Docker, but we add this for staging HTTPS with self-signed certs).
     dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
@@ -64,20 +56,8 @@ class AppInterceptor {
         return client;
       },
     );
-    businessDio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () {
-        final HttpClient client = HttpClient();
-        client.badCertificateCallback = (cert, host, port) => true;
-        return client;
-      },
-    );
 
-    // Same interceptor instance on both Dio clients — it holds no per-Dio
-    // state, only per-request state (RequestOptions), so sharing it is safe
-    // and keeps token injection/refresh identical for both services.
-    final interceptor = _buildInterceptor();
-    dio.interceptors.add(interceptor);
-    businessDio.interceptors.add(interceptor);
+    dio.interceptors.add(_buildInterceptor());
   }
 
   QueuedInterceptorsWrapper _buildInterceptor() {
@@ -296,9 +276,6 @@ class AppInterceptor {
     );
 
     // New Dio instance to avoid using the interceptor-locked main instance.
-    // baseUrl comes from the original request, not a hardcoded service — the
-    // failing request may have come from either `dio` (Identity) or
-    // `businessDio` (Business), and the retry must hit the same host.
     final retryDio = Dio(
       BaseOptions(
         contentType: requestOptions.contentType,

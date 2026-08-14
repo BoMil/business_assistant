@@ -10,7 +10,7 @@ import 'package:business_assistant/core/utils/api/app_interceptor.dart';
 class ImageApiService {
   final Dio dio;
 
-  ImageApiService({Dio? dio}) : dio = dio ?? AppInterceptor().businessDio;
+  ImageApiService({Dio? dio}) : dio = dio ?? AppInterceptor().dio;
 
   Future<ApiResponse<String>> uploadImage(File file) async {
     try {

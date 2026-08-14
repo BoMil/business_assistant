@@ -12,7 +12,7 @@ import 'package:business_assistant/core/utils/api/app_interceptor.dart';
 class AssetApiService {
   final Dio dio;
 
-  AssetApiService({Dio? dio}) : dio = dio ?? AppInterceptor().businessDio;
+  AssetApiService({Dio? dio}) : dio = dio ?? AppInterceptor().dio;
 
   Future<ApiResponse<List<AssetResponse>>> getAssets() async {
     // TODO: temporary mock data for UI testing — remove and let the real

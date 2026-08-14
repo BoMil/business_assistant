@@ -56,6 +56,21 @@ services:
       ba-db:
         condition: service_healthy
 
+  # ── API Gateway ──────────────────────────────────────────────────────────
+  # Jedini entrypoint za mobilnu/web aplikaciju — rutira po path prefiksu
+  # (/identity/** -> identity.api, /business/** -> business.api).
+  gateway.api:
+    image: ${DOCKER_REGISTRY-}gatewayapi
+    container_name: gateway-api
+    networks:
+      - backend
+    build:
+      context: .
+      dockerfile: apps/backend/gateway/Gateway.API/Dockerfile
+    depends_on:
+      - identity.api
+      - business.api
+
   # ── SQL Server ─────────────────────────────────────────────────────────────
   # Jedan SQL Server instance, odvojena baza po mikroservisu (Zepp pattern).
   # Svaki mikroservis koristi sopstvenu bazu: IdentityDb, BusinessDb, itd.
