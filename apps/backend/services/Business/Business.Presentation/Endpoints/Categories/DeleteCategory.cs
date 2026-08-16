@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Business.Application.UseCases.UpdateAsset;
+using Business.Application.UseCases.DeleteCategory;
 using Business.Presentation.Endpoints.Common;
 using Shared.Presentation.ErrorHandling;
 using MediatR;
@@ -8,32 +8,27 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 
-namespace Business.Presentation.Endpoints.Assets;
+namespace Business.Presentation.Endpoints.Categories;
 
-public static class UpdateAsset
+public static class DeleteCategory
 {
     public sealed class Endpoint : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPut($"{EndpointGroups.Assets}/{{id:guid}}", Handle)
-                .WithTags(EndpointTags.Assets)
+            app.MapDelete($"{EndpointGroups.Categories}/{{id:guid}}", Handle)
+                .WithTags(EndpointTags.Categories)
                 .RequireAuthorization();
         }
     }
 
     public static async Task<Results<NoContent, ProblemHttpResult>> Handle(
         Guid id,
-        UpdateAssetRequest request,
         ClaimsPrincipal user,
         ISender sender,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateAssetCommand(
-            id, user.GetTenantId(), request.Name, request.CategoryId, request.Description,
-            request.SalePrice, request.RentalPrice, request.StockCount, request.ImgUrl);
-
-        var result = await sender.Send(command, cancellationToken);
+        var result = await sender.Send(new DeleteCategoryCommand(id, user.GetTenantId()), cancellationToken);
 
         if (result.IsSuccess)
             return TypedResults.NoContent();

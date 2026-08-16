@@ -3,7 +3,8 @@ namespace Business.Application.UseCases.Common;
 public record AssetDto(
     Guid Id,
     string Name,
-    string Category,
+    Guid? CategoryId,
+    string? CategoryName,
     string? Description,
     decimal? SalePrice,
     decimal? RentalPrice,

@@ -7,10 +7,10 @@ namespace Business.Persistence.Repositories;
 internal sealed class AssetRepository(BusinessDbContext context) : IAssetRepository
 {
     public Task<Asset?> GetByIdAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default) =>
-        context.Assets.FirstOrDefaultAsync(a => a.Id == id && a.TenantId == tenantId, cancellationToken);
+        context.Assets.Include(a => a.Category).FirstOrDefaultAsync(a => a.Id == id && a.TenantId == tenantId, cancellationToken);
 
     public Task<List<Asset>> GetAllAsync(Guid tenantId, CancellationToken cancellationToken = default) =>
-        context.Assets.Where(a => a.TenantId == tenantId).ToListAsync(cancellationToken);
+        context.Assets.Include(a => a.Category).Where(a => a.TenantId == tenantId).ToListAsync(cancellationToken);
 
     public async Task AddAsync(Asset asset, CancellationToken cancellationToken = default) =>
         await context.Assets.AddAsync(asset, cancellationToken);

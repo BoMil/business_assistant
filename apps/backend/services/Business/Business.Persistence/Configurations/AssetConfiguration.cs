@@ -17,9 +17,10 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(a => a.Category)
-            .IsRequired()
-            .HasMaxLength(100);
+        builder.HasOne(a => a.Category)
+            .WithMany()
+            .HasForeignKey(a => a.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.Property(a => a.Description)
             .HasMaxLength(1000);

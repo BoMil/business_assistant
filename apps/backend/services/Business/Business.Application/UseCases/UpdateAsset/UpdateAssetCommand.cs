@@ -8,7 +8,7 @@ public record UpdateAssetCommand(
     Guid Id,
     Guid TenantId,
     string Name,
-    string Category,
+    Guid? CategoryId,
     string? Description,
     decimal? SalePrice,
     decimal? RentalPrice,
@@ -21,7 +21,6 @@ public sealed class UpdateAssetCommandValidator : AbstractValidator<UpdateAssetC
     public UpdateAssetCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required");
-        RuleFor(x => x.Category).NotEmpty().WithMessage("Category is required");
         RuleFor(x => x.StockCount).GreaterThanOrEqualTo(0).WithMessage("StockCount cannot be negative");
     }
 }

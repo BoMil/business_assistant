@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Business.Application.UseCases.CreateAsset;
+using Business.Application.UseCases.UpdateCategory;
 using Business.Presentation.Endpoints.Common;
 using Shared.Presentation.ErrorHandling;
 using MediatR;
@@ -8,34 +8,33 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 
-namespace Business.Presentation.Endpoints.Assets;
+namespace Business.Presentation.Endpoints.Categories;
 
-public static class CreateAsset
+public static class UpdateCategory
 {
     public sealed class Endpoint : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost(EndpointGroups.Assets, Handle)
-                .WithTags(EndpointTags.Assets)
+            app.MapPut($"{EndpointGroups.Categories}/{{id:guid}}", Handle)
+                .WithTags(EndpointTags.Categories)
                 .RequireAuthorization();
         }
     }
 
-    public static async Task<Results<Created<Guid>, ProblemHttpResult>> Handle(
-        CreateAssetRequest request,
+    public static async Task<Results<NoContent, ProblemHttpResult>> Handle(
+        Guid id,
+        UpdateCategoryRequest request,
         ClaimsPrincipal user,
         ISender sender,
         CancellationToken cancellationToken)
     {
-        var command = new CreateAssetCommand(
-            user.GetTenantId(), request.Name, request.CategoryId, request.Description,
-            request.SalePrice, request.RentalPrice, request.StockCount, request.ImgUrl);
+        var command = new UpdateCategoryCommand(id, user.GetTenantId(), request.Name, request.ImgUrl);
 
         var result = await sender.Send(command, cancellationToken);
 
         if (result.IsSuccess)
-            return TypedResults.Created($"{EndpointGroups.Assets}/{result.Value}", result.Value);
+            return TypedResults.NoContent();
 
         return CommonHttpErrorHandlers.HandleError(result.Errors[0]);
     }

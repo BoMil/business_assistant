@@ -9,7 +9,8 @@ namespace Business.Application.UseCases.Common;
 public record AssetDetailDto(
     Guid Id,
     string Name,
-    string Category,
+    Guid? CategoryId,
+    string? CategoryName,
     string? Description,
     decimal? SalePrice,
     decimal? RentalPrice,
