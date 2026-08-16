@@ -14,4 +14,6 @@ internal sealed class ClientRepository(BusinessDbContext context) : IClientRepos
 
     public async Task AddAsync(Client client, CancellationToken cancellationToken = default) =>
         await context.Clients.AddAsync(client, cancellationToken);
+
+    public void Remove(Client client) => context.Clients.Remove(client);
 }
