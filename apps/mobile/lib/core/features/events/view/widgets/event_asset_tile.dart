@@ -29,10 +29,10 @@ class EventAssetTile extends StatefulWidget {
 }
 
 class _EventAssetTileState extends State<EventAssetTile> {
-  late final TextEditingController _quantityController =
-      TextEditingController(text: widget.item.quantity.toString());
-  late final TextEditingController _priceController =
-      TextEditingController(text: widget.item.price.toStringAsFixed(0));
+  late final TextEditingController _quantityController = TextEditingController(text: widget.item.quantity.toString());
+  late final TextEditingController _priceController = TextEditingController(
+    text: widget.item.price % 1 == 0 ? widget.item.price.toStringAsFixed(0) : widget.item.price.toString(),
+  );
 
   @override
   void dispose() {

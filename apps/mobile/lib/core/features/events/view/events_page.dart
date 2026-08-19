@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/events/cubits/events/events_cubit.dart';
+import 'package:business_assistant/core/features/events/models/page_props/create_edit_event_page_props.dart';
 import 'package:business_assistant/core/features/events/view/event_card.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_card_skeleton.dart';
 import 'package:business_assistant/core/features/main_header/view/main_header.dart';
@@ -38,7 +39,7 @@ class _EventsPageContent extends StatelessWidget {
 
   Future<void> _openEditEvent(BuildContext context, String eventId) async {
     final cubit = context.read<EventsCubit>();
-    await context.push(RouteNames.editEventPagePath(eventId));
+    await context.push(RouteNames.editEventPage, extra: CreateEditEventPageProps(eventId: eventId));
     cubit.resetState();
   }
 

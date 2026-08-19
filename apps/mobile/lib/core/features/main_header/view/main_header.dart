@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
-import 'package:business_assistant/config/translations/view/language_switcher.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/selectable_icon.dart';
 import 'package:business_assistant/core/shared/widgets/images/loaded_image.dart';
@@ -71,8 +70,8 @@ class MainHeader extends StatelessWidget {
               child: Icon(Icons.person, size: 20, color: theme.primaryText.withValues(alpha: 0.5)),
             ),
           ),
-          const SizedBox(width: 10),
-          const LanguageSwitcher(),
+          // const SizedBox(width: 10),
+          // const LanguageSwitcher(),
         ],
       ),
     );

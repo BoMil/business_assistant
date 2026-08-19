@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:business_assistant/core/features/inventory/api_services/asset_api_service.dart';
+import 'package:business_assistant/core/features/inventory/api_services/category_api_service.dart';
 import 'package:business_assistant/core/features/inventory/api_services/image_api_service.dart';
 import 'package:business_assistant/core/features/inventory/models/requests/create_asset_request.dart';
 import 'package:business_assistant/core/features/inventory/models/requests/update_asset_request.dart';
+import 'package:business_assistant/core/features/inventory/models/responses/category_response.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
 
@@ -17,20 +20,43 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
   final String? assetId;
   final AssetApiService assetApiService;
   final ImageApiService imageApiService;
+  final CategoryApiService categoryApiService;
 
-  CreateEditAssetCubit({this.assetId, AssetApiService? assetApiService, ImageApiService? imageApiService})
-      : assetApiService = assetApiService ?? AssetApiService(),
-        imageApiService = imageApiService ?? ImageApiService(),
-        super(const CreateEditAssetState());
+  CreateEditAssetCubit({
+    this.assetId,
+    AssetApiService? assetApiService,
+    ImageApiService? imageApiService,
+    CategoryApiService? categoryApiService,
+  }) : assetApiService = assetApiService ?? AssetApiService(),
+       imageApiService = imageApiService ?? ImageApiService(),
+       categoryApiService = categoryApiService ?? CategoryApiService(),
+       super(const CreateEditAssetState());
 
   bool get isEditMode => assetId != null;
 
+  /// Kicks off the category picker's options and — in edit mode — the
+  /// existing asset's data, as two independent calls: one failing doesn't
+  /// stop or delay the other.
   Future<void> loadFormData() async {
-    if (!isEditMode) {
+    unawaited(_loadCategories());
+    if (isEditMode) {
+      unawaited(_loadAsset());
+    } else {
       emit(state.copyWith(currentState: CubitState.loaded));
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    emit(state.copyWith(categoriesState: CubitState.loading));
+    final response = await categoryApiService.getCategories();
+    if (response.status == ResponseStatus.error) {
+      emit(state.copyWith(categoriesState: CubitState.error, errorMessage: response.message));
       return;
     }
+    emit(state.copyWith(categoriesState: CubitState.loaded, availableCategories: response.data ?? []));
+  }
 
+  Future<void> _loadAsset() async {
     emit(state.copyWith(currentState: CubitState.loading));
     final response = await assetApiService.getAssetById(assetId!);
     if (response.status == ResponseStatus.error) {
@@ -39,22 +65,25 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
     }
 
     final asset = response.data!;
-    emit(state.copyWith(
-      currentState: CubitState.loaded,
-      name: asset.name,
-      category: asset.category,
-      description: asset.description ?? '',
-      salePrice: asset.salePrice,
-      rentalPrice: asset.rentalPrice,
-      stockCount: asset.stockCount,
-      currentlyReserved: asset.currentlyReserved,
-      imgUrl: asset.imgUrl,
-    ));
+    emit(
+      state.copyWith(
+        currentState: CubitState.loaded,
+        name: asset.name,
+        categoryId: asset.categoryId,
+        description: asset.description ?? '',
+        salePrice: asset.salePrice,
+        rentalPrice: asset.rentalPrice,
+        stockCount: asset.stockCount,
+        currentlyReserved: asset.currentlyReserved,
+        imgUrl: asset.imgUrl,
+      ),
+    );
   }
 
   void setName(String value) => emit(state.copyWith(name: value, isDirty: true));
 
-  void setCategory(String value) => emit(state.copyWith(category: value, isDirty: true));
+  void selectCategory(CategoryResponse? category) =>
+      emit(state.copyWith(categoryId: category?.id, clearCategoryId: category == null, isDirty: true));
 
   void setDescription(String value) => emit(state.copyWith(description: value, isDirty: true));
 
@@ -82,8 +111,8 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
   }
 
   Future<void> save() async {
-    if (state.name.trim().isEmpty || state.category.trim().isEmpty) {
-      emit(state.copyWith(errorMessage: 'Name and category are required.'));
+    if (state.name.trim().isEmpty) {
+      emit(state.copyWith(errorMessage: 'Name is required.'));
       return;
     }
     if (state.rentalPrice == null && state.salePrice == null) {
@@ -101,7 +130,7 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
         assetId!,
         UpdateAssetRequest(
           name: state.name.trim(),
-          category: state.category.trim(),
+          categoryId: state.categoryId,
           description: description,
           salePrice: state.salePrice,
           rentalPrice: state.rentalPrice,
@@ -113,7 +142,7 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
       response = await assetApiService.createAsset(
         CreateAssetRequest(
           name: state.name.trim(),
-          category: state.category.trim(),
+          categoryId: state.categoryId,
           description: description,
           salePrice: state.salePrice,
           rentalPrice: state.rentalPrice,

@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:business_assistant/config/constants/api_endpoints.dart';
+import 'package:business_assistant/core/features/inventory/models/requests/assets_request.dart';
 import 'package:business_assistant/core/features/inventory/models/requests/create_asset_request.dart';
 import 'package:business_assistant/core/features/inventory/models/requests/update_asset_request.dart';
 import 'package:business_assistant/core/features/inventory/models/responses/asset_detail_response.dart';
 import 'package:business_assistant/core/features/inventory/models/responses/asset_response.dart';
+import 'package:business_assistant/core/features/inventory/models/responses/assets_paged_response.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
 
@@ -14,11 +16,12 @@ class AssetApiService {
 
   AssetApiService({Dio? dio}) : dio = dio ?? AppInterceptor().dio;
 
+  /// Full, unpaginated list — used by the Events feature's "Add product" picker.
   Future<ApiResponse<List<AssetResponse>>> getAssets() async {
     // TODO: temporary mock data for UI testing — remove and let the real
     // Dio call below run once the Business API is reachable.
-    await Future.delayed(const Duration(milliseconds: 500));
-    return ApiResponse.completed(_mockAssets());
+    // await Future.delayed(const Duration(milliseconds: 500));
+    // return ApiResponse.completed(_mockAssets());
 
     try {
       final response = await dio.get(APIEndpoints.assets);
@@ -31,22 +34,37 @@ class AssetApiService {
     }
   }
 
+  /// Paginated, server-searched list — used by the Inventory list page.
+  Future<ApiResponse<AssetsPagedResponse>> getAssetsPaged(AssetsRequest request) async {
+    try {
+      final response = await dio.get(APIEndpoints.assetsPaged, queryParameters: request.toQueryParameters());
+      return ApiResponse.completed(AssetsPagedResponse.fromJson(response.data));
+    } on DioException catch (e) {
+      return ApiResponse.error(_messageFor(e));
+    } catch (e) {
+      return ApiResponse.error('Something went wrong. Please try again.');
+    }
+  }
+
   Future<ApiResponse<AssetDetailResponse>> getAssetById(String id) async {
     // TODO: temporary mock data for UI testing — remove and let the real
     // Dio call below run once the Business API is reachable.
-    await Future.delayed(const Duration(milliseconds: 500));
-    final asset = _mockAssets().firstWhere((a) => a.id == id, orElse: () => _mockAssets().first);
-    return ApiResponse.completed(AssetDetailResponse(
-      id: asset.id,
-      name: asset.name,
-      category: asset.category,
-      description: asset.description,
-      salePrice: asset.salePrice,
-      rentalPrice: asset.rentalPrice,
-      stockCount: asset.stockCount,
-      currentlyReserved: 0,
-      imgUrl: asset.imgUrl,
-    ));
+    // await Future.delayed(const Duration(milliseconds: 500));
+    // final asset = _mockAssets().firstWhere((a) => a.id == id, orElse: () => _mockAssets().first);
+    // return ApiResponse.completed(
+    //   AssetDetailResponse(
+    //     id: asset.id,
+    //     name: asset.name,
+    //     categoryId: asset.categoryId,
+    //     categoryName: asset.categoryName,
+    //     description: asset.description,
+    //     salePrice: asset.salePrice,
+    //     rentalPrice: asset.rentalPrice,
+    //     stockCount: asset.stockCount,
+    //     currentlyReserved: 0,
+    //     imgUrl: asset.imgUrl,
+    //   ),
+    // );
 
     try {
       final response = await dio.get(APIEndpoints.assetById(id));
@@ -66,7 +84,7 @@ class AssetApiService {
       AssetResponse(
         id: 'a1',
         name: 'Tiffany Stolice',
-        category: 'Nameštaj',
+        categoryName: 'Nameštaj',
         stockCount: 100,
         rentalPrice: 50,
         imgUrl: 'https://picsum.photos/id/1060/400/300',
@@ -74,7 +92,7 @@ class AssetApiService {
       AssetResponse(
         id: 'a2',
         name: 'Barski Stolovi',
-        category: 'Nameštaj',
+        categoryName: 'Nameštaj',
         stockCount: 20,
         rentalPrice: 30,
         imgUrl: 'https://picsum.photos/id/1080/400/300',
@@ -82,7 +100,7 @@ class AssetApiService {
       AssetResponse(
         id: 'a3',
         name: 'Šator 6x12',
-        category: 'Šatori',
+        categoryName: 'Šatori',
         stockCount: 4,
         rentalPrice: 400,
         imgUrl: 'https://picsum.photos/id/1074/400/300',
@@ -90,7 +108,7 @@ class AssetApiService {
       AssetResponse(
         id: 'a4',
         name: 'Zvučni sistem',
-        category: 'Ozvučenje',
+        categoryName: 'Ozvučenje',
         stockCount: 3,
         rentalPrice: 150,
         imgUrl: 'https://picsum.photos/id/1082/400/300',

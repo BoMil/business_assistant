@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/events/cubits/create_edit_event/create_edit_event_cubit.dart';
+import 'package:business_assistant/core/features/events/models/page_props/create_edit_event_page_props.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_asset_tile.dart';
 import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
 import 'package:business_assistant/core/shared/models/dropdowns/base_dropdown_item.dart';
@@ -21,17 +22,20 @@ import 'package:business_assistant/theme/get_theme_color.dart';
 import 'package:business_assistant/theme/theme_color.dart';
 
 /// Create/edit form for a Rental event — reused for both flows since the
-/// fields and validation are identical; only eventId (null → create) and the
-/// Cancel/Delete actions (edit-mode only) differ.
+/// fields and validation are identical; only pageProps.eventId (null →
+/// create) and the Cancel/Delete actions (edit-mode only) differ.
 class CreateEditEventPage extends StatelessWidget {
-  final String? eventId;
+  final CreateEditEventPageProps? pageProps;
 
-  const CreateEditEventPage({super.key, this.eventId});
+  const CreateEditEventPage({super.key, this.pageProps});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<CreateEditEventCubit>(
-      create: (_) => CreateEditEventCubit(eventId: eventId)..loadFormData(),
+      create:
+          (_) =>
+              CreateEditEventCubit(eventId: pageProps?.eventId, initialClientId: pageProps?.initialClientId)
+                ..loadFormData(),
       child: const _CreateEditEventPageContent(),
     );
   }
@@ -97,7 +101,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
               (asset) => BaseDropdownItem(
                 text: asset.name,
                 value: asset.id,
-                subtitle: asset.category,
+                subtitle: asset.categoryName,
                 rightContent:
                     asset.rentalPrice != null
                         ? Text(

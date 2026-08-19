@@ -37,6 +37,9 @@ class AuthCubit extends Cubit<AuthState> {
   /// Owner and Admin can add/edit/delete Inventory products — Member is view-only.
   bool get canManageInventory => currentUserRole == UserRole.owner || currentUserRole == UserRole.admin;
 
+  /// Owner and Admin can add/edit/remove Clients — Member is view-only.
+  bool get canManageClients => currentUserRole == UserRole.owner || currentUserRole == UserRole.admin;
+
   /// Called once in MyApp.initState() — checks the stored token and emits
   /// Authenticated or Unauthenticated accordingly.
   Future<void> initAuthState() async {

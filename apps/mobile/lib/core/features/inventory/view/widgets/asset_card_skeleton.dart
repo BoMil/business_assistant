@@ -10,7 +10,7 @@ class AssetCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final placeholder = AssetResponse(id: '****', name: '****', category: '****', stockCount: 0, rentalPrice: 0);
+    final placeholder = AssetResponse(id: '****', name: '****', categoryName: '****', stockCount: 0, rentalPrice: 0);
 
     return Skeletonizer(
       enabled: true,

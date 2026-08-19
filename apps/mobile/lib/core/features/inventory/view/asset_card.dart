@@ -26,7 +26,7 @@ class AssetCard extends StatelessWidget {
       children: [
         SelectableItem(
           title: asset.name,
-          subtitle: asset.category,
+          subtitle: asset.categoryName,
           textColor: context.colors.primaryText,
           fontSize: 16,
           itemPressed: onTap,

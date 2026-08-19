@@ -293,6 +293,22 @@ No global EF query filter, no `ITenantContext` service — tenant scoping is **e
 - `lib/config/routes/routes.dart` — singleton `GoRouter` (don't rebuild it, resets nav history). Full-screen pushed pages (create/edit forms) are top-level `GoRoute`s outside the bottom-nav shell, using a consistent `CustomTransitionPage` left-slide transition — copy that block for new pushed pages.
 - `StatefulShellRoute.indexedStack` wraps bottom-nav tabs — **it keeps every tab's widget tree alive simultaneously**. Tab switches always go through `BottomNavigationCubit.changeScreen()`, never `navigationShell.goBranch()` directly.
 - **Hero-tag gotcha**: because all tabs stay alive, two tabs each having a `FloatingActionButton` with Flutter's default hero tag causes a "multiple heroes share the same tag" crash. Every per-tab FAB must set an explicit unique `heroTag` (e.g. `'inventoryFab'`, `'eventsFab'`). Any new tab-root page with a FAB needs its own unique tag.
+- **PageProps navigation convention**: every pushed create/edit/detail page (Events, Inventory, Clients) takes its data via a `<Page>PageProps` object passed through GoRouter's `extra`, not a path (`/:id`) or query parameter — mirrors `/Users/boki/Zepp/ZEPP.FluterMobileAppNew`'s `models/page_props/*PageProps` pattern. Define a plain props class per page (in `<feature>/models/page_props/`), e.g. `CreateEditEventPageProps({eventId, initialClientId})`, `CreateEditAssetPageProps({assetId})`, `CreateEditClientPageProps({clientId})`, `ClientEventsPageProps({clientId, clientName})` — `null`/absent fields mean create mode or "no value passed". Navigate with `context.push(RouteNames.x, extra: XPageProps(...))`; the page widget takes a single nullable `pageProps` constructor field and reads its way through (`pageProps?.assetId`, etc.). In `routes.dart`, every such route reads it back with the try/catch cast below — never a bare `state.extra as X` (an uncaught type mismatch there crashes navigation):
+  ```dart
+  GoRoute(
+    path: RouteNames.editClientPage,
+    pageBuilder: (context, state) {
+      CreateEditClientPageProps? pageProps;
+      try {
+        pageProps = state.extra as CreateEditClientPageProps?;
+      } catch (e) {
+        debugPrint('No data in the route extra params');
+      }
+      return CustomTransitionPage<void>(key: state.pageKey, child: CreateEditClientPage(pageProps: pageProps), ...);
+    },
+  ),
+  ```
+  `RouteNames` only holds plain static path strings for these routes (no `.../:id` segments, no path-builder helper functions) — copy this shape for any new pushed page.
 
 ### Multi-tenant / white-label
 

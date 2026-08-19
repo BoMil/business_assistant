@@ -3,8 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:business_assistant/config/constants/api_endpoints.dart';
 import 'package:business_assistant/config/constants/secure_storage_keys.dart';
 import 'package:business_assistant/config/environment/environment.dart';
@@ -58,6 +60,7 @@ class AppInterceptor {
     );
 
     dio.interceptors.add(_buildInterceptor());
+    dio.interceptors.add(PrettyDioLogger(enabled: kDebugMode, requestBody: true));
   }
 
   QueuedInterceptorsWrapper _buildInterceptor() {

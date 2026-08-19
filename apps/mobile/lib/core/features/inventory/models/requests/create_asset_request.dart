@@ -1,7 +1,7 @@
 /// JSON body for POST /assets — mirrors the Business API's CreateAssetRequest.
 class CreateAssetRequest {
   final String name;
-  final String category;
+  final String? categoryId;
   final String? description;
   final double? salePrice;
   final double? rentalPrice;
@@ -10,8 +10,8 @@ class CreateAssetRequest {
 
   const CreateAssetRequest({
     required this.name,
-    required this.category,
     required this.stockCount,
+    this.categoryId,
     this.description,
     this.salePrice,
     this.rentalPrice,
@@ -20,7 +20,7 @@ class CreateAssetRequest {
 
   Map<String, dynamic> toJson() => {
         'name': name,
-        'category': category,
+        'categoryId': categoryId,
         'description': description,
         'salePrice': salePrice,
         'rentalPrice': rentalPrice,

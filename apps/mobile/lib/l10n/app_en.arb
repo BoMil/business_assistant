@@ -75,6 +75,7 @@
     "eventSelectDatesFirstHint": "Select From and To dates first",
     "selectProductTitle": "Select Product",
     "selectClientTitle": "Select Client",
+    "selectCategoryTitle": "Select Category",
 
     "cancelEventButton": "Cancel Event",
     "confirmCancelEvent": "Are you sure you want to cancel this event?",
@@ -93,6 +94,7 @@
     "productDetailsTitle": "Product Details",
     "productNameLabel": "Name",
     "productCategoryLabel": "Category",
+    "productSelectCategoryLabel": "Select category (optional)",
     "productDescriptionLabel": "Description",
     "productRentalPriceLabel": "Rental Price",
     "productSalePriceLabel": "Product Price",
@@ -105,5 +107,24 @@
     "createProductButton": "Create Product",
 
     "productSavedToast": "Product saved",
-    "productDeletedToast": "Product deleted"
+    "productDeletedToast": "Product deleted",
+
+    "clientsSearchHint": "Search clients...",
+    "clientsEmptyStateText": "No clients yet",
+
+    "clientDetailsTitle": "Client Details",
+    "clientNameLabel": "Name",
+    "clientPhoneNumberLabel": "Phone Number",
+    "clientEmailLabel": "Email",
+    "clientLocationLabel": "Location",
+    "clientDescriptionLabel": "Description",
+    "clientEventsLabel": "Events",
+    "addNewEventButton": "Add new event",
+    "createClientButton": "Create Client",
+
+    "removeClientButton": "Remove Client",
+    "confirmDeleteClient": "Are you sure you want to remove this client? This cannot be undone.",
+
+    "clientSavedToast": "Client saved",
+    "clientDeletedToast": "Client deleted"
 }

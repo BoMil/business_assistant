@@ -4,7 +4,8 @@
 class AssetDetailResponse {
   final String id;
   final String name;
-  final String category;
+  final String? categoryId;
+  final String? categoryName;
   final String? description;
   final double? salePrice;
   final double? rentalPrice;
@@ -15,9 +16,10 @@ class AssetDetailResponse {
   AssetDetailResponse({
     required this.id,
     required this.name,
-    required this.category,
     required this.stockCount,
     required this.currentlyReserved,
+    this.categoryId,
+    this.categoryName,
     this.description,
     this.salePrice,
     this.rentalPrice,
@@ -28,7 +30,8 @@ class AssetDetailResponse {
     return AssetDetailResponse(
       id: json['id'] as String,
       name: json['name'] as String? ?? '',
-      category: json['category'] as String? ?? '',
+      categoryId: json['categoryId'] as String?,
+      categoryName: json['categoryName'] as String?,
       description: json['description'] as String?,
       salePrice: (json['salePrice'] as num?)?.toDouble(),
       rentalPrice: (json['rentalPrice'] as num?)?.toDouble(),

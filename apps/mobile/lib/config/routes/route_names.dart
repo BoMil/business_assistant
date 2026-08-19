@@ -24,17 +24,21 @@ class RouteNames {
   // Always visible regardless of TenantModules — see bottom_nav_tabs.dart.
   static const String accountPage = '/account';
 
+  // All of the routes below are plain static paths — page data travels via a
+  // PageProps object passed through GoRouter's `extra` (e.g.
+  // CreateEditEventPageProps, CreateEditClientPageProps), not a path/query
+  // parameter. See CLAUDE.md's "Routing" section.
+
   // ── Event detail (pushed full-screen on top of the Events tab) ───────────
   static const String createEventPage = '/events/create';
-  // Appended with '/:id' in routes.dart — use editEventPagePath(id) to build a
-  // concrete path for navigation.
   static const String editEventPage = '/events/edit';
-  static String editEventPagePath(String id) => '$editEventPage/$id';
 
   // ── Product detail (pushed full-screen on top of the Inventory tab) ─────
   static const String createAssetPage = '/inventory/create';
-  // Appended with '/:id' in routes.dart — use editAssetPagePath(id) to build a
-  // concrete path for navigation.
   static const String editAssetPage = '/inventory/edit';
-  static String editAssetPagePath(String id) => '$editAssetPage/$id';
+
+  // ── Client detail (pushed full-screen on top of the Clients tab) ────────
+  static const String createClientPage = '/clients/create';
+  static const String editClientPage = '/clients/edit';
+  static const String clientEventsPage = '/clients/events';
 }

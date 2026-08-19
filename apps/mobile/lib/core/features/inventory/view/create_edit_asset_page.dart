@@ -5,7 +5,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/features/inventory/cubits/create_edit_asset/create_edit_asset_cubit.dart';
+import 'package:business_assistant/core/features/inventory/models/page_props/create_edit_asset_page_props.dart';
 import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
+import 'package:business_assistant/core/shared/models/dropdowns/base_dropdown_item.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/button_with_loading_state.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
@@ -13,21 +15,23 @@ import 'package:business_assistant/core/shared/widgets/cards/card_frame.dart';
 import 'package:business_assistant/core/shared/widgets/images/loaded_image.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/input_label.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/primary_input_field.dart';
+import 'package:business_assistant/core/shared/widgets/modals/selection_bottom_modal.dart';
 import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
+import 'package:business_assistant/theme/theme_color.dart';
 
 /// Create/edit form for an Inventory product (Asset) — reused for both flows
-/// since the fields and validation are identical; only assetId (null →
-/// create) and the Remove action (edit-mode only) differ.
+/// since the fields and validation are identical; only pageProps.assetId
+/// (null → create) and the Remove action (edit-mode only) differ.
 class CreateEditAssetPage extends StatelessWidget {
-  final String? assetId;
+  final CreateEditAssetPageProps? pageProps;
 
-  const CreateEditAssetPage({super.key, this.assetId});
+  const CreateEditAssetPage({super.key, this.pageProps});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<CreateEditAssetCubit>(
-      create: (_) => CreateEditAssetCubit(assetId: assetId)..loadFormData(),
+      create: (_) => CreateEditAssetCubit(assetId: pageProps?.assetId)..loadFormData(),
       child: const _CreateEditAssetPageContent(),
     );
   }
@@ -42,7 +46,6 @@ class _CreateEditAssetPageContent extends StatefulWidget {
 
 class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent> {
   final _nameController = TextEditingController();
-  final _categoryController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _rentalPriceController = TextEditingController();
   final _salePriceController = TextEditingController();
@@ -52,7 +55,6 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
   @override
   void dispose() {
     _nameController.dispose();
-    _categoryController.dispose();
     _descriptionController.dispose();
     _rentalPriceController.dispose();
     _salePriceController.dispose();
@@ -67,7 +69,6 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
     if (isEditMode && state.isPending) return;
     _controllersPopulated = true;
     _nameController.text = state.name;
-    _categoryController.text = state.category;
     _descriptionController.text = state.description;
     _rentalPriceController.text = state.rentalPrice?.toStringAsFixed(0) ?? '';
     _salePriceController.text = state.salePrice?.toStringAsFixed(0) ?? '';
@@ -88,6 +89,60 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
           ),
     );
     if (confirmed == true) onConfirm();
+  }
+
+  void _openCategoryPicker(BuildContext context, CreateEditAssetState state) {
+    final t = TranslationStorage.translation;
+    final cubit = context.read<CreateEditAssetCubit>();
+    final items =
+        state.availableCategories.map((category) => BaseDropdownItem(text: category.name, value: category.id)).toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (_) => SelectionBottomModal(
+            title: t.selectCategoryTitle,
+            items: items,
+            onItemSelected: (item) {
+              final category = state.availableCategories.firstWhere((category) => category.id == item.value);
+              cubit.selectCategory(category);
+            },
+          ),
+    ).then((_) => FocusManager.instance.primaryFocus?.unfocus());
+  }
+
+  Widget _buildCategoryPicker(BuildContext context, CreateEditAssetState state, ThemeColor theme) {
+    final t = TranslationStorage.translation;
+    return CardFrame(
+      headerSectionTtitle: t.productCategoryLabel,
+      child: InkWell(
+        onTap: () => _openCategoryPicker(context, state),
+        borderRadius: BorderRadius.circular(12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                state.categoryName ?? t.productSelectCategoryLabel,
+                style: TextStyle(
+                  color: state.categoryName != null ? theme.primaryText : theme.primaryText.withValues(alpha: 0.4),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            if (state.categoryId != null)
+              InkWell(
+                onTap: () => context.read<CreateEditAssetCubit>().selectCategory(null),
+                child: Icon(Icons.close, size: 18, color: theme.primaryText.withValues(alpha: 0.5)),
+              )
+            else
+              Icon(Icons.keyboard_arrow_down_rounded, color: theme.primaryText.withValues(alpha: 0.5)),
+          ],
+        ),
+      ),
+    );
   }
 
   void _onStateChange(BuildContext context, CreateEditAssetState state) {
@@ -203,14 +258,9 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
                         ),
                       ),
                       const SizedBox(height: 12),
-                      CardFrame(
-                        headerSectionTtitle: t.productCategoryLabel,
-                        child: PrimaryInputField(
-                          controller: _categoryController,
-                          showValidationError: false,
-                          onChanged: cubit.setCategory,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
+                      Skeletonizer(
+                        enabled: state.isCategoriesPending,
+                        child: _buildCategoryPicker(context, state, theme),
                       ),
                       const SizedBox(height: 12),
                       CardFrame(

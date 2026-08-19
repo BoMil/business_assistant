@@ -14,9 +14,14 @@
 ///   GET/PUT    /business/transactions/{id}          → get / update a single event
 ///   POST       /business/transactions/{id}/cancel   → soft-cancel an event
 ///   DELETE     /business/transactions/{id}          → hard-delete an event (not yet implemented server-side)
-///   GET/POST   /business/assets                     → list / create an asset (product)
+///   GET/POST   /business/assets                     → list (unpaginated) / create an asset (product)
+///   GET        /business/assets/paged                → paginated, server-searched list of assets
 ///   GET/PUT/DELETE /business/assets/{id}            → get / update / remove a single asset
-///   GET        /business/clients                    → list clients, for the "Select client" picker
+///   GET/POST   /business/categories                 → list / create an asset category
+///   GET/PUT/DELETE /business/categories/{id}        → get / update / remove a single category
+///   GET/POST   /business/clients                    → list / create a client
+///   GET/PUT/DELETE /business/clients/{id}           → get / update / remove a single client
+///   GET        /business/clients/{id}/transactions  → list a client's events
 ///   POST       /business/images                     → upload an image, returns its blob URL
 class APIEndpoints {
   static String login = '/identity/auth/login';
@@ -27,7 +32,12 @@ class APIEndpoints {
   static String cancelTransaction(String id) => '/business/transactions/$id/cancel';
 
   static String assets = '/business/assets';
+  static String assetsPaged = '/business/assets/paged';
   static String assetById(String id) => '/business/assets/$id';
+  static String categories = '/business/categories';
+  static String categoryById(String id) => '/business/categories/$id';
   static String clients = '/business/clients';
+  static String clientById(String id) => '/business/clients/$id';
+  static String clientTransactions(String id) => '/business/clients/$id/transactions';
   static String images = '/business/images';
 }

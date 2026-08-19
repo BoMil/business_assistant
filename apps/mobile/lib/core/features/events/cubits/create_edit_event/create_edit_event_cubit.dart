@@ -25,15 +25,19 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
   final AssetApiService assetApiService;
   final ClientApiService clientApiService;
 
+  /// Preselects the client picker when opened from a Client Details page's
+  /// "Add new event" button. Only relevant in create mode — edit mode
+  /// overwrites clientId from the loaded event anyway.
   CreateEditEventCubit({
     this.eventId,
+    String? initialClientId,
     EventApiService? eventApiService,
     AssetApiService? assetApiService,
     ClientApiService? clientApiService,
   })  : eventApiService = eventApiService ?? EventApiService(),
         assetApiService = assetApiService ?? AssetApiService(),
         clientApiService = clientApiService ?? ClientApiService(),
-        super(const CreateEditEventState());
+        super(CreateEditEventState(clientId: initialClientId));
 
   bool get isEditMode => eventId != null;
 

@@ -49,7 +49,7 @@ class EventCard extends StatelessWidget {
             children: [
               Text(
                 '${event.totalPrice.toStringAsFixed(0)} ${context.read<TenantConfigCubit>().state.currencySymbol}',
-                style: TextStyle(color: context.colors.primaryText, fontSize: 15, fontWeight: FontWeight.w700),
+                style: TextStyle(color: context.colors.statusFinished, fontSize: 15, fontWeight: FontWeight.w700),
               ),
               if (event.status != null) ...[const SizedBox(height: 6), EventStatusBadge(status: event.status!)],
             ],

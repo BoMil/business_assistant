@@ -70,6 +70,7 @@
     "eventSelectDatesFirstHint": "Прво изаберите датуме Од и До",
     "selectProductTitle": "Изабери производ",
     "selectClientTitle": "Изабери клијента",
+    "selectCategoryTitle": "Изабери категорију",
 
     "cancelEventButton": "Откажи догађај",
     "confirmCancelEvent": "Да ли сте сигурни да желите да откажете овај догађај?",
@@ -88,6 +89,7 @@
     "productDetailsTitle": "Детаљи производа",
     "productNameLabel": "Назив",
     "productCategoryLabel": "Категорија",
+    "productSelectCategoryLabel": "Изабери категорију (опционо)",
     "productDescriptionLabel": "Опис",
     "productRentalPriceLabel": "Цена изнајмљивања",
     "productSalePriceLabel": "Продајна цена",
@@ -100,5 +102,24 @@
     "createProductButton": "Креирај производ",
 
     "productSavedToast": "Производ сачуван",
-    "productDeletedToast": "Производ обрисан"
+    "productDeletedToast": "Производ обрисан",
+
+    "clientsSearchHint": "Претражи клијенте...",
+    "clientsEmptyStateText": "Још нема клијената",
+
+    "clientDetailsTitle": "Детаљи клијента",
+    "clientNameLabel": "Име",
+    "clientPhoneNumberLabel": "Број телефона",
+    "clientEmailLabel": "Имејл",
+    "clientLocationLabel": "Локација",
+    "clientDescriptionLabel": "Опис",
+    "clientEventsLabel": "Догађаји",
+    "addNewEventButton": "Додај нови догађај",
+    "createClientButton": "Креирај клијента",
+
+    "removeClientButton": "Уклони клијента",
+    "confirmDeleteClient": "Да ли сте сигурни да желите да уклоните овог клијента? Ова акција је неповратна.",
+
+    "clientSavedToast": "Клијент сачуван",
+    "clientDeletedToast": "Клијент обрисан"
 }

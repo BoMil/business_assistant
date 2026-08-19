@@ -7,7 +7,13 @@ import 'package:business_assistant/core/features/authentication/cubits/auth/auth
 import 'package:business_assistant/core/features/authentication/view/initial_screen.dart';
 import 'package:business_assistant/core/features/authentication/view/landing_page/landing_page.dart';
 import 'package:business_assistant/core/features/authentication/view/login_page/login_page.dart';
+import 'package:business_assistant/core/features/clients/models/page_props/client_events_page_props.dart';
+import 'package:business_assistant/core/features/clients/models/page_props/create_edit_client_page_props.dart';
+import 'package:business_assistant/core/features/clients/view/client_events_page.dart';
+import 'package:business_assistant/core/features/clients/view/create_edit_client_page.dart';
+import 'package:business_assistant/core/features/events/models/page_props/create_edit_event_page_props.dart';
 import 'package:business_assistant/core/features/events/view/create_edit_event_page.dart';
+import 'package:business_assistant/core/features/inventory/models/page_props/create_edit_asset_page_props.dart';
 import 'package:business_assistant/core/features/inventory/view/create_edit_asset_page.dart';
 import 'package:business_assistant/core/shared/widgets/navigation/bottom_navigation_frame.dart';
 import 'package:business_assistant/core/utils/stream_to_listenable.dart';
@@ -98,9 +104,15 @@ class Routes {
       GoRoute(
         path: RouteNames.createEventPage,
         pageBuilder: (BuildContext context, GoRouterState state) {
+          CreateEditEventPageProps? pageProps;
+          try {
+            pageProps = state.extra as CreateEditEventPageProps?;
+          } catch (e) {
+            debugPrint('No data in the route extra params');
+          }
           return CustomTransitionPage<void>(
             key: state.pageKey,
-            child: const CreateEditEventPage(),
+            child: CreateEditEventPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
@@ -112,11 +124,17 @@ class Routes {
         },
       ),
       GoRoute(
-        path: '${RouteNames.editEventPage}/:id',
+        path: RouteNames.editEventPage,
         pageBuilder: (BuildContext context, GoRouterState state) {
+          CreateEditEventPageProps? pageProps;
+          try {
+            pageProps = state.extra as CreateEditEventPageProps?;
+          } catch (e) {
+            debugPrint('No data in the route extra params');
+          }
           return CustomTransitionPage<void>(
             key: state.pageKey,
-            child: CreateEditEventPage(eventId: state.pathParameters['id']),
+            child: CreateEditEventPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
@@ -133,9 +151,15 @@ class Routes {
       GoRoute(
         path: RouteNames.createAssetPage,
         pageBuilder: (BuildContext context, GoRouterState state) {
+          CreateEditAssetPageProps? pageProps;
+          try {
+            pageProps = state.extra as CreateEditAssetPageProps?;
+          } catch (e) {
+            debugPrint('No data in the route extra params');
+          }
           return CustomTransitionPage<void>(
             key: state.pageKey,
-            child: const CreateEditAssetPage(),
+            child: CreateEditAssetPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
@@ -147,11 +171,86 @@ class Routes {
         },
       ),
       GoRoute(
-        path: '${RouteNames.editAssetPage}/:id',
+        path: RouteNames.editAssetPage,
         pageBuilder: (BuildContext context, GoRouterState state) {
+          CreateEditAssetPageProps? pageProps;
+          try {
+            pageProps = state.extra as CreateEditAssetPageProps?;
+          } catch (e) {
+            debugPrint('No data in the route extra params');
+          }
           return CustomTransitionPage<void>(
             key: state.pageKey,
-            child: CreateEditAssetPage(assetId: state.pathParameters['id']),
+            child: CreateEditAssetPage(pageProps: pageProps),
+            transitionDuration: const Duration(milliseconds: 250),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+
+      // Client create/edit — pushed full-screen on top of the Clients tab
+      // (rootNavigatorKey via top-level placement), so it covers the bottom nav.
+      GoRoute(
+        path: RouteNames.createClientPage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          CreateEditClientPageProps? pageProps;
+          try {
+            pageProps = state.extra as CreateEditClientPageProps?;
+          } catch (e) {
+            debugPrint('No data in the route extra params');
+          }
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: CreateEditClientPage(pageProps: pageProps),
+            transitionDuration: const Duration(milliseconds: 250),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteNames.editClientPage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          CreateEditClientPageProps? pageProps;
+          try {
+            pageProps = state.extra as CreateEditClientPageProps?;
+          } catch (e) {
+            debugPrint('No data in the route extra params');
+          }
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: CreateEditClientPage(pageProps: pageProps),
+            transitionDuration: const Duration(milliseconds: 250),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteNames.clientEventsPage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          ClientEventsPageProps? pageProps;
+          try {
+            pageProps = state.extra as ClientEventsPageProps?;
+          } catch (e) {
+            debugPrint('No data in the route extra params');
+          }
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: ClientEventsPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
@@ -168,15 +267,14 @@ class Routes {
       // (BottomNavigationFrame) never fall out of sync.
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => BottomNavigationFrame(navigationShell: navigationShell),
-        branches:
-            visibleBottomNavTabs()
-                .map(
-                  (tab) => StatefulShellBranch(
-                    navigatorKey: tab.navigatorKey,
-                    routes: [GoRoute(path: tab.path, builder: (context, state) => tab.pageBuilder(context))],
-                  ),
-                )
-                .toList(),
+        branches: visibleBottomNavTabs()
+            .map(
+              (tab) => StatefulShellBranch(
+                navigatorKey: tab.navigatorKey,
+                routes: [GoRoute(path: tab.path, builder: (context, state) => tab.pageBuilder(context))],
+              ),
+            )
+            .toList(),
       ),
 
       //     GoRoute(
