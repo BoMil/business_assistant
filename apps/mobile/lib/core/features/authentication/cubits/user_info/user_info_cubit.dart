@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:business_assistant/config/constants/api_endpoints.dart';
 import 'package:business_assistant/core/features/authentication/api_services/user_api_service.dart';
 import 'package:business_assistant/core/features/authentication/models/enums/user_role.dart';
@@ -46,7 +47,9 @@ class UserInfoCubit extends Cubit<UserInfoState> {
       state.copyWith(
         currentState: CubitState.loaded,
         firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+        phoneNumber: user.phoneNumber,
         tenantId: user.tenantId,
         role: user.role,
         imgUrl: user.imgUrl,
@@ -54,17 +57,32 @@ class UserInfoCubit extends Cubit<UserInfoState> {
     );
   }
 
-  /// Uploads a new profile picture and persists its URL on the user. Not yet
-  /// wired to any UI — ready for whenever the Account page adds this.
-  Future<void> updateProfileImage(File file) async {
-    final uploadResponse = await imageApiService.uploadImage(file, endpoint: APIEndpoints.identityImages);
-    if (uploadResponse.status != ResponseStatus.completed) return;
+  /// Picks a photo, uploads it, then persists its URL on the user. If the
+  /// persist call fails, the picture is not shown on mobile even though it
+  /// already made it to blob storage.
+  Future<void> pickAndUploadImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
+
+    emit(state.copyWith(isUploadingImage: true, clearError: true));
+
+    final uploadResponse = await imageApiService.uploadImage(
+      File(pickedFile.path),
+      endpoint: APIEndpoints.identityImages,
+    );
+    if (uploadResponse.status != ResponseStatus.completed) {
+      emit(state.copyWith(isUploadingImage: false, errorMessage: uploadResponse.message));
+      return;
+    }
 
     final imgUrl = uploadResponse.data!;
     final updateResponse = await userApiService.updateUserImage(imgUrl);
-    if (updateResponse.status == ResponseStatus.completed) {
-      emit(state.copyWith(imgUrl: imgUrl));
+    if (updateResponse.status != ResponseStatus.completed) {
+      emit(state.copyWith(isUploadingImage: false, errorMessage: updateResponse.message));
+      return;
     }
+
+    emit(state.copyWith(isUploadingImage: false, imgUrl: imgUrl));
   }
 
   /// Resets to empty — called on logout.

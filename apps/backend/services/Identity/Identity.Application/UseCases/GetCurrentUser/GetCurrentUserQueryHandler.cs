@@ -14,6 +14,6 @@ internal sealed class GetCurrentUserQueryHandler(IUnitOfWorkIdentity unitOfWork)
         if (user is null)
             return Result.Fail(new NotFoundError($"User '{request.UserId}' not found."));
 
-        return Result.Ok(new UserDto(user.Id, user.TenantId, user.FirstName, user.LastName, user.Email, user.Role, user.ImgUrl));
+        return Result.Ok(new UserDto(user.Id, user.TenantId, user.FirstName, user.LastName, user.Email, user.PhoneNumber, user.Role, user.ImgUrl));
     }
 }

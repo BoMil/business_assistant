@@ -44,6 +44,10 @@
     "welcomeGeneric": "Добродошли",
     "notificationsComingSoonToast": "Ускоро доступно",
 
+    "accountTapToChangeLabel": "Додирни за промену",
+    "accountNameLabel": "Име",
+    "accountContactNumberLabel": "Контакт телефон",
+
     "eventStatusPending": "На чекању",
     "eventStatusInProgress": "У току",
     "eventStatusFinished": "Завршено",

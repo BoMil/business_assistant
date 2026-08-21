@@ -49,6 +49,10 @@
     "welcomeGeneric": "Welcome",
     "notificationsComingSoonToast": "Coming soon",
 
+    "accountTapToChangeLabel": "Tap to change",
+    "accountNameLabel": "Name",
+    "accountContactNumberLabel": "Contact Number",
+
     "eventStatusPending": "Pending",
     "eventStatusInProgress": "In Progress",
     "eventStatusFinished": "Finished",

@@ -7,6 +7,7 @@ class UserResponse {
   String firstName = '';
   String lastName = '';
   String email = '';
+  String phoneNumber = '';
   UserRole? role;
   String? imgUrl;
 
@@ -16,6 +17,7 @@ class UserResponse {
     firstName = json['firstName'] ?? '';
     lastName = json['lastName'] ?? '';
     email = json['email'] ?? '';
+    phoneNumber = json['phoneNumber'] ?? '';
     role = userRoleFromString(json['role']);
     imgUrl = json['imgUrl'];
   }
