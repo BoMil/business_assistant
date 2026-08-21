@@ -12,12 +12,12 @@ class ImageApiService {
 
   ImageApiService({Dio? dio}) : dio = dio ?? AppInterceptor().dio;
 
-  Future<ApiResponse<String>> uploadImage(File file) async {
+  Future<ApiResponse<String>> uploadImage(File file, {String? endpoint}) async {
     try {
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path),
       });
-      final response = await dio.post(APIEndpoints.images, data: formData);
+      final response = await dio.post(endpoint ?? APIEndpoints.images, data: formData);
       return ApiResponse.completed(response.data.toString());
     } on DioException catch (e) {
       return ApiResponse.error(_messageFor(e));

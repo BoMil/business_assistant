@@ -40,7 +40,7 @@
     "navClients": "Clients",
     "navAccount": "Account",
 
-    "welcomeUser": "Welcome, {name}",
+    "welcomeUser": "Welcome {name}",
     "@welcomeUser": {
         "placeholders": {
             "name": {"type": "String"}

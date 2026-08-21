@@ -1,8 +1,8 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Business.Application.Services;
+using Shared.Application.Services;
 
-namespace Business.Infrastructure.BlobStorage;
+namespace Shared.Infrastructure.BlobStorage;
 
 /// Containers are scoped per-tenant ("tenant-{tenantId}") so each client's images are
 /// isolated from every other client's, rather than sharing one container.

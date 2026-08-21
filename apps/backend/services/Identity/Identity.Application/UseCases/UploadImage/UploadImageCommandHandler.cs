@@ -2,7 +2,7 @@ using FluentResults;
 using MediatR;
 using Shared.Application.Services;
 
-namespace Business.Application.UseCases.UploadImage;
+namespace Identity.Application.UseCases.UploadImage;
 
 internal sealed class UploadImageCommandHandler(IBlobStorageService blobStorageService)
     : IRequestHandler<UploadImageCommand, Result<string>>

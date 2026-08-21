@@ -9,6 +9,8 @@ public static class EndpointGroups
 {
     public const string Auth = "auth";
     public const string Tenants = "tenants";
+    public const string Users = "users";
+    public const string Images = "images";
 }
 
 /// <summary>
@@ -18,4 +20,6 @@ public static class EndpointTags
 {
     public const string Auth = "Auth";
     public const string Tenants = "Tenants";
+    public const string Users = "Users";
+    public const string Images = "Images";
 }

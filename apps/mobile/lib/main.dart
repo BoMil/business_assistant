@@ -9,6 +9,7 @@ import 'package:business_assistant/config/routes/router_config.dart';
 import 'package:business_assistant/config/routes/routes.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
 import 'package:business_assistant/core/features/bottom_navigation/cubits/bottom_navigation/bottom_navigation_cubit.dart';
 import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
@@ -101,12 +102,19 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (context) => BottomNavigationCubit(tabs: visibleBottomNavTabs())),
         // Global so any widget can read the tenant's currency/symbol for display.
         BlocProvider(create: (context) => TenantConfigCubit()),
+        // Global so any widget can read the logged-in user's profile/role —
+        // populated/cleared from the BlocListener below, not by AuthCubit itself.
+        BlocProvider(create: (context) => UserInfoCubit()),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
+          if (state is Authenticated) {
+            context.read<UserInfoCubit>().loadUserInfo();
+          }
           if (state is Unauthenticated) {
             // Next login should start on the first tab, not wherever the user left off.
             context.read<BottomNavigationCubit>().resetCurrentIndex();
+            context.read<UserInfoCubit>().clear();
           }
         },
         // ToastificationWrapper must wrap MaterialApp so toastification.show()

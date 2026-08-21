@@ -1,14 +1,16 @@
+import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
-import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
 import 'package:business_assistant/core/shared/widgets/buttons/selectable_icon.dart';
 import 'package:business_assistant/core/shared/widgets/images/loaded_image.dart';
 import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
 import 'package:business_assistant/theme/theme_constants.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// Header shown at the top of the Events/Inventory/Clients tabs — tenant
 /// logo + name on the left, notifications and the user's avatar on the right.
@@ -26,7 +28,8 @@ class MainHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final tenant = TenantConfig();
     final theme = context.colors;
-    final firstName = context.watch<AuthCubit>().currentUserFirstName;
+    final firstName = context.watch<UserInfoCubit>().state.firstName;
+    final String userImageUrl = context.watch<UserInfoCubit>().state.imgUrl ?? '';
     final t = TranslationStorage.translation;
 
     return Container(
@@ -41,10 +44,13 @@ class MainHeader extends StatelessWidget {
           SvgPicture.asset(tenant.logoPath, height: 32),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              firstName != null ? t.welcomeUser(firstName) : t.welcomeGeneric,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: theme.primaryText),
+            child: Skeletonizer(
+              enabled: context.watch<UserInfoCubit>().state.currentState == CubitState.loading,
+              child: Text(
+                firstName != null ? t.welcomeUser(firstName) : t.welcomeGeneric,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: theme.primaryText),
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -60,7 +66,7 @@ class MainHeader extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           LoadedImage(
-            imageUrl: '',
+            imageUrl: userImageUrl,
             width: 36,
             height: 36,
             boxShape: BoxShape.circle,

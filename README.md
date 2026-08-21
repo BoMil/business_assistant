@@ -91,12 +91,17 @@ Each microservice has its own database on the same server: `IdentityDb`, `Busine
 
 ## Blob Storage & Secrets
 
-The Business service uploads images (e.g. asset photos) to Azure Blob Storage. Each tenant gets its own container (`tenant-{tenantId}`), created automatically on first upload — so no two clients share the same container.
+Both Business (e.g. asset photos) and Identity (user profile pictures) upload images to Azure Blob Storage via the shared `Shared.Infrastructure` blob service. Each tenant gets its own container (`tenant-{tenantId}`), created automatically on first upload — so no two clients share the same container.
 
 `appsettings.json` only ever holds placeholder values (`BlobStorage:ConnectionString`, `Jwt:Secret`, etc.) — real secrets never go into the repo. Locally, each developer sets their own values via `dotnet user-secrets`, which stores them outside the repo (per machine, keyed by the project's `UserSecretsId`):
 
 ```bash
 cd apps/backend/services/Business/Business.API
+dotnet user-secrets set "BlobStorage:ConnectionString" "<your-azure-storage-connection-string>"
+```
+
+```bash
+cd apps/backend/services/Identity/Identity.API
 dotnet user-secrets set "BlobStorage:ConnectionString" "<your-azure-storage-connection-string>"
 ```
 

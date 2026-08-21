@@ -8,6 +8,9 @@
 /// Identity microservice endpoints:
 ///   POST /identity/auth/login           → returns accessToken + refreshToken
 ///   POST /identity/auth/refresh-token   → exchanges refreshToken for a new accessToken
+///   GET  /identity/users/me             → the logged-in user's profile (incl. imgUrl)
+///   PUT  /identity/users/me/image       → set/clear the logged-in user's profile picture URL
+///   POST /identity/images               → upload an image, returns its blob URL
 ///
 /// Business microservice endpoints:
 ///   GET/POST   /business/transactions              → list / create an event (TransactionType.Rental)
@@ -26,6 +29,9 @@
 class APIEndpoints {
   static String login = '/identity/auth/login';
   static String refreshToken = '/identity/auth/refresh-token';
+  static String currentUser = '/identity/users/me';
+  static String updateUserImage = '/identity/users/me/image';
+  static String identityImages = '/identity/images';
 
   static String transactions = '/business/transactions';
   static String transactionById(String id) => '/business/transactions/$id';

@@ -1,4 +1,4 @@
-namespace Business.Application.Services;
+namespace Shared.Application.Services;
 
 public interface IBlobStorageService
 {

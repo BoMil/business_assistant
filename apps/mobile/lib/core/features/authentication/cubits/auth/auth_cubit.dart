@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:business_assistant/config/constants/secure_storage_keys.dart';
-import 'package:business_assistant/core/features/authentication/models/enums/user_role.dart';
 import 'package:business_assistant/core/features/authentication/models/responses/login_response.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 part 'auth_state.dart';
@@ -27,18 +26,6 @@ class AuthCubit extends Cubit<AuthState> {
   /// Used by GoRouter's redirect to know whether to redirect to homePage
   /// on the very first Authenticated emission (avoids a redundant redirect loop).
   bool redirectToHomeInitialy = true;
-
-  /// First name parsed from the JWT's 'firstName' claim — used for header greetings.
-  String? currentUserFirstName;
-
-  /// Role parsed from the JWT's 'role' claim — used to gate Owner/Admin-only actions.
-  UserRole? currentUserRole;
-
-  /// Owner and Admin can add/edit/delete Inventory products — Member is view-only.
-  bool get canManageInventory => currentUserRole == UserRole.owner || currentUserRole == UserRole.admin;
-
-  /// Owner and Admin can add/edit/remove Clients — Member is view-only.
-  bool get canManageClients => currentUserRole == UserRole.owner || currentUserRole == UserRole.admin;
 
   /// Called once in MyApp.initState() — checks the stored token and emits
   /// Authenticated or Unauthenticated accordingly.
@@ -85,8 +72,6 @@ class AuthCubit extends Cubit<AuthState> {
   /// GoRouter's redirect will send the user to landing_page.
   Future<void> logout() async {
     redirectToHomeInitialy = true;
-    currentUserFirstName = null;
-    currentUserRole = null;
     await _clearStorage();
     emit(Unauthenticated());
   }
@@ -102,16 +87,10 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Returns true if a token exists in storage AND its 'exp' claim is in the future.
   ///
-  /// JWT payload from the Identity service contains:
-  ///   sub       → user ID (GUID)
-  ///   email     → user email
-  ///   firstName → user's first name, shown in header greetings
-  ///   role      → user role string (e.g. "Owner")
-  ///   tenantId  → tenant GUID
-  ///   exp       → Unix timestamp of expiry (standard JWT claim)
-  ///
-  /// We only check existence + expiry here. Role-based access control is
-  /// enforced by the API — the app trusts that any non-expired token is valid.
+  /// We only check existence + expiry (+ a 'sub' sanity check) here. Role-based
+  /// access control is enforced by the API — the app trusts that any
+  /// non-expired token is valid. User profile claims (email/firstName/role/
+  /// tenantId) are parsed separately by UserInfoCubit, not here.
   Future<bool> _isTokenValidAndNotExpired() async {
     try {
       String? token = await secureStorage.read(key: SecureStorageKeys.tokenKey);
@@ -130,18 +109,6 @@ class AuthCubit extends Cubit<AuthState> {
       if (payload['sub'] == null) {
         debugPrint('[AuthCubit] Token missing sub claim.');
         return false;
-      }
-
-      try {
-        currentUserFirstName = payload['firstName'] as String?;
-      } catch (e) {
-        debugPrint('[AuthCubit] Failed to parse first name error: $e');
-      }
-
-      try {
-        currentUserRole = userRoleFromString(payload['role'] as String?);
-      } catch (e) {
-        debugPrint('[AuthCubit] Failed to parse role error: $e');
       }
 
       return true;

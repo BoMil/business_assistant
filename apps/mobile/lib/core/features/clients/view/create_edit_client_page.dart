@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
-import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
 import 'package:business_assistant/core/features/clients/cubits/create_edit_client/create_edit_client_cubit.dart';
 import 'package:business_assistant/core/features/clients/models/page_props/client_events_page_props.dart';
 import 'package:business_assistant/core/features/clients/models/page_props/create_edit_client_page_props.dart';
@@ -133,7 +133,7 @@ class _CreateEditClientPageContentState extends State<_CreateEditClientPageConte
       builder: (context, state) {
         final cubit = context.read<CreateEditClientCubit>();
         final isEditMode = cubit.isEditMode;
-        final canManageClients = context.read<AuthCubit>().canManageClients;
+        final canManageClients = context.read<UserInfoCubit>().canManageClients;
 
         return PageFrame(
           headerActionIcon: Icons.close,

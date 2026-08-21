@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
 import 'package:business_assistant/core/features/bottom_navigation/cubits/bottom_navigation/bottom_navigation_cubit.dart';
 import 'package:business_assistant/core/features/inventory/cubits/assets/assets_cubit.dart';
 import 'package:business_assistant/core/features/inventory/models/page_props/create_edit_asset_page_props.dart';
@@ -48,7 +49,7 @@ class _InventoryPageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = TranslationStorage.translation;
     final theme = context.colors;
-    final canManageInventory = context.watch<AuthCubit>().canManageInventory;
+    final canManageInventory = context.watch<UserInfoCubit>().canManageInventory;
 
     return BlocListener<BottomNavigationCubit, BottomNavigationState>(
       listener: (context, state) {

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
-import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
+import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
 import 'package:business_assistant/core/features/inventory/cubits/create_edit_asset/create_edit_asset_cubit.dart';
 import 'package:business_assistant/core/features/inventory/models/page_props/create_edit_asset_page_props.dart';
 import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
@@ -181,7 +181,7 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
       builder: (context, state) {
         final cubit = context.read<CreateEditAssetCubit>();
         final isEditMode = cubit.isEditMode;
-        final canManageInventory = context.read<AuthCubit>().canManageInventory;
+        final canManageInventory = context.read<UserInfoCubit>().canManageInventory;
         final currencySymbol = context.read<TenantConfigCubit>().state.currencySymbol;
 
         return PageFrame(

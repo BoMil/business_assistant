@@ -1,11 +1,9 @@
 using System.Text;
-using Azure.Storage.Blobs;
-using Business.Application.Services;
-using Business.Infrastructure.BlobStorage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Infrastructure.BlobStorage;
 
 namespace Business.Infrastructure;
 
@@ -36,11 +34,7 @@ public static class DependencyInjection
 
         services.AddAuthorization();
 
-        // Factory registration (not `new BlobServiceClient(...)` inline) so the connection
-        // string is only parsed on first actual use — an unconfigured/invalid value shouldn't
-        // crash the whole API at startup for endpoints that have nothing to do with images.
-        services.AddSingleton(_ => new BlobServiceClient(configuration["BlobStorage:ConnectionString"]));
-        services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
+        services.SetupBlobStorage(configuration);
 
         return services;
     }

@@ -40,6 +40,9 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion<int>()
             .IsRequired();
 
+        builder.Property(u => u.ImgUrl)
+            .HasMaxLength(2000);
+
         // Relationship to Tenant is configured from TenantConfiguration.
         // HasOne is declared here for clarity but the FK constraint lives on the Tenant side.
         builder.HasMany(u => u.RefreshTokens)

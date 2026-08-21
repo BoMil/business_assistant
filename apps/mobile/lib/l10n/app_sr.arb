@@ -40,7 +40,7 @@
     "navClients": "Клијенти",
     "navAccount": "Налог",
 
-    "welcomeUser": "Добродошли, {name}",
+    "welcomeUser": "Добродошли {name}",
     "welcomeGeneric": "Добродошли",
     "notificationsComingSoonToast": "Ускоро доступно",
 

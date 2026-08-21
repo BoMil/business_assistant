@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Infrastructure.BlobStorage;
 
 namespace Identity.Infrastructure;
 
@@ -41,6 +42,8 @@ public static class DependencyInjection
         // Required for UseAuthorization() middleware in Program.cs.
         // Without this, the app throws InvalidOperationException on startup.
         services.AddAuthorization();
+
+        services.SetupBlobStorage(configuration);
 
         return services;
     }
