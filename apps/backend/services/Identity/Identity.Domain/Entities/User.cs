@@ -20,6 +20,7 @@ public class User : Entity<Guid>
     public Tenant Tenant { get; private set; } = null!;
 
     public ICollection<RefreshToken> RefreshTokens { get; private set; } = [];
+    public ICollection<DeviceToken> DeviceTokens { get; private set; } = [];
 
     private User() { }
 

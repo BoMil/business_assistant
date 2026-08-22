@@ -90,9 +90,12 @@ Thumbs.db
 # ========================
 # Docker
 # ========================
-.env
-.env.local
-.env.*.local
+# Anchored to repo root (leading /) — otherwise this also matches
+# apps/mobile/.env/ (the per-tenant dart-define JSON directory, which must
+# stay tracked in git) since an unanchored gitignore pattern matches at any depth.
+/.env
+/.env.local
+/.env.*.local
 
 # ========================
 # Secrets

@@ -59,6 +59,11 @@ internal sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             m.ToJson();
         });
 
+        builder.OwnsOne(t => t.FirebaseConfig, fc =>
+        {
+            fc.ToJson();
+        });
+
         builder.HasMany(t => t.Users)
             .WithOne(u => u.Tenant)
             .HasForeignKey(u => u.TenantId)

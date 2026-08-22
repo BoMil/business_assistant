@@ -1,5 +1,6 @@
 using System.Text;
 using Identity.Application.Services;
+using Identity.Infrastructure.PushNotifications;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +45,11 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         services.SetupBlobStorage(configuration);
+
+        services.AddDataProtection();
+        services.AddSingleton<FirebaseAppCache>();
+        services.AddScoped<IFirebaseCredentialProtector, FirebaseCredentialProtector>();
+        services.AddScoped<IPushNotificationService, FirebasePushNotificationService>();
 
         return services;
     }

@@ -1,9 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:toastification/toastification.dart';
 import 'package:business_assistant/config/environment/environment.dart';
+import 'package:business_assistant/config/firebase/firebase_config.dart';
 import 'package:business_assistant/config/routes/bottom_nav_tabs.dart';
 import 'package:business_assistant/config/routes/router_config.dart';
 import 'package:business_assistant/config/routes/routes.dart';
@@ -11,6 +14,8 @@ import 'package:business_assistant/config/translations/translation_storage.dart'
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
 import 'package:business_assistant/core/features/bottom_navigation/cubits/bottom_navigation/bottom_navigation_cubit.dart';
+import 'package:business_assistant/core/features/push_notifications/services/local_notifications_service.dart';
+import 'package:business_assistant/core/features/push_notifications/services/push_notification_service.dart';
 import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
 import 'package:business_assistant/l10n/app_localizations.dart';
@@ -21,8 +26,9 @@ import 'package:business_assistant/theme/themes.dart';
 ///
 /// Startup sequence:
 ///   1. Suppress debug prints in non-DEV environments.
-///   2. Initialize the Dio interceptor (token injection + 401 refresh).
-///   3. Run MyApp.
+///   2. Initialize Firebase, if this tenant has a project configured.
+///   3. Initialize the Dio interceptor (token injection + 401 refresh).
+///   4. Run MyApp.
 void main() async {
   // Disable all debugPrint() calls in release mode and non-DEV environments
   // so no sensitive data appears in device logs on staging/production.
@@ -32,12 +38,30 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
+  if (FirebaseConfig().isConfigured) {
+    await Firebase.initializeApp(options: FirebaseConfig().currentPlatform);
+    await LocalNotificationsService().init();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.instance.onTokenRefresh.listen((_) => PushNotificationService().registerCurrentToken());
+    // FCM only auto-shows a notification when the app is backgrounded/killed —
+    // in the foreground we have to display it ourselves.
+    FirebaseMessaging.onMessage.listen(
+      (message) => LocalNotificationsService().showNotification(message.notification?.title, message.notification?.body),
+    );
+  }
+
   // Set up the singleton Dio instance with the auth interceptor before any
   // repository can make an HTTP call.
   AppInterceptor().initializeInterceptor();
 
   runApp(const MyApp());
 }
+
+/// Must be a top-level function — Firebase's own requirement for background
+/// message handling. No-op body: v1 only needs the OS to show the
+/// notification, which happens automatically without any handling here.
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -110,6 +134,7 @@ class _MyAppState extends State<MyApp> {
         listener: (context, state) {
           if (state is Authenticated) {
             context.read<UserInfoCubit>().loadUserInfo();
+            if (FirebaseConfig().isConfigured) PushNotificationService().registerCurrentToken();
           }
           if (state is Unauthenticated) {
             // Next login should start on the first tab, not wherever the user left off.

@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Shared.Presentation.ErrorHandling;
 
@@ -35,6 +36,10 @@ public static class GetTenantConfig
 
     public static async Task<Results<Ok<TenantConfigDto>, ProblemHttpResult>> Handle(
         string slug,
+        // Unused here on purpose — ApiKeyEndpointFilter reads the header itself from
+        // HttpContext. This parameter exists only so Swashbuckle documents it as an
+        // input field in Swagger UI (it has no other way to know the filter needs it).
+        [FromHeader(Name = "X-Api-Key")] string apiKey,
         ISender sender,
         CancellationToken cancellationToken)
     {

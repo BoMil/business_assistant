@@ -135,7 +135,12 @@ jobs:
             MODULE_INVENTORY: (.inventory | tostring),
             MODULE_CLIENTS: (.clients | tostring),
             FEATURE_THEME_CHANGE: (.themeChange | tostring),
-            FEATURE_LANGUAGE: (.language | tostring)
+            FEATURE_LANGUAGE: (.language | tostring),
+            FIREBASE_ANDROID_API_KEY: .firebaseAndroidApiKey,
+            FIREBASE_ANDROID_APP_ID: .firebaseAndroidAppId,
+            FIREBASE_MESSAGING_SENDER_ID: .firebaseMessagingSenderId,
+            FIREBASE_PROJECT_ID: .firebaseProjectId,
+            FIREBASE_STORAGE_BUCKET: .firebaseStorageBucket
           }' tenant-config.json > tenant-config.mapped.json
 
           # Merge fetched values over the local file — SERVER_ADDRESS/ENVIRONMENT/

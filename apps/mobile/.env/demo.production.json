@@ -1,0 +1,23 @@
+{
+  "ENVIRONMENT": "PRODUCTION",
+  "SERVER_ADDRESS": "https://api.businessassistant.com",
+  "GOOGLE_PLACES_API_KEY": "AIzaSyDlsUz6UlgyCwG-dDbYHP4wEZbQnJ_R_bo",
+  "TENANT_ID": "demo",
+  "TENANT_TYPE": "Rental",
+  "CURRENCY": "EUR",
+  "APP_NAME": "Business Assistant",
+  "PRIMARY_COLOR": "FF1A237E",
+  "ACCENT_COLOR": "FF00BCD4",
+  "ERROR_COLOR": "FFEB2E25",
+  "PACKAGE_NAME": "com.businessassistant.demo",
+  "FEATURE_THEME_CHANGE": "true",
+  "FEATURE_LANGUAGE": "true",
+  "MODULE_EVENTS": "true",
+  "MODULE_INVENTORY": "true",
+  "MODULE_CLIENTS": "true",
+  "FIREBASE_ANDROID_API_KEY": "",
+  "FIREBASE_ANDROID_APP_ID": "",
+  "FIREBASE_MESSAGING_SENDER_ID": "",
+  "FIREBASE_PROJECT_ID": "",
+  "FIREBASE_STORAGE_BUCKET": ""
+}

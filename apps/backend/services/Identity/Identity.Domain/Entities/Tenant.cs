@@ -17,6 +17,7 @@ public class Tenant : Entity<Guid>
     public string Currency { get; private set; } = string.Empty;
     public FeatureFlags FeatureFlags { get; private set; } = new();
     public TenantModules Modules { get; private set; } = new();
+    public FirebaseConfig FirebaseConfig { get; private set; } = new();
 
     public ICollection<User> Users { get; private set; } = [];
 
@@ -46,6 +47,19 @@ public class Tenant : Entity<Guid>
         PrimaryColor = primaryColor;
         AccentColor = accentColor;
         ErrorColor = errorColor;
+    }
+
+    public void SetFirebaseConfig(string androidApiKey, string androidAppId, string projectId, string messagingSenderId, string storageBucket, string encryptedServiceAccountJson)
+    {
+        FirebaseConfig = new FirebaseConfig
+        {
+            AndroidApiKey = androidApiKey,
+            AndroidAppId = androidAppId,
+            ProjectId = projectId,
+            MessagingSenderId = messagingSenderId,
+            StorageBucket = storageBucket,
+            EncryptedServiceAccountJson = encryptedServiceAccountJson
+        };
     }
 
     public void Deactivate() => IsActive = false;

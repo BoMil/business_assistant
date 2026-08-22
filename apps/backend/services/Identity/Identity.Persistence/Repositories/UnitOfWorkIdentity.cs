@@ -8,6 +8,7 @@ internal sealed class UnitOfWorkIdentity : IUnitOfWorkIdentity
     private IUserRepository? _userRepository;
     private ITenantRepository? _tenantRepository;
     private IRefreshTokenRepository? _refreshTokenRepository;
+    private IDeviceTokenRepository? _deviceTokenRepository;
 
     public UnitOfWorkIdentity(IdentityDbContext context)
     {
@@ -20,4 +21,5 @@ internal sealed class UnitOfWorkIdentity : IUnitOfWorkIdentity
     public IUserRepository Users => _userRepository ??= new UserRepository(_context);
     public ITenantRepository Tenants => _tenantRepository ??= new TenantRepository(_context);
     public IRefreshTokenRepository RefreshTokens => _refreshTokenRepository ??= new RefreshTokenRepository(_context);
+    public IDeviceTokenRepository DeviceTokens => _deviceTokenRepository ??= new DeviceTokenRepository(_context);
 }

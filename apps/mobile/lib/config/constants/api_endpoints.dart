@@ -11,6 +11,8 @@
 ///   GET  /identity/users/me             → the logged-in user's profile (incl. imgUrl)
 ///   PUT  /identity/users/me/image       → set/clear the logged-in user's profile picture URL
 ///   POST /identity/images               → upload an image, returns its blob URL
+///   POST   /identity/users/me/device-tokens → register this device's FCM token
+///   DELETE /identity/users/me/device-tokens → remove this device's FCM token
 ///
 /// Business microservice endpoints:
 ///   GET/POST   /business/transactions              → list / create an event (TransactionType.Rental)
@@ -32,6 +34,7 @@ class APIEndpoints {
   static String currentUser = '/identity/users/me';
   static String updateUserImage = '/identity/users/me/image';
   static String identityImages = '/identity/images';
+  static String deviceTokens = '/identity/users/me/device-tokens';
 
   static String transactions = '/business/transactions';
   static String transactionById(String id) => '/business/transactions/$id';

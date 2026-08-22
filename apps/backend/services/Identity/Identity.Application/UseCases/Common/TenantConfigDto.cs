@@ -19,4 +19,9 @@ public record TenantConfigDto(
     bool Inventory,
     bool Clients,
     bool ThemeChange,
-    bool Language);
+    bool Language,
+    string FirebaseAndroidApiKey,
+    string FirebaseAndroidAppId,
+    string FirebaseProjectId,
+    string FirebaseMessagingSenderId,
+    string FirebaseStorageBucket);

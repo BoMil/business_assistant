@@ -10,6 +10,7 @@ public interface IUnitOfWorkIdentity
     IUserRepository Users { get; }
     ITenantRepository Tenants { get; }
     IRefreshTokenRepository RefreshTokens { get; }
+    IDeviceTokenRepository DeviceTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

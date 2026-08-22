@@ -28,6 +28,11 @@ internal sealed class GetTenantConfigQueryHandler(IUnitOfWorkIdentity unitOfWork
             tenant.Modules.Inventory,
             tenant.Modules.Clients,
             tenant.FeatureFlags.ThemeChange,
-            tenant.FeatureFlags.Language));
+            tenant.FeatureFlags.Language,
+            tenant.FirebaseConfig.AndroidApiKey,
+            tenant.FirebaseConfig.AndroidAppId,
+            tenant.FirebaseConfig.ProjectId,
+            tenant.FirebaseConfig.MessagingSenderId,
+            tenant.FirebaseConfig.StorageBucket));
     }
 }

@@ -43,7 +43,12 @@ internal sealed class LoginCommandHandler(
             user.Tenant.Modules.Inventory,
             user.Tenant.Modules.Clients,
             user.Tenant.FeatureFlags.ThemeChange,
-            user.Tenant.FeatureFlags.Language);
+            user.Tenant.FeatureFlags.Language,
+            user.Tenant.FirebaseConfig.AndroidApiKey,
+            user.Tenant.FirebaseConfig.AndroidAppId,
+            user.Tenant.FirebaseConfig.ProjectId,
+            user.Tenant.FirebaseConfig.MessagingSenderId,
+            user.Tenant.FirebaseConfig.StorageBucket);
 
         return Result.Ok(new LoginResult(accessToken, rawRefreshToken, config));
     }
