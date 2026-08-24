@@ -15,10 +15,14 @@ internal static class TransactionMapper
             assetDtos.Add(new TransactionAssetDto(transactionAsset.AssetId, asset?.Name ?? string.Empty, transactionAsset.Quantity, transactionAsset.Price));
         }
 
+        var costDtos = transaction.Costs
+            .Select(cost => new TransactionCostDto(cost.Id, cost.Title, cost.Cost, cost.IsIncludedInTotalCost))
+            .ToList();
+
         return new TransactionDto(
             transaction.Id, transaction.Type, transaction.Title, transaction.Description,
             transaction.From, transaction.To,
             transaction.Location?.Address, transaction.Location?.Latitude, transaction.Location?.Longitude,
-            transaction.ClientId, transaction.GetStatus(now), assetDtos);
+            transaction.ClientId, transaction.GetStatus(now), assetDtos, costDtos);
     }
 }

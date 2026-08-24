@@ -18,7 +18,8 @@ public record CreateTransactionCommand(
     double? LocationLatitude,
     double? LocationLongitude,
     Guid? ClientId,
-    List<TransactionAssetInput> Assets
+    List<TransactionAssetInput> Assets,
+    List<TransactionCostInput> Costs
 ) : ICommand<Result<Guid>>;
 
 public sealed class CreateTransactionCommandValidator : AbstractValidator<CreateTransactionCommand>
@@ -30,6 +31,11 @@ public sealed class CreateTransactionCommandValidator : AbstractValidator<Create
         RuleForEach(x => x.Assets).ChildRules(item =>
         {
             item.RuleFor(asset => asset.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than zero");
+        });
+        RuleForEach(x => x.Costs).ChildRules(item =>
+        {
+            item.RuleFor(cost => cost.Title).NotEmpty().WithMessage("Cost title is required");
+            item.RuleFor(cost => cost.Cost).GreaterThanOrEqualTo(0).WithMessage("Cost must be zero or greater");
         });
     }
 }

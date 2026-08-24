@@ -39,5 +39,13 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
             .WithOne()
             .HasForeignKey(asset => asset.TransactionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Metadata.FindNavigation(nameof(Transaction.Costs))!
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasMany(t => t.Costs)
+            .WithOne()
+            .HasForeignKey(cost => cost.TransactionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

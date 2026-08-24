@@ -9,6 +9,7 @@ public class BusinessDbContext(DbContextOptions<BusinessDbContext> options) : Db
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<TransactionAsset> TransactionAssets => Set<TransactionAsset>();
+    public DbSet<TransactionCost> TransactionCosts => Set<TransactionCost>();
     public DbSet<Category> Categories => Set<Category>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

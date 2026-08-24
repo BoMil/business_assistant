@@ -37,6 +37,8 @@ internal sealed class CreateTransactionCommandHandler(
         var transaction = Transaction.Create(request.TenantId, request.Type, request.Title, request.Description, request.From, request.To, location, request.ClientId);
         foreach (var item in request.Assets)
             transaction.AddAsset(item.AssetId, item.Quantity, item.Price);
+        foreach (var item in request.Costs)
+            transaction.AddCost(item.Title, item.Cost, item.IsIncludedInTotalCost);
 
         await unitOfWork.Transactions.AddAsync(transaction, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -46,6 +46,12 @@ internal sealed class UpdateTransactionCommandHandler(
         foreach (var item in request.Assets)
             transaction.AddAsset(item.AssetId, item.Quantity, item.Price);
 
+        transaction.ClearCosts();
+        foreach (var item in request.Costs)
+            transaction.AddCost(item.Title, item.Cost, item.IsIncludedInTotalCost);
+
+        unitOfWork.Transactions.TrackNewChildren(transaction);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         try

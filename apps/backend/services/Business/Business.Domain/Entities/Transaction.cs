@@ -33,6 +33,9 @@ public class Transaction : Entity<Guid>
     private readonly List<TransactionAsset> _assets = [];
     public IReadOnlyCollection<TransactionAsset> Assets => _assets;
 
+    private readonly List<TransactionCost> _costs = [];
+    public IReadOnlyCollection<TransactionCost> Costs => _costs;
+
     private Transaction() { }
 
     public static Transaction Create(
@@ -67,6 +70,11 @@ public class Transaction : Entity<Guid>
         _assets.Add(TransactionAsset.Create(Id, assetId, quantity, price));
 
     public void ClearAssets() => _assets.Clear();
+
+    public void AddCost(string title, decimal cost, bool isIncludedInTotalCost) =>
+        _costs.Add(TransactionCost.Create(Id, title, cost, isIncludedInTotalCost));
+
+    public void ClearCosts() => _costs.Clear();
 
     public void Cancel() => IsCancelled = true;
 

@@ -19,6 +19,16 @@ public interface ITransactionRepository
     Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Explicitly marks a Transaction's current Assets/Costs as Added. Needed after an Update
+    /// handler's Clear+re-Add replacement of these collections: since the child entities already
+    /// have their (client-generated Guid) key set, EF Core's change detection can't tell them apart
+    /// from existing rows when it discovers them via navigation fixup, and defaults to Modified —
+    /// generating an UPDATE against a row that doesn't exist yet. Create doesn't need this because
+    /// AddAsync's own Add() call already cascades Added to the whole graph unconditionally.
+    /// </summary>
+    void TrackNewChildren(Transaction transaction);
+
+    /// <summary>
     /// Sum of quantities already reserved for <paramref name="assetId"/> across active
     /// (non-cancelled) Rental transactions whose [From,To] range overlaps [<paramref name="from"/>,
     /// <paramref name="to"/>]. Pass <paramref name="excludeTransactionId"/> when updating an

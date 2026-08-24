@@ -10,11 +10,13 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
     public Task<Transaction?> GetByIdAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default) =>
         context.Transactions
             .Include(t => t.Assets)
+            .Include(t => t.Costs)
             .FirstOrDefaultAsync(t => t.Id == id && t.TenantId == tenantId, cancellationToken);
 
     public Task<List<Transaction>> GetByClientAsync(Guid clientId, Guid tenantId, CancellationToken cancellationToken = default) =>
         context.Transactions
             .Include(t => t.Assets)
+            .Include(t => t.Costs)
             .Where(t => t.TenantId == tenantId && t.ClientId == clientId)
             .ToListAsync(cancellationToken);
 
@@ -23,6 +25,7 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
     {
         var query = context.Transactions
             .Include(t => t.Assets)
+            .Include(t => t.Costs)
             .Where(t => t.TenantId == tenantId);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -46,6 +49,12 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
 
     public async Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default) =>
         await context.Transactions.AddAsync(transaction, cancellationToken);
+
+    public void TrackNewChildren(Transaction transaction)
+    {
+        context.TransactionAssets.AddRange(transaction.Assets);
+        context.TransactionCosts.AddRange(transaction.Costs);
+    }
 
     public Task<int> GetReservedQuantityAsync(Guid assetId, DateTime from, DateTime to, Guid? excludeTransactionId, CancellationToken cancellationToken = default)
     {
