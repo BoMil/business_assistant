@@ -6,10 +6,25 @@ plugins {
 }
 
 // White-label: applicationId and app label are injected per-tenant at build time.
-// Locally: falls back to the demo tenant defaults.
-// On CI: set_tenant_branding.sh exports PACKAGE_NAME and APP_NAME before the build.
+// On CI: set_tenant_branding.sh exports the APP_NAME env var before the build.
+// Locally: flutter run/build forwards --dart-define-from-file entries to Gradle
+// as the "dart-defines" project property (comma-separated, each entry
+// base64("KEY=value") — see Flutter's encodeDartDefines), so the same
+// .env/<tenant>.<environment>.json used by the Dart layer also drives the
+// native app label here, with no separate local setup needed.
+def dartDefines = [:]
+if (project.hasProperty("dart-defines")) {
+    project.property("dart-defines").toString().split(",").each { encoded ->
+        def decoded = new String(encoded.decodeBase64(), "UTF-8")
+        def i = decoded.indexOf("=")
+        if (i > 0) {
+            dartDefines[decoded.substring(0, i)] = decoded.substring(i + 1)
+        }
+    }
+}
+
 def tenantPackageName = System.getenv("PACKAGE_NAME") ?: "com.businessassistant.demo"
-def tenantAppName = System.getenv("APP_NAME") ?: "Business Assistant"
+def tenantAppName = System.getenv("APP_NAME") ?: dartDefines["APP_NAME"] ?: "Business Assistant"
 
 // Read key.properties for local release signing (not used on CI).
 // Create android/key.properties with your local keystore path if you want to
