@@ -110,7 +110,7 @@ class Routes {
           } catch (e) {
             debugPrint('No data in the route extra params');
           }
-          return CustomTransitionPage<void>(
+          return CustomTransitionPage<bool>(
             key: state.pageKey,
             child: CreateEditEventPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
@@ -132,7 +132,7 @@ class Routes {
           } catch (e) {
             debugPrint('No data in the route extra params');
           }
-          return CustomTransitionPage<void>(
+          return CustomTransitionPage<bool>(
             key: state.pageKey,
             child: CreateEditEventPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
@@ -157,7 +157,7 @@ class Routes {
           } catch (e) {
             debugPrint('No data in the route extra params');
           }
-          return CustomTransitionPage<void>(
+          return CustomTransitionPage<bool>(
             key: state.pageKey,
             child: CreateEditAssetPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
@@ -179,7 +179,7 @@ class Routes {
           } catch (e) {
             debugPrint('No data in the route extra params');
           }
-          return CustomTransitionPage<void>(
+          return CustomTransitionPage<bool>(
             key: state.pageKey,
             child: CreateEditAssetPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
@@ -204,7 +204,7 @@ class Routes {
           } catch (e) {
             debugPrint('No data in the route extra params');
           }
-          return CustomTransitionPage<void>(
+          return CustomTransitionPage<bool>(
             key: state.pageKey,
             child: CreateEditClientPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
@@ -226,7 +226,7 @@ class Routes {
           } catch (e) {
             debugPrint('No data in the route extra params');
           }
-          return CustomTransitionPage<void>(
+          return CustomTransitionPage<bool>(
             key: state.pageKey,
             child: CreateEditClientPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),

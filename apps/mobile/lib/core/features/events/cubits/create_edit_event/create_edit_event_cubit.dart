@@ -7,6 +7,7 @@ import 'package:business_assistant/core/features/events/api_services/event_api_s
 import 'package:business_assistant/core/features/events/models/enums/event_status.dart';
 import 'package:business_assistant/core/features/events/models/requests/create_event_request.dart';
 import 'package:business_assistant/core/features/events/models/requests/event_asset_request.dart';
+import 'package:business_assistant/core/features/events/models/requests/event_cost_request.dart';
 import 'package:business_assistant/core/features/events/models/requests/update_event_request.dart';
 import 'package:business_assistant/core/features/inventory/api_services/asset_api_service.dart';
 import 'package:business_assistant/core/features/inventory/models/responses/asset_response.dart';
@@ -96,6 +97,14 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
       eventAssets: event.eventAssets
           .map((asset) => EventFormAsset(assetId: asset.assetId, assetName: asset.assetName, quantity: asset.quantity, price: asset.price))
           .toList(),
+      eventCosts: event.eventCosts
+          .map((cost) => EventFormCost(
+                localId: cost.id,
+                title: cost.title,
+                cost: cost.cost,
+                isIncludedInTotalCost: cost.isIncludedInTotalCost,
+              ))
+          .toList(),
       status: event.status,
     ));
   }
@@ -154,6 +163,46 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
     ));
   }
 
+  void addEventCost() {
+    final newCost = EventFormCost(
+      localId: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: '',
+      cost: 0,
+      isIncludedInTotalCost: false,
+    );
+    emit(state.copyWith(eventCosts: [...state.eventCosts, newCost], isDirty: true));
+  }
+
+  void removeEventCost(String localId) {
+    emit(state.copyWith(
+      eventCosts: state.eventCosts.where((ec) => ec.localId != localId).toList(),
+      isDirty: true,
+    ));
+  }
+
+  void updateEventCostTitle(String localId, String title) {
+    emit(state.copyWith(
+      eventCosts: state.eventCosts.map((ec) => ec.localId == localId ? ec.copyWith(title: title) : ec).toList(),
+      isDirty: true,
+    ));
+  }
+
+  void updateEventCostAmount(String localId, double cost) {
+    emit(state.copyWith(
+      eventCosts: state.eventCosts.map((ec) => ec.localId == localId ? ec.copyWith(cost: cost) : ec).toList(),
+      isDirty: true,
+    ));
+  }
+
+  void updateEventCostIncluded(String localId, bool isIncludedInTotalCost) {
+    emit(state.copyWith(
+      eventCosts: state.eventCosts
+          .map((ec) => ec.localId == localId ? ec.copyWith(isIncludedInTotalCost: isIncludedInTotalCost) : ec)
+          .toList(),
+      isDirty: true,
+    ));
+  }
+
   Future<void> save() async {
     if (state.title.trim().isEmpty ||
         state.from == null ||
@@ -162,11 +211,18 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
       emit(state.copyWith(errorMessage: 'Title, dates and location are required.'));
       return;
     }
+    if (state.eventCosts.any((cost) => cost.title.trim().isEmpty || cost.cost < 0)) {
+      emit(state.copyWith(errorMessage: 'Each additional cost needs a name and a non-negative amount.'));
+      return;
+    }
 
     emit(state.copyWith(isSaving: true, clearError: true));
 
     final eventAssets = state.eventAssets
         .map((asset) => EventAssetRequest(assetId: asset.assetId, quantity: asset.quantity, price: asset.price))
+        .toList();
+    final eventCosts = state.eventCosts
+        .map((cost) => EventCostRequest(title: cost.title.trim(), cost: cost.cost, isIncludedInTotalCost: cost.isIncludedInTotalCost))
         .toList();
     final description = state.description.trim().isEmpty ? null : state.description.trim();
 
@@ -184,6 +240,7 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
           locationLongitude: state.locationLongitude,
           clientId: state.clientId,
           eventAssets: eventAssets,
+          eventCosts: eventCosts,
         ),
       );
     } else {
@@ -198,6 +255,7 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
           locationLongitude: state.locationLongitude,
           clientId: state.clientId,
           eventAssets: eventAssets,
+          eventCosts: eventCosts,
         ),
       );
     }

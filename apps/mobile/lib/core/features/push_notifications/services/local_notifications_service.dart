@@ -14,11 +14,7 @@ class LocalNotificationsService {
 
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
 
-  static const _channel = AndroidNotificationChannel(
-    'default_channel',
-    'Notifications',
-    importance: Importance.max,
-  );
+  static const _channel = AndroidNotificationChannel('default_channel', 'Notifications', importance: Importance.max);
 
   bool _isInitialized = false;
   int _notificationIdCounter = 0;
@@ -28,11 +24,9 @@ class LocalNotificationsService {
 
     try {
       await _plugin.initialize(
-        settings: const InitializationSettings(
-          android: AndroidInitializationSettings('ic_notification'),
-        ),
-        onDidReceiveNotificationResponse: (details) =>
-            PushNotificationRouter.handleLocalNotificationPayload(details.payload),
+        settings: const InitializationSettings(android: AndroidInitializationSettings('ic_notification')),
+        onDidReceiveNotificationResponse:
+            (details) => PushNotificationRouter.handleLocalNotificationPayload(details.payload),
       );
       await _plugin
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()

@@ -15,6 +15,7 @@ import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_b
 import 'package:business_assistant/core/shared/widgets/cards/card_frame.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/location_input_field.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/primary_input_field.dart';
+import 'package:business_assistant/core/utils/launcher.dart';
 import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
 
@@ -97,6 +98,12 @@ class _CreateEditClientPageContentState extends State<_CreateEditClientPageConte
     context.push(RouteNames.clientEventsPage, extra: ClientEventsPageProps(clientId: clientId, clientName: clientName));
   }
 
+  void _openInMaps(double? latitude, double? longitude, String address) {
+    final query = latitude != null && longitude != null ? '$latitude,$longitude' : address;
+    final uri = Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': query});
+    launchWebUrl(uri.toString());
+  }
+
   void _onStateChange(BuildContext context, CreateEditClientState state) {
     final t = TranslationStorage.translation;
 
@@ -104,12 +111,12 @@ class _CreateEditClientPageContentState extends State<_CreateEditClientPageConte
 
     if (state.saveSucceeded) {
       ToastMessage().showSuccessToast(text: t.clientSavedToast);
-      context.pop();
+      context.pop(true);
       return;
     }
     if (state.deleteSucceeded) {
       ToastMessage().showSuccessToast(text: t.clientDeletedToast);
-      context.pop();
+      context.pop(true);
       return;
     }
     if (state.errorMessage != null) {
@@ -185,10 +192,30 @@ class _CreateEditClientPageContentState extends State<_CreateEditClientPageConte
                       const SizedBox(height: 12),
                       CardFrame(
                         headerSectionTtitle: t.clientLocationLabel,
-                        child: LocationInputField(
-                          controller: _locationController,
-                          onLocationSelected: cubit.setLocation,
-                          language: TranslationStorage().selectedLanguage.languageCode,
+                        child: Column(
+                          children: [
+                            LocationInputField(
+                              controller: _locationController,
+                              onLocationSelected: cubit.setLocation,
+                              language: TranslationStorage().selectedLanguage.languageCode,
+                            ),
+                            if (state.locationAddress.trim().isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  onPressed:
+                                      () => _openInMaps(
+                                        state.locationLatitude,
+                                        state.locationLongitude,
+                                        state.locationAddress,
+                                      ),
+                                  icon: const Icon(Icons.map_outlined, size: 18),
+                                  label: Text(t.eventViewOnMapLabel),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                       if (isEditMode) ...[
@@ -205,10 +232,17 @@ class _CreateEditClientPageContentState extends State<_CreateEditClientPageConte
                                 Expanded(
                                   child: Text(
                                     t.clientEventsLabel,
-                                    style: TextStyle(color: theme.primaryText, fontSize: 14, fontWeight: FontWeight.w500),
+                                    style: TextStyle(
+                                      color: theme.primaryText,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
-                                Icon(Icons.keyboard_arrow_right_rounded, color: theme.primaryText.withValues(alpha: 0.5)),
+                                Icon(
+                                  Icons.keyboard_arrow_right_rounded,
+                                  color: theme.primaryText.withValues(alpha: 0.5),
+                                ),
                               ],
                             ),
                           ),

@@ -1,7 +1,6 @@
 import 'package:business_assistant/config/routes/bottom_nav_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
@@ -123,6 +122,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
         final isLoading = state.currentState == CubitState.loading;
 
         return PageFrame(
+          isHeaderVisible: false,
           pageBody: SafeArea(
             child: SingleChildScrollView(
               child: Form(
@@ -131,7 +131,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 60),
                     _buildLogoSection(tenant),
                     const SizedBox(height: 40),
                     _buildEmailField(),
@@ -183,7 +183,7 @@ class _LoginPageContentState extends State<_LoginPageContent> {
     final t = TranslationStorage.translation;
     return Column(
       children: [
-        SvgPicture.asset(tenant.logoPath, height: 56),
+        Image.asset(tenant.logoPath, height: 56),
         const SizedBox(height: 12),
         Text(
           tenant.appName,
@@ -257,22 +257,22 @@ class _LoginPageContentState extends State<_LoginPageContent> {
 
   // ── Forgot password link ───────────────────────────────────────────────────
 
-  Widget _buildForgotPasswordLink() {
-    final t = TranslationStorage.translation;
-    return Align(
-      alignment: Alignment.centerRight,
-      child: GestureDetector(
-        onTap: () {
-          // TODO: Navigate to RouteNames.resetPassword when implemented
-          ToastMessage().showInfoToast(text: 'Coming soon');
-        },
-        child: Text(
-          t.forgotPassword,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.colors.brandPrimary),
-        ),
-      ),
-    );
-  }
+  // Widget _buildForgotPasswordLink() {
+  //   final t = TranslationStorage.translation;
+  //   return Align(
+  //     alignment: Alignment.centerRight,
+  //     child: GestureDetector(
+  //       onTap: () {
+  //         // TODO: Navigate to RouteNames.resetPassword when implemented
+  //         ToastMessage().showInfoToast(text: 'Coming soon');
+  //       },
+  //       child: Text(
+  //         t.forgotPassword,
+  //         style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.colors.brandPrimary),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // ── Sign In button ─────────────────────────────────────────────────────────
 

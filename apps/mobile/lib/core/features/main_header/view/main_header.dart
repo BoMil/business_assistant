@@ -1,13 +1,10 @@
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
-import 'package:business_assistant/core/shared/widgets/buttons/selectable_icon.dart';
 import 'package:business_assistant/core/shared/widgets/images/loaded_image.dart';
-import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
 import 'package:business_assistant/theme/theme_constants.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -41,7 +38,9 @@ class MainHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: ThemeConstants.headerPadding, vertical: 12),
       child: Row(
         children: [
-          SvgPicture.asset(tenant.logoPath, height: 32),
+          // SvgPicture.asset(tenant.logoPath, height: 32),
+          Image.asset(tenant.logoPath, height: 32),
+
           const SizedBox(width: 10),
           Expanded(
             child: Skeletonizer(
@@ -53,17 +52,17 @@ class MainHeader extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 10),
-          SelectableIcon(
-            padding: const EdgeInsets.all(8),
-            itemPressed: () => ToastMessage().showInfoToast(text: t.notificationsComingSoonToast),
-            iconWidget: SvgPicture.asset(
-              'assets/svg/notification_bell.svg',
-              width: 20,
-              height: 20,
-              colorFilter: ColorFilter.mode(theme.primaryText, BlendMode.srcIn),
-            ),
-          ),
+          // const SizedBox(width: 10),
+          // SelectableIcon(
+          //   padding: const EdgeInsets.all(8),
+          //   itemPressed: () => ToastMessage().showInfoToast(text: t.notificationsComingSoonToast),
+          //   iconWidget: SvgPicture.asset(
+          //     'assets/svg/notification_bell.svg',
+          //     width: 20,
+          //     height: 20,
+          //     colorFilter: ColorFilter.mode(theme.primaryText, BlendMode.srcIn),
+          //   ),
+          // ),
           const SizedBox(width: 10),
           LoadedImage(
             imageUrl: userImageUrl,

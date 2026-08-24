@@ -94,7 +94,7 @@ come from a local `.env` file or from the database via CI (see below).
 (`.github/workflows/mobile-android.yml`) before the build step. Given
 `TENANT_ID`, `APP_NAME`, `PACKAGE_NAME`, it:
 
-1. Validates that `assets/tenants/$TENANT_ID/{logo.svg,app_icon.png,splash_logo.png}` exist
+1. Validates that `assets/tenants/$TENANT_ID/{logo.png,app_icon.png,splash_logo.png}` exist
 2. Ensures the tenant asset directory is listed in `pubspec.yaml`
 3. Generates `flutter_launcher_icons.yaml` / `flutter_native_splash.yaml` and runs the generators
 

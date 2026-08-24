@@ -19,10 +19,16 @@ internal static class TransactionMapper
             .Select(cost => new TransactionCostDto(cost.Id, cost.Title, cost.Cost, cost.IsIncludedInTotalCost))
             .ToList();
 
+        var assetsTotal = transaction.Assets.Sum(a => a.Quantity * a.Price);
+        var includedCostsTotal = transaction.Costs.Where(c => c.IsIncludedInTotalCost).Sum(c => c.Cost);
+        var allCostsTotal = transaction.Costs.Sum(c => c.Cost);
+        var chargedTotal = assetsTotal + includedCostsTotal;
+        var netBalance = chargedTotal - allCostsTotal;
+
         return new TransactionDto(
             transaction.Id, transaction.Type, transaction.Title, transaction.Description,
             transaction.From, transaction.To,
             transaction.Location?.Address, transaction.Location?.Latitude, transaction.Location?.Longitude,
-            transaction.ClientId, transaction.GetStatus(now), assetDtos, costDtos);
+            transaction.ClientId, transaction.GetStatus(now), assetDtos, costDtos, chargedTotal, netBalance);
     }
 }

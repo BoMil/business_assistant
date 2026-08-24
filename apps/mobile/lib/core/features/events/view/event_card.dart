@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/events/models/responses/event_response.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_status_badge.dart';
 import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
@@ -34,28 +35,62 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = TranslationStorage.translation;
+    final theme = context.colors;
+    final currencySymbol = context.read<TenantConfigCubit>().state.currencySymbol;
+    final balanceColor = event.netBalance >= 0 ? theme.statusFinished : theme.brandError;
+
     return Column(
       children: [
         SelectableItem(
           // borderColor: context.colors.primaryText.withValues(alpha: 0.09),
           title: event.title,
           subtitle: _subtitle,
-          textColor: context.colors.primaryText,
+          textColor: theme.primaryText,
           fontSize: 16,
           itemPressed: onTap,
           rightContent: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                '${event.totalPrice.toStringAsFixed(0)} ${context.read<TenantConfigCubit>().state.currencySymbol}',
-                style: TextStyle(color: context.colors.statusFinished, fontSize: 15, fontWeight: FontWeight.w700),
+              Text.rich(
+                TextSpan(
+                  style: TextStyle(
+                    color: theme.primaryText.withValues(alpha: 0.5),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  children: [
+                    TextSpan(text: '${t.eventCardBalanceLabel}: '),
+                    TextSpan(
+                      text: '${event.netBalance.toStringAsFixed(0)} $currencySymbol',
+                      style: TextStyle(color: balanceColor),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text.rich(
+                TextSpan(
+                  style: TextStyle(
+                    color: theme.primaryText.withValues(alpha: 0.5),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  children: [
+                    TextSpan(text: '${t.eventCardChargedLabel}: '),
+                    TextSpan(
+                      text: '${event.chargedTotal.toStringAsFixed(0)} $currencySymbol',
+                      style: TextStyle(color: theme.statusFinished),
+                    ),
+                  ],
+                ),
               ),
               if (event.status != null) ...[const SizedBox(height: 6), EventStatusBadge(status: event.status!)],
             ],
           ),
         ),
-        if (isBottomBorderVisible) Divider(height: 1, color: context.colors.primaryText.withValues(alpha: 0.09)),
+        if (isBottomBorderVisible) Divider(height: 1, color: theme.primaryText.withValues(alpha: 0.09)),
       ],
     );
   }

@@ -33,14 +33,14 @@ class _EventsPageContent extends StatelessWidget {
 
   Future<void> _openCreateEvent(BuildContext context) async {
     final cubit = context.read<EventsCubit>();
-    await context.push(RouteNames.createEventPage);
-    cubit.resetState();
+    final saved = await context.push<bool>(RouteNames.createEventPage);
+    if (saved == true) cubit.resetState();
   }
 
   Future<void> _openEditEvent(BuildContext context, String eventId) async {
     final cubit = context.read<EventsCubit>();
-    await context.push(RouteNames.editEventPage, extra: CreateEditEventPageProps(eventId: eventId));
-    cubit.resetState();
+    final saved = await context.push<bool>(RouteNames.editEventPage, extra: CreateEditEventPageProps(eventId: eventId));
+    if (saved == true) cubit.resetState();
   }
 
   @override

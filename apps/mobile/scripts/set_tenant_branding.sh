@@ -11,7 +11,7 @@ set -e
 #   PACKAGE_NAME   — Android applicationId, e.g. "com.businessassistant.demo"
 #
 # Assets must already exist in the repo at:
-#   assets/tenants/$TENANT_ID/logo.svg
+#   assets/tenants/$TENANT_ID/logo.png
 #   assets/tenants/$TENANT_ID/app_icon.png
 #   assets/tenants/$TENANT_ID/splash_logo.png
 #
@@ -35,8 +35,8 @@ echo "  Build dir: $BUILD_DIR"
 
 ASSET_DIR="$BUILD_DIR/assets/tenants/$TENANT_ID"
 
-if [ ! -f "$ASSET_DIR/logo.svg" ]; then
-  echo "  [ERROR] Missing: $ASSET_DIR/logo.svg"
+if [ ! -f "$ASSET_DIR/logo.png" ]; then
+  echo "  [ERROR] Missing: $ASSET_DIR/logo.png"
   exit 1
 fi
 

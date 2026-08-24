@@ -152,12 +152,12 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
 
     if (state.saveSucceeded) {
       ToastMessage().showSuccessToast(text: t.productSavedToast);
-      context.pop();
+      context.pop(true);
       return;
     }
     if (state.deleteSucceeded) {
       ToastMessage().showSuccessToast(text: t.productDeletedToast);
-      context.pop();
+      context.pop(true);
       return;
     }
     if (state.errorMessage != null) {

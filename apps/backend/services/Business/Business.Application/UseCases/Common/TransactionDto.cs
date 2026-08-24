@@ -7,9 +7,11 @@ public record TransactionAssetDto(Guid AssetId, string AssetName, int Quantity, 
 public record TransactionCostDto(Guid Id, string Title, decimal Cost, bool IsIncludedInTotalCost);
 
 /// <summary>
-/// <see cref="Status"/> is derived at query time (Transaction.GetStatus in the Domain project) —
-/// null for instantaneous transaction types (Sale/Consumption/Production), which have no
-/// From/To lifecycle.
+/// <see cref="Status"/>, <see cref="ChargedTotal"/> and <see cref="NetBalance"/> are all derived
+/// at query time (Transaction.GetStatus / TransactionMapper), never persisted — Status is null for
+/// instantaneous transaction types (Sale/Consumption/Production), which have no From/To lifecycle.
+/// ChargedTotal is the assets total plus costs marked IsIncludedInTotalCost (what the client is
+/// billed); NetBalance is ChargedTotal minus ALL costs, included or not (the actual profit/loss).
 /// </summary>
 public record TransactionDto(
     Guid Id,
@@ -24,4 +26,6 @@ public record TransactionDto(
     Guid? ClientId,
     TransactionStatus? Status,
     List<TransactionAssetDto> Assets,
-    List<TransactionCostDto> Costs);
+    List<TransactionCostDto> Costs,
+    decimal ChargedTotal,
+    decimal NetBalance);

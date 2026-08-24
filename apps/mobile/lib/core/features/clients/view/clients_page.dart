@@ -34,14 +34,14 @@ class _ClientsPageContent extends StatelessWidget {
 
   Future<void> _openCreateClient(BuildContext context) async {
     final cubit = context.read<ClientsCubit>();
-    await context.push(RouteNames.createClientPage);
-    cubit.resetState();
+    final saved = await context.push<bool>(RouteNames.createClientPage);
+    if (saved == true) cubit.resetState();
   }
 
   Future<void> _openEditClient(BuildContext context, String clientId) async {
     final cubit = context.read<ClientsCubit>();
-    await context.push(RouteNames.editClientPage, extra: CreateEditClientPageProps(clientId: clientId));
-    cubit.resetState();
+    final saved = await context.push<bool>(RouteNames.editClientPage, extra: CreateEditClientPageProps(clientId: clientId));
+    if (saved == true) cubit.resetState();
   }
 
   @override

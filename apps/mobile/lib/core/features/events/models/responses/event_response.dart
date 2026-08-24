@@ -1,5 +1,6 @@
 import 'package:business_assistant/core/features/events/models/enums/event_status.dart';
 import 'package:business_assistant/core/features/events/models/responses/event_asset_response.dart';
+import 'package:business_assistant/core/features/events/models/responses/event_cost_response.dart';
 
 /// Mirrors the Business API's TransactionDto. `status` is only meaningful for
 /// TransactionType.Rental (the only type this app creates) — it is derived
@@ -16,6 +17,9 @@ class EventResponse {
   final String? clientId;
   final EventStatus? status;
   final List<EventAssetResponse> eventAssets;
+  final List<EventCostResponse> eventCosts;
+  final double chargedTotal;
+  final double netBalance;
 
   EventResponse({
     required this.id,
@@ -29,10 +33,10 @@ class EventResponse {
     this.clientId,
     this.status,
     this.eventAssets = const [],
+    this.eventCosts = const [],
+    this.chargedTotal = 0,
+    this.netBalance = 0,
   });
-
-  /// Sum of quantity * price across all event assets — shown as the event's price.
-  double get totalPrice => eventAssets.fold(0, (sum, asset) => sum + asset.quantity * asset.price);
 
   factory EventResponse.fromJson(Map<String, dynamic> json) {
     return EventResponse(
@@ -50,6 +54,12 @@ class EventResponse {
       eventAssets: (json['assets'] as List? ?? [])
           .map((asset) => EventAssetResponse.fromJson(asset as Map<String, dynamic>))
           .toList(),
+      // Wire key is 'costs' — mirrors the Business API's TransactionDto.Costs.
+      eventCosts: (json['costs'] as List? ?? [])
+          .map((cost) => EventCostResponse.fromJson(cost as Map<String, dynamic>))
+          .toList(),
+      chargedTotal: (json['chargedTotal'] as num?)?.toDouble() ?? 0,
+      netBalance: (json['netBalance'] as num?)?.toDouble() ?? 0,
     );
   }
 }

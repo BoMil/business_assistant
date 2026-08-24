@@ -25,6 +25,33 @@ class EventFormAsset {
   }
 }
 
+/// An additional-cost line as edited on the form. `localId` is a client-only
+/// identifier used to address a row in the list (title isn't unique, and a
+/// backend id doesn't exist yet for a row the user just added) — it is never
+/// sent to the server, since UpdateTransaction fully replaces the cost list.
+class EventFormCost {
+  final String localId;
+  final String title;
+  final double cost;
+  final bool isIncludedInTotalCost;
+
+  const EventFormCost({
+    required this.localId,
+    required this.title,
+    required this.cost,
+    required this.isIncludedInTotalCost,
+  });
+
+  EventFormCost copyWith({String? title, double? cost, bool? isIncludedInTotalCost}) {
+    return EventFormCost(
+      localId: localId,
+      title: title ?? this.title,
+      cost: cost ?? this.cost,
+      isIncludedInTotalCost: isIncludedInTotalCost ?? this.isIncludedInTotalCost,
+    );
+  }
+}
+
 class CreateEditEventState {
   /// getEventById status (edit mode only) — CubitState.loaded immediately in
   /// create mode, since there's no event to fetch.
@@ -48,6 +75,7 @@ class CreateEditEventState {
   final double? locationLongitude;
   final String? clientId;
   final List<EventFormAsset> eventAssets;
+  final List<EventFormCost> eventCosts;
   final EventStatus? status;
   final bool isDirty;
 
@@ -74,6 +102,7 @@ class CreateEditEventState {
     this.locationLongitude,
     this.clientId,
     this.eventAssets = const [],
+    this.eventCosts = const [],
     this.status,
     this.isDirty = false,
     this.availableAssets = const [],
@@ -136,6 +165,7 @@ class CreateEditEventState {
     String? clientId,
     bool clearClient = false,
     List<EventFormAsset>? eventAssets,
+    List<EventFormCost>? eventCosts,
     EventStatus? status,
     bool? isDirty,
     List<AssetResponse>? availableAssets,
@@ -161,6 +191,7 @@ class CreateEditEventState {
       locationLongitude: locationLongitude ?? this.locationLongitude,
       clientId: clearClient ? null : (clientId ?? this.clientId),
       eventAssets: eventAssets ?? this.eventAssets,
+      eventCosts: eventCosts ?? this.eventCosts,
       status: status ?? this.status,
       isDirty: isDirty ?? this.isDirty,
       availableAssets: availableAssets ?? this.availableAssets,

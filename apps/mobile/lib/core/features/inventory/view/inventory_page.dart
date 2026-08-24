@@ -35,14 +35,14 @@ class _InventoryPageContent extends StatelessWidget {
 
   Future<void> _openCreateAsset(BuildContext context) async {
     final cubit = context.read<AssetsCubit>();
-    await context.push(RouteNames.createAssetPage);
-    cubit.resetState();
+    final saved = await context.push<bool>(RouteNames.createAssetPage);
+    if (saved == true) cubit.resetState();
   }
 
   Future<void> _openEditAsset(BuildContext context, String assetId) async {
     final cubit = context.read<AssetsCubit>();
-    await context.push(RouteNames.editAssetPage, extra: CreateEditAssetPageProps(assetId: assetId));
-    cubit.resetState();
+    final saved = await context.push<bool>(RouteNames.editAssetPage, extra: CreateEditAssetPageProps(assetId: assetId));
+    if (saved == true) cubit.resetState();
   }
 
   @override

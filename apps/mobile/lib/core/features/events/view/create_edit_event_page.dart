@@ -6,6 +6,7 @@ import 'package:business_assistant/config/translations/translation_storage.dart'
 import 'package:business_assistant/core/features/events/cubits/create_edit_event/create_edit_event_cubit.dart';
 import 'package:business_assistant/core/features/events/models/page_props/create_edit_event_page_props.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_asset_tile.dart';
+import 'package:business_assistant/core/features/events/view/widgets/event_cost_tile.dart';
 import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
 import 'package:business_assistant/core/shared/models/dropdowns/base_dropdown_item.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
@@ -165,17 +166,17 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
 
     if (state.saveSucceeded) {
       ToastMessage().showSuccessToast(text: t.eventSavedToast);
-      context.pop();
+      context.pop(true);
       return;
     }
     if (state.cancelSucceeded) {
       ToastMessage().showSuccessToast(text: t.eventCancelledToast);
-      context.pop();
+      context.pop(true);
       return;
     }
     if (state.deleteSucceeded) {
       ToastMessage().showSuccessToast(text: t.eventDeletedToast);
-      context.pop();
+      context.pop(true);
       return;
     }
     if (state.errorMessage != null) {
@@ -200,7 +201,9 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
       builder: (context, state) {
         final cubit = context.read<CreateEditEventCubit>();
         final isEditMode = cubit.isEditMode;
-        final totalValue = state.eventAssets.fold<double>(0, (sum, ea) => sum + ea.price * ea.quantity);
+        final totalValue =
+            state.eventAssets.fold<double>(0, (sum, ea) => sum + ea.price * ea.quantity) +
+            state.eventCosts.where((ec) => ec.isIncludedInTotalCost).fold<double>(0, (sum, ec) => sum + ec.cost);
         final currencySymbol = context.read<TenantConfigCubit>().state.currencySymbol;
 
         return PageFrame(
@@ -230,6 +233,8 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      _buildBalanceSection(context, state, theme, currencySymbol),
+                      const SizedBox(height: 12),
                       CardFrame(
                         headerSectionTtitle: t.eventTitleLabel,
                         child: PrimaryInputField(
@@ -290,6 +295,8 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
                 Skeletonizer(enabled: state.isClientPending, child: _buildClientPicker(context, state, theme)),
                 const SizedBox(height: 24),
                 Skeletonizer(enabled: state.isAssetsPending, child: _buildProductsSection(context, state, theme)),
+                const SizedBox(height: 24),
+                _buildCostsSection(context, state, theme),
                 const SizedBox(height: 12),
 
                 CardFrame(
@@ -337,6 +344,68 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
           ),
         );
       },
+    );
+  }
+
+  Widget _buildBalanceSection(BuildContext context, CreateEditEventState state, ThemeColor theme, String currencySymbol) {
+    final t = TranslationStorage.translation;
+
+    final assetsValue = state.eventAssets.fold<double>(0, (sum, ea) => sum + ea.price * ea.quantity);
+    final includedCosts =
+        state.eventCosts.where((ec) => ec.isIncludedInTotalCost).fold<double>(0, (sum, ec) => sum + ec.cost);
+    final extraCosts =
+        state.eventCosts.where((ec) => !ec.isIncludedInTotalCost).fold<double>(0, (sum, ec) => sum + ec.cost);
+    final netBalance = assetsValue - extraCosts;
+
+    return CardFrame(
+      headerSectionTtitle: t.eventBalanceTitle,
+      child: Column(
+        children: [
+          _buildBalanceRow(theme, t.eventBalanceAssetsValueLabel, assetsValue, theme.statusFinished, currencySymbol),
+          Divider(height: 20, color: theme.primaryText.withValues(alpha: 0.08)),
+          _buildBalanceRow(
+            theme,
+            t.eventBalanceIncludedCostsLabel,
+            includedCosts,
+            theme.statusFinished,
+            currencySymbol,
+          ),
+          Divider(height: 20, color: theme.primaryText.withValues(alpha: 0.08)),
+          _buildBalanceRow(theme, t.eventBalanceExtraCostsLabel, extraCosts, theme.brandError, currencySymbol),
+          Divider(height: 20, color: theme.primaryText.withValues(alpha: 0.08)),
+          _buildBalanceRow(
+            theme,
+            t.eventBalanceTotalLabel,
+            netBalance,
+            netBalance >= 0 ? theme.statusFinished : theme.brandError,
+            currencySymbol,
+            isBold: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBalanceRow(
+    ThemeColor theme,
+    String label,
+    double value,
+    Color valueColor,
+    String currencySymbol, {
+    bool isBold = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: theme.primaryText, fontSize: 14, fontWeight: isBold ? FontWeight.w700 : FontWeight.w500),
+        ),
+        Text(
+          '${value.toStringAsFixed(0)} $currencySymbol',
+          style: TextStyle(color: valueColor, fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+      ],
     );
   }
 
@@ -407,6 +476,42 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
             onQuantityChanged: (quantity) => cubit.updateEventAssetQuantity(item.assetId, quantity),
             onPriceChanged: (price) => cubit.updateEventAssetPrice(item.assetId, price),
             onRemove: () => cubit.removeEventAsset(item.assetId),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCostsSection(BuildContext context, CreateEditEventState state, ThemeColor theme) {
+    final t = TranslationStorage.translation;
+    final cubit = context.read<CreateEditEventCubit>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              t.eventCostsLabel,
+              style: TextStyle(color: theme.primaryText, fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            TextButton.icon(
+              onPressed: cubit.addEventCost,
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(t.addCostButton),
+            ),
+          ],
+        ),
+        if (state.eventCosts.isNotEmpty) const SizedBox(height: 8),
+        ...state.eventCosts.map(
+          (item) => EventCostTile(
+            key: ValueKey(item.localId),
+            item: item,
+            onTitleChanged: (title) => cubit.updateEventCostTitle(item.localId, title),
+            onCostChanged: (cost) => cubit.updateEventCostAmount(item.localId, cost),
+            onIncludedChanged: (included) => cubit.updateEventCostIncluded(item.localId, included),
+            onRemove: () => cubit.removeEventCost(item.localId),
           ),
         ),
       ],

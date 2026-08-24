@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
+import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
 import 'package:business_assistant/core/shared/widgets/cards/card_frame.dart';
@@ -96,6 +97,22 @@ class AccountPage extends StatelessWidget {
                         Divider(height: 1, color: theme.primaryText.withValues(alpha: 0.09)),
                         _AccountInfoRow(title: t.accountContactNumberLabel, value: state.phoneNumber ?? ''),
                       ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Logout
+                CardFrame(
+                  padding: EdgeInsets.zero,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: SelectableItem(
+                      title: t.accountLogoutLabel,
+                      textColor: theme.primaryText,
+                      fontSize: 15,
+                      leftIcon: Icon(Icons.logout, color: theme.primaryText.withValues(alpha: 0.7)),
+                      itemPressed: context.read<AuthCubit>().logout,
                     ),
                   ),
                 ),

@@ -82,7 +82,7 @@ flutter:
     - assets/svg/flags/
     # GIF assets (e.g. the shared button loading spinner)
     - assets/gifs/
-    # Demo tenant assets: logo.svg, app_icon.png, splash_logo.png
+    # Demo tenant assets: logo.png, app_icon.png, splash_logo.png
     - assets/tenants/demo/
 
   fonts:

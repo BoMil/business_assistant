@@ -1,4 +1,5 @@
 import 'package:business_assistant/core/features/events/models/requests/event_asset_request.dart';
+import 'package:business_assistant/core/features/events/models/requests/event_cost_request.dart';
 
 /// JSON body for POST /transactions — mirrors the Business API's
 /// CreateTransactionRequest. This app only ever creates TransactionType.Rental
@@ -16,6 +17,7 @@ class CreateEventRequest {
   final double? locationLongitude;
   final String? clientId;
   final List<EventAssetRequest> eventAssets;
+  final List<EventCostRequest> eventCosts;
 
   const CreateEventRequest({
     required this.title,
@@ -27,6 +29,7 @@ class CreateEventRequest {
     this.locationLongitude,
     this.clientId,
     this.eventAssets = const [],
+    this.eventCosts = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -41,5 +44,7 @@ class CreateEventRequest {
         'clientId': clientId,
         // Wire key is 'assets' — mirrors the Business API's CreateTransactionRequest.Assets.
         'assets': eventAssets.map((asset) => asset.toJson()).toList(),
+        // Wire key is 'costs' — mirrors the Business API's CreateTransactionRequest.Costs.
+        'costs': eventCosts.map((cost) => cost.toJson()).toList(),
       };
 }
