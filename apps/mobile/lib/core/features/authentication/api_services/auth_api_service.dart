@@ -4,6 +4,7 @@ import 'package:business_assistant/core/features/authentication/models/requests/
 import 'package:business_assistant/core/features/authentication/models/responses/login_response.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
+import 'package:business_assistant/core/utils/api/dio_exception_handler.dart';
 
 /// Wraps every authentication-related HTTP call (POST /auth/login, ...).
 ///
@@ -24,14 +25,12 @@ class AuthApiService {
       final response = await dio.post(APIEndpoints.login, data: request.toJson());
       return ApiResponse.completed(LoginResponse.fromJson(response.data));
     } on DioException catch (e) {
-      // 400/401 means invalid credentials — anything else is a server/network error
-      if (e.type == DioExceptionType.connectionError) {
-        return ApiResponse.error('No internet connection. Check your connection and try again.');
-      }
+      // 400/401 means invalid credentials — more specific than the generic
+      // status message DioExceptionHandler would return for these codes.
       if (e.response?.statusCode == 400 || e.response?.statusCode == 401) {
         return ApiResponse.error('Invalid email or password. Please try again.');
       }
-      return ApiResponse.error('Something went wrong. Please try again.');
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }

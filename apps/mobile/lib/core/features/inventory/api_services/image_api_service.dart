@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:business_assistant/config/constants/api_endpoints.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
+import 'package:business_assistant/core/utils/api/dio_exception_handler.dart';
 
 /// Uploads an image file and returns its blob URL — decoupled from any
 /// specific entity (Asset, etc.) so it works for create flows too, where
@@ -20,17 +21,9 @@ class ImageApiService {
       final response = await dio.post(endpoint ?? APIEndpoints.images, data: formData);
       return ApiResponse.completed(response.data.toString());
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
-  }
-
-  String _messageFor(DioException e) {
-    if (e.type == DioExceptionType.connectionError) {
-      return 'No internet connection. Check your connection and try again.';
-    }
-    final detail = e.response?.data is Map ? (e.response?.data['detail'] as String?) : null;
-    return detail ?? 'Something went wrong. Please try again.';
   }
 }

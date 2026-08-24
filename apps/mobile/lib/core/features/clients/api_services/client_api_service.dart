@@ -6,6 +6,7 @@ import 'package:business_assistant/core/features/clients/models/responses/client
 import 'package:business_assistant/core/features/events/models/responses/event_response.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
+import 'package:business_assistant/core/utils/api/dio_exception_handler.dart';
 
 /// Wraps every Business API call for Clients.
 class ClientApiService {
@@ -24,10 +25,7 @@ class ClientApiService {
       final clients = (response.data as List).map((json) => ClientResponse.fromJson(json)).toList();
       return ApiResponse.completed(clients);
     } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionError) {
-        return ApiResponse.error('No internet connection. Check your connection and try again.');
-      }
-      return ApiResponse.error('Something went wrong. Please try again.');
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -38,7 +36,7 @@ class ClientApiService {
       final response = await dio.get(APIEndpoints.clientById(id));
       return ApiResponse.completed(ClientResponse.fromJson(response.data));
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -50,7 +48,7 @@ class ClientApiService {
       final response = await dio.post(APIEndpoints.clients, data: request.toJson());
       return ApiResponse.completed(response.data.toString());
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -61,7 +59,7 @@ class ClientApiService {
       await dio.put(APIEndpoints.clientById(id), data: request.toJson());
       return ApiResponse.completed(true);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -72,7 +70,7 @@ class ClientApiService {
       await dio.delete(APIEndpoints.clientById(id));
       return ApiResponse.completed(true);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -84,17 +82,9 @@ class ClientApiService {
       final events = (response.data as List).map((json) => EventResponse.fromJson(json)).toList();
       return ApiResponse.completed(events);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
-  }
-
-  String _messageFor(DioException e) {
-    if (e.type == DioExceptionType.connectionError) {
-      return 'No internet connection. Check your connection and try again.';
-    }
-    final detail = e.response?.data is Map ? (e.response?.data['detail'] as String?) : null;
-    return detail ?? 'Something went wrong. Please try again.';
   }
 }

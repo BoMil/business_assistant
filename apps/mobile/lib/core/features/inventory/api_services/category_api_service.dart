@@ -5,6 +5,7 @@ import 'package:business_assistant/core/features/inventory/models/requests/updat
 import 'package:business_assistant/core/features/inventory/models/responses/category_response.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
+import 'package:business_assistant/core/utils/api/dio_exception_handler.dart';
 
 /// Wraps every Business API call for Categories — backs the Inventory
 /// feature's "category" picker on the product form (getCategories()).
@@ -19,7 +20,7 @@ class CategoryApiService {
       final categories = (response.data as List).map((json) => CategoryResponse.fromJson(json)).toList();
       return ApiResponse.completed(categories);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -31,7 +32,7 @@ class CategoryApiService {
       final response = await dio.post(APIEndpoints.categories, data: request.toJson());
       return ApiResponse.completed(response.data.toString());
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -42,7 +43,7 @@ class CategoryApiService {
       await dio.put(APIEndpoints.categoryById(id), data: request.toJson());
       return ApiResponse.completed(true);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -53,17 +54,9 @@ class CategoryApiService {
       await dio.delete(APIEndpoints.categoryById(id));
       return ApiResponse.completed(true);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
-  }
-
-  String _messageFor(DioException e) {
-    if (e.type == DioExceptionType.connectionError) {
-      return 'No internet connection. Check your connection and try again.';
-    }
-    final detail = e.response?.data is Map ? (e.response?.data['detail'] as String?) : null;
-    return detail ?? 'Something went wrong. Please try again.';
   }
 }

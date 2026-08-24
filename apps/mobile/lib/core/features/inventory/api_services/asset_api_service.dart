@@ -8,6 +8,7 @@ import 'package:business_assistant/core/features/inventory/models/responses/asse
 import 'package:business_assistant/core/features/inventory/models/responses/assets_paged_response.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
 import 'package:business_assistant/core/utils/api/app_interceptor.dart';
+import 'package:business_assistant/core/utils/api/dio_exception_handler.dart';
 
 /// Wraps every Business API call for Assets (Inventory products) — also
 /// backs the Events feature's "Add product" picker (getAssets()).
@@ -28,7 +29,7 @@ class AssetApiService {
       final assets = (response.data as List).map((json) => AssetResponse.fromJson(json)).toList();
       return ApiResponse.completed(assets);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -40,7 +41,7 @@ class AssetApiService {
       final response = await dio.get(APIEndpoints.assetsPaged, queryParameters: request.toQueryParameters());
       return ApiResponse.completed(AssetsPagedResponse.fromJson(response.data));
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -70,7 +71,7 @@ class AssetApiService {
       final response = await dio.get(APIEndpoints.assetById(id));
       return ApiResponse.completed(AssetDetailResponse.fromJson(response.data));
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -122,7 +123,7 @@ class AssetApiService {
       final response = await dio.post(APIEndpoints.assets, data: request.toJson());
       return ApiResponse.completed(response.data.toString());
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -133,7 +134,7 @@ class AssetApiService {
       await dio.put(APIEndpoints.assetById(id), data: request.toJson());
       return ApiResponse.completed(true);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
@@ -144,17 +145,9 @@ class AssetApiService {
       await dio.delete(APIEndpoints.assetById(id));
       return ApiResponse.completed(true);
     } on DioException catch (e) {
-      return ApiResponse.error(_messageFor(e));
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
     } catch (e) {
       return ApiResponse.error('Something went wrong. Please try again.');
     }
-  }
-
-  String _messageFor(DioException e) {
-    if (e.type == DioExceptionType.connectionError) {
-      return 'No internet connection. Check your connection and try again.';
-    }
-    final detail = e.response?.data is Map ? (e.response?.data['detail'] as String?) : null;
-    return detail ?? 'Something went wrong. Please try again.';
   }
 }
