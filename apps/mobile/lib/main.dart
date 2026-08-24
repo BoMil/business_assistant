@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -14,6 +15,7 @@ import 'package:business_assistant/config/translations/translation_storage.dart'
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
 import 'package:business_assistant/core/features/bottom_navigation/cubits/bottom_navigation/bottom_navigation_cubit.dart';
+import 'package:business_assistant/core/features/push_notifications/push_notification_router.dart';
 import 'package:business_assistant/core/features/push_notifications/services/local_notifications_service.dart';
 import 'package:business_assistant/core/features/push_notifications/services/push_notification_service.dart';
 import 'package:business_assistant/core/features/tenant/cubits/tenant_config/tenant_config_cubit.dart';
@@ -44,10 +46,22 @@ void main() async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     FirebaseMessaging.instance.onTokenRefresh.listen((_) => PushNotificationService().registerCurrentToken());
     // FCM only auto-shows a notification when the app is backgrounded/killed —
-    // in the foreground we have to display it ourselves.
+    // in the foreground we have to display it ourselves. The data payload is
+    // JSON-encoded into the local notification's payload so a tap on it can
+    // still be routed (see LocalNotificationsService's onDidReceiveNotificationResponse).
     FirebaseMessaging.onMessage.listen(
-      (message) => LocalNotificationsService().showNotification(message.notification?.title, message.notification?.body),
+      (message) => LocalNotificationsService().showNotification(
+        message.notification?.title,
+        message.notification?.body,
+        payload: jsonEncode(message.data),
+      ),
     );
+    // App was backgrounded (not terminated) and the user tapped the system notification.
+    FirebaseMessaging.onMessageOpenedApp.listen((message) => PushNotificationRouter.handleTap(message.data));
+    // App was terminated and launched by tapping the notification — RouterState().authCubit
+    // isn't set up yet at this point, so stash the data for MyApp to consume once it is.
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) PushNotificationRouter.pendingColdStartData = initialMessage.data;
   }
 
   // Set up the singleton Dio instance with the auth interceptor before any
@@ -135,6 +149,13 @@ class _MyAppState extends State<MyApp> {
           if (state is Authenticated) {
             context.read<UserInfoCubit>().loadUserInfo();
             if (FirebaseConfig().isConfigured) PushNotificationService().registerCurrentToken();
+            // Consume a cold-start notification tap now that auth state (and
+            // therefore RouterState().authCubit) is actually resolved.
+            final pendingData = PushNotificationRouter.pendingColdStartData;
+            if (pendingData != null) {
+              PushNotificationRouter.pendingColdStartData = null;
+              PushNotificationRouter.handleTap(pendingData);
+            }
           }
           if (state is Unauthenticated) {
             // Next login should start on the first tab, not wherever the user left off.

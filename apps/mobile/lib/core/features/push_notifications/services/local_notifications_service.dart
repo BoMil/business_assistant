@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:business_assistant/core/features/push_notifications/push_notification_router.dart';
 
 /// Displays a push notification while the app is in the foreground — FCM only
 /// auto-shows notifications when the app is backgrounded/killed. Uses the same
@@ -30,6 +31,8 @@ class LocalNotificationsService {
         settings: const InitializationSettings(
           android: AndroidInitializationSettings('ic_notification'),
         ),
+        onDidReceiveNotificationResponse: (details) =>
+            PushNotificationRouter.handleLocalNotificationPayload(details.payload),
       );
       await _plugin
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -40,13 +43,14 @@ class LocalNotificationsService {
     }
   }
 
-  Future<void> showNotification(String? title, String? body) async {
+  Future<void> showNotification(String? title, String? body, {String? payload}) async {
     if (!_isInitialized) return;
 
     await _plugin.show(
       id: _notificationIdCounter++,
       title: title,
       body: body,
+      payload: payload,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channel.id,

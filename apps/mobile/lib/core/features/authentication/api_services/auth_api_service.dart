@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:business_assistant/config/constants/api_endpoints.dart';
 import 'package:business_assistant/core/features/authentication/models/requests/login_request.dart';
@@ -42,21 +40,21 @@ class AuthApiService {
   /// Builds a structurally valid, unsigned JWT for local testing — carries the
   /// claims AuthCubit reads (sub, email, firstName, role, tenantId, exp) with
   /// exp 1 hour out, so token-validity checks pass without a real Identity server.
-  String _mockAccessToken() {
-    final header = _base64UrlEncodeNoPad({'alg': 'HS256', 'typ': 'JWT'});
-    final exp = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
-    final payload = _base64UrlEncodeNoPad({
-      'sub': '11111111-1111-1111-1111-111111111111',
-      'email': 'test@example.com',
-      'firstName': 'John',
-      'role': 'Owner',
-      'tenantId': '22222222-2222-2222-2222-222222222222',
-      'exp': exp,
-    });
-    return '$header.$payload.mock-signature';
-  }
+  // String _mockAccessToken() {
+  //   final header = _base64UrlEncodeNoPad({'alg': 'HS256', 'typ': 'JWT'});
+  //   final exp = DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000;
+  //   final payload = _base64UrlEncodeNoPad({
+  //     'sub': '11111111-1111-1111-1111-111111111111',
+  //     'email': 'test@example.com',
+  //     'firstName': 'John',
+  //     'role': 'Owner',
+  //     'tenantId': '22222222-2222-2222-2222-222222222222',
+  //     'exp': exp,
+  //   });
+  //   return '$header.$payload.mock-signature';
+  // }
 
-  String _base64UrlEncodeNoPad(Map<String, dynamic> json) {
-    return base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
-  }
+  // String _base64UrlEncodeNoPad(Map<String, dynamic> json) {
+  //   return base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
+  // }
 }
