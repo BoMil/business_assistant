@@ -189,6 +189,18 @@ No global EF query filter, no `ITenantContext` service — tenant scoping is **e
 
 **When adding a new tenant-scoped entity/endpoint, follow this exact chain — don't introduce a shortcut (global filter, ambient context, etc.) without discussing it first**, since it would be inconsistent with everything else in the codebase.
 
+### Cross-service communication — event bus (MassTransit + RabbitMQ)
+
+Identity and Business never call each other directly (no HttpClient, no gRPC) — the only link between them is publish/consume over RabbitMQ via MassTransit. This mirrors Zepp.WebApp's own pattern: Zepp uses an event bus for exactly this kind of "service A did something, service B should react" case, and has no API-key-guarded internal-HTTP tier for service-to-service calls either — internal trust is implicit (private network), not a distinct auth layer.
+
+- Event contracts live in `apps/backend/shared/Shared.Queues` (new, dependency-free — separate from `Shared.Application` since only the publish/consume side needs it, not every use case). One record per event, e.g. `TenantNotificationRequested(Guid TenantId, Guid ExcludeUserId, string Title, string Body)`.
+- **Publish**: directly from an `X.Application` command handler via MassTransit's `IPublishEndpoint` — treated the same as MediatR/FluentValidation, an abstraction package Application is allowed to reference, not a concrete infra implementation. Wrap the `Publish` call in try/catch and swallow failures — a broker outage must not fail the primary create operation; the notification is a side effect, not part of that operation's success criteria.
+- **Consume**: a plain `IConsumer<T>` in `X.Infrastructure/Messaging/` that immediately hands off to a MediatR command via `ISender.Send(...)` — no business logic in the consumer itself, same discipline as an endpoint's `Handle` method.
+- Bus wiring (`AddMassTransit` + `UsingRabbitMq`) lives in each service's `X.Infrastructure/DependencyInjection.cs`. Config keys `RabbitMq:Host/Username/Password` follow the usual placeholder (`appsettings.json`) / dev-value (`appsettings.Development.json`) / env-var (`docker-compose.override.yml`) convention — dev credentials are RabbitMQ's own default `guest`/`guest`, a throwaway, not a real secret.
+- **No outbox, no sagas.** Zepp's outbox is per-tenant-database-specific (MassTransit's EF outbox, one per tenant DB) — doesn't map here since this repo uses one shared database with `TenantId` columns, not database-per-tenant (see below for why). A message lost to broker downtime is an accepted v1 gap, not silently patched over.
+
+First (and so far only) use: `CreateTransactionCommandHandler`/`CreateAssetCommandHandler` (Business) publish `TenantNotificationRequested` after save; Identity's `TenantNotificationRequestedConsumer` reacts via `BroadcastTenantNotificationCommand`, pushing to every other tenant user's registered devices. See `README.md`'s "Push Notifications" section for the full picture including the mobile side.
+
 ### EF Core conventions
 
 - `DbContext` in `X.Persistence/XDbContext.cs`, primary-constructor style, `OnModelCreating` calls `modelBuilder.ApplyConfigurationsFromAssembly(...)`.
@@ -212,7 +224,7 @@ No global EF query filter, no `ITenantContext` service — tenant scoping is **e
 
 - **`IEndpoint`/`EndpointExtensions` are duplicated per-service** instead of living once in `Shared.Presentation`, as they do in Zepp. Identity's copy of `IEndpoint.cs` has a doc-comment flagging this: *"When a second microservice is added, this interface should be moved to Shared.Presentation."* That second service (Business) now exists — this is a live, acknowledged TODO. Ask before extracting it (touches both services).
 - **Swagger setup lives in `X.API/Program.cs`**, not in `X.Presentation/DependencyInjection.cs` like Zepp does it. Both services agree on this — a considered choice, not an inconsistency.
-- **No message bus, gRPC, OpenTelemetry, Sentry, Key Vault, or health checks yet** — Zepp's `Products.Infrastructure` wires all of these; Identity/Business don't. If a task needs one of these, Zepp's `Products.Infrastructure/DependencyInjection.cs` is the reference to adapt, not something to invent from scratch.
+- **No gRPC, OpenTelemetry, Sentry, Key Vault, outbox/sagas, or health checks yet** — Zepp's `Products.Infrastructure` wires all of these; Identity/Business don't. If a task needs one of these, Zepp's `Products.Infrastructure/DependencyInjection.cs` is the reference to adapt, not something to invent from scratch. (A message bus — MassTransit + RabbitMQ — was added; see "Cross-service communication" above. It's intentionally narrower than Zepp's usage: no outbox, no sagas, one event type so far.)
 - **`UserError`** is defined in `Shared.Domain/Errors` but not handled in `CommonHttpErrorHandlers.HandleError`'s switch (falls to generic 400).
 
 ---

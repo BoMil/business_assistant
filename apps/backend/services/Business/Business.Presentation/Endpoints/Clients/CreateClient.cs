@@ -29,7 +29,7 @@ public static class CreateClient
         CancellationToken cancellationToken)
     {
         var command = new CreateClientCommand(
-            user.GetTenantId(), request.Name, request.PhoneNumber, request.Email,
+            user.GetTenantId(), user.GetUserId(), request.Name, request.PhoneNumber, request.Email,
             request.LocationAddress, request.LocationLatitude, request.LocationLongitude, request.Description);
 
         var result = await sender.Send(command, cancellationToken);

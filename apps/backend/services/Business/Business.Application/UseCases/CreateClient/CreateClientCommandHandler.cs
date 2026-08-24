@@ -2,11 +2,16 @@ using Business.Application.Repositories;
 using Business.Domain.Entities;
 using Business.Domain.ValueObjects;
 using FluentResults;
+using MassTransit;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using Shared.Queues.Enums;
+using Shared.Queues.IntegrationEvents;
 
 namespace Business.Application.UseCases.CreateClient;
 
-internal sealed class CreateClientCommandHandler(IUnitOfWorkBusiness unitOfWork)
+internal sealed class CreateClientCommandHandler(
+    IUnitOfWorkBusiness unitOfWork, IPublishEndpoint publishEndpoint, ILogger<CreateClientCommandHandler> logger)
     : IRequestHandler<CreateClientCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(CreateClientCommand request, CancellationToken cancellationToken)
@@ -19,6 +24,21 @@ internal sealed class CreateClientCommandHandler(IUnitOfWorkBusiness unitOfWork)
 
         await unitOfWork.Clients.AddAsync(client, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await publishEndpoint.Publish(
+                new TenantNotificationRequested(
+                    request.TenantId, request.UserId, "Нови клијент је додат", client.Name,
+                    PushEntityType.Client, PushAction.Created, client.Id),
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Broker being unreachable must not fail the create — the notification is a
+            // side effect, not part of this operation's success criteria.
+            logger.LogWarning(ex, "Failed to publish TenantNotificationRequested for created client {ClientId}", client.Id);
+        }
 
         return Result.Ok(client.Id);
     }

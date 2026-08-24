@@ -6,6 +6,7 @@ namespace Business.Application.UseCases.CreateClient;
 
 public record CreateClientCommand(
     Guid TenantId,
+    Guid UserId,
     string Name,
     string PhoneNumber,
     string Email,

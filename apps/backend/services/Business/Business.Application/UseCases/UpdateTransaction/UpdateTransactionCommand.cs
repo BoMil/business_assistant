@@ -8,6 +8,7 @@ namespace Business.Application.UseCases.UpdateTransaction;
 public record UpdateTransactionCommand(
     Guid Id,
     Guid TenantId,
+    Guid UserId,
     string Title,
     string? Description,
     DateTime? From,

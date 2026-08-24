@@ -109,6 +109,17 @@ This is picked up automatically when running in the `Development` environment (t
 
 When running via `docker compose` instead, the container can't see your host's user-secrets, so the same connection string is passed via the gitignored `.env` file (see "Whole backend stack" above) — `docker-compose.override.yml` maps it to `BlobStorage__ConnectionString`.
 
+## Push Notifications
+
+Firebase Cloud Messaging, one Firebase project per tenant (`Tenant.FirebaseConfig`, service-account credential encrypted at rest via `IDataProtector`). On login, the mobile app registers its FCM device token (`POST /identity/users/me/device-tokens`) — a user can have several (multi-device). Mobile shows the notification both in the background (FCM's default OS handling) and in the foreground (`flutter_local_notifications`, since FCM doesn't auto-display while the app is active).
+
+Beyond that manual/per-user path, the system also broadcasts automatically: when any user creates an Event (Transaction) or Asset, every other user of that tenant gets pushed a notification — regardless of whether they're currently logged in, since it targets their stored device tokens, not an active session. This crosses a service boundary (Business creates the entity, Identity owns the push infrastructure), so it goes over a message bus (RabbitMQ + MassTransit) instead of a direct HTTP call:
+
+1. Business publishes `TenantNotificationRequested` (tenant id, creator's user id to exclude, title, body) after saving.
+2. Identity consumes it, looks up every device token belonging to that tenant except the creator's, and sends a push to each via Firebase.
+
+See `CLAUDE.md`'s "Cross-service communication" section for why an event bus was chosen here instead of a synchronous internal endpoint.
+
 ## Roadmap
 
 | Phase | Features |

@@ -6,6 +6,7 @@ namespace Business.Application.UseCases.CreateAsset;
 
 public record CreateAssetCommand(
     Guid TenantId,
+    Guid UserId,
     string Name,
     Guid? CategoryId,
     string? Description,

@@ -4,11 +4,16 @@ using Business.Domain.Enums;
 using Shared.Domain.Errors;
 using Business.Domain.ValueObjects;
 using FluentResults;
+using MassTransit;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using Shared.Queues.Enums;
+using Shared.Queues.IntegrationEvents;
 
 namespace Business.Application.UseCases.UpdateTransaction;
 
-internal sealed class UpdateTransactionCommandHandler(IUnitOfWorkBusiness unitOfWork)
+internal sealed class UpdateTransactionCommandHandler(
+    IUnitOfWorkBusiness unitOfWork, IPublishEndpoint publishEndpoint, ILogger<UpdateTransactionCommandHandler> logger)
     : IRequestHandler<UpdateTransactionCommand, Result>
 {
     public async Task<Result> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
@@ -42,6 +47,21 @@ internal sealed class UpdateTransactionCommandHandler(IUnitOfWorkBusiness unitOf
             transaction.AddAsset(item.AssetId, item.Quantity, item.Price);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await publishEndpoint.Publish(
+                new TenantNotificationRequested(
+                    request.TenantId, request.UserId, "Догађај је ажуриран", transaction.Title,
+                    PushEntityType.Transaction, PushAction.Updated, transaction.Id),
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Broker being unreachable must not fail the update — the notification is a
+            // side effect, not part of this operation's success criteria.
+            logger.LogWarning(ex, "Failed to publish TenantNotificationRequested for updated transaction {TransactionId}", transaction.Id);
+        }
 
         return Result.Ok();
     }

@@ -8,6 +8,7 @@ namespace Business.Application.UseCases.CreateTransaction;
 
 public record CreateTransactionCommand(
     Guid TenantId,
+    Guid UserId,
     TransactionType Type,
     string Title,
     string? Description,

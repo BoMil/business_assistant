@@ -29,7 +29,7 @@ public static class CreateAsset
         CancellationToken cancellationToken)
     {
         var command = new CreateAssetCommand(
-            user.GetTenantId(), request.Name, request.CategoryId, request.Description,
+            user.GetTenantId(), user.GetUserId(), request.Name, request.CategoryId, request.Description,
             request.SalePrice, request.RentalPrice, request.StockCount, request.ImgUrl);
 
         var result = await sender.Send(command, cancellationToken);

@@ -28,7 +28,7 @@ public static class CancelTransaction
         ISender sender,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new CancelTransactionCommand(id, user.GetTenantId()), cancellationToken);
+        var result = await sender.Send(new CancelTransactionCommand(id, user.GetTenantId(), user.GetUserId()), cancellationToken);
 
         if (result.IsSuccess)
             return TypedResults.NoContent();

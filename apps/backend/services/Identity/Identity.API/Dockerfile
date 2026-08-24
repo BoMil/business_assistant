@@ -33,6 +33,7 @@ COPY ["apps/backend/services/Identity/Identity.Persistence/Identity.Persistence.
 COPY ["apps/backend/services/Identity/Identity.Presentation/Identity.Presentation.csproj", "apps/backend/services/Identity/Identity.Presentation/"]
 COPY ["apps/backend/shared/Shared.Application/Shared.Application.csproj", "apps/backend/shared/Shared.Application/"]
 COPY ["apps/backend/shared/Shared.Domain/Shared.Domain.csproj", "apps/backend/shared/Shared.Domain/"]
+COPY ["apps/backend/shared/Shared.Queues/Shared.Queues.csproj", "apps/backend/shared/Shared.Queues/"]
 
 RUN dotnet restore "apps/backend/services/Identity/Identity.API/Identity.API.csproj"
 

@@ -28,7 +28,7 @@ public static class RemoveAsset
         ISender sender,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new RemoveAssetCommand(id, user.GetTenantId()), cancellationToken);
+        var result = await sender.Send(new RemoveAssetCommand(id, user.GetTenantId(), user.GetUserId()), cancellationToken);
 
         if (result.IsSuccess)
             return TypedResults.NoContent();

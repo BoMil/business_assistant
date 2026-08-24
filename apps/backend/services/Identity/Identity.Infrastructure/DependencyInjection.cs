@@ -1,6 +1,8 @@
 using System.Text;
 using Identity.Application.Services;
+using Identity.Infrastructure.Messaging;
 using Identity.Infrastructure.PushNotifications;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +52,21 @@ public static class DependencyInjection
         services.AddSingleton<FirebaseAppCache>();
         services.AddScoped<IFirebaseCredentialProtector, FirebaseCredentialProtector>();
         services.AddScoped<IPushNotificationService, FirebasePushNotificationService>();
+
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<TenantNotificationRequestedConsumer>();
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(configuration["RabbitMq:Host"], "/", h =>
+                {
+                    h.Username(configuration["RabbitMq:Username"]!);
+                    h.Password(configuration["RabbitMq:Password"]!);
+                });
+                cfg.ConfigureEndpoints(context);
+            });
+        });
 
         return services;
     }

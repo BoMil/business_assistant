@@ -1,4 +1,5 @@
 using System.Text;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,20 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         services.SetupBlobStorage(configuration);
+
+        // Business only publishes (TenantNotificationRequested) — it never consumes, so no
+        // AddConsumer<> calls here. Identity is the one that reacts to what's published.
+        services.AddMassTransit(x =>
+        {
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(configuration["RabbitMq:Host"], "/", h =>
+                {
+                    h.Username(configuration["RabbitMq:Username"]!);
+                    h.Password(configuration["RabbitMq:Password"]!);
+                });
+            });
+        });
 
         return services;
     }

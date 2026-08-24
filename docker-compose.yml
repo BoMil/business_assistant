@@ -42,6 +42,8 @@ services:
         # condition: service_healthy ceka da SQL Server bude spreman (healthcheck)
         # pre nego sto pokrene identity.api — bez ovoga app bi pao pri startu
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   # ── Business mikroservis ────────────────────────────────────────────────────
   business.api:
@@ -54,6 +56,8 @@ services:
       dockerfile: apps/backend/services/Business/Business.API/Dockerfile
     depends_on:
       ba-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   # ── API Gateway ──────────────────────────────────────────────────────────
@@ -70,6 +74,20 @@ services:
     depends_on:
       - identity.api
       - business.api
+
+  # ── RabbitMQ ─────────────────────────────────────────────────────────────
+  # Message broker za MassTransit — Business objavljuje TenantNotificationRequested
+  # (kad se kreira Event/Asset), Identity ga konzumira i salje push. Isti pattern
+  # (event bus umesto direktnog HTTP poziva izmedju servisa) kao Zepp.WebApp.
+  rabbitmq:
+    container_name: ba-rabbitmq
+    image: rabbitmq:3-management
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      retries: 10
 
   # ── SQL Server ─────────────────────────────────────────────────────────────
   # Jedan SQL Server instance, odvojena baza po mikroservisu (Zepp pattern).

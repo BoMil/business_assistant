@@ -12,6 +12,9 @@ internal sealed class DeviceTokenRepository(IdentityDbContext context) : IDevice
     public Task<List<DeviceToken>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default) =>
         context.DeviceTokens.Where(dt => dt.UserId == userId).ToListAsync(cancellationToken);
 
+    public Task<List<DeviceToken>> GetByTenantIdAsync(Guid tenantId, Guid excludeUserId, CancellationToken cancellationToken = default) =>
+        context.DeviceTokens.Where(dt => dt.User.TenantId == tenantId && dt.UserId != excludeUserId).ToListAsync(cancellationToken);
+
     public async Task AddAsync(DeviceToken deviceToken, CancellationToken cancellationToken = default) =>
         await context.DeviceTokens.AddAsync(deviceToken, cancellationToken);
 

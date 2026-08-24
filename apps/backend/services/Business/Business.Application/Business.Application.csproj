@@ -2,12 +2,16 @@
   <ItemGroup>
     <ProjectReference Include="..\Business.Domain\Business.Domain.csproj" />
     <ProjectReference Include="..\..\..\shared\Shared.Application\Shared.Application.csproj" />
+    <ProjectReference Include="..\..\..\shared\Shared.Queues\Shared.Queues.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="FluentResults" Version="3.16.0" />
     <PackageReference Include="FluentValidation" Version="11.10.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
+    <!-- Only IPublishEndpoint is used here (publishing TenantNotificationRequested) — the
+         actual RabbitMQ transport is wired in Business.Infrastructure, not here. -->
+    <PackageReference Include="MassTransit" Version="8.3.0" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>

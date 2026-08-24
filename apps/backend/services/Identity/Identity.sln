@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Domain", "..\..\shar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Application", "..\..\shared\Shared.Application\Shared.Application.csproj", "{B620F58A-D792-46EA-8F85-104B53C2B0C7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Queues", "..\..\shared\Shared.Queues\Shared.Queues.csproj", "{2E3F4A5B-6C7D-4E8F-9A0B-1C2D3E4F5A6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +62,9 @@ Global
 		{B620F58A-D792-46EA-8F85-104B53C2B0C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B620F58A-D792-46EA-8F85-104B53C2B0C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B620F58A-D792-46EA-8F85-104B53C2B0C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E3F4A5B-6C7D-4E8F-9A0B-1C2D3E4F5A6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E3F4A5B-6C7D-4E8F-9A0B-1C2D3E4F5A6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E3F4A5B-6C7D-4E8F-9A0B-1C2D3E4F5A6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E3F4A5B-6C7D-4E8F-9A0B-1C2D3E4F5A6B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

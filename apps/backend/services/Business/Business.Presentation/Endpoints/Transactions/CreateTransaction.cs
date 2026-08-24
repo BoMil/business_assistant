@@ -30,7 +30,7 @@ public static class CreateTransaction
         CancellationToken cancellationToken)
     {
         var command = new CreateTransactionCommand(
-            user.GetTenantId(), request.Type, request.Title, request.Description,
+            user.GetTenantId(), user.GetUserId(), request.Type, request.Title, request.Description,
             request.From, request.To, request.LocationAddress, request.LocationLatitude, request.LocationLongitude,
             request.ClientId,
             request.Assets.Select(asset => new TransactionAssetInput(asset.AssetId, asset.Quantity, asset.Price)).ToList());

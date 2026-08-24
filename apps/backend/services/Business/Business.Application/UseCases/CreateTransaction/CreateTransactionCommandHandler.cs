@@ -4,11 +4,16 @@ using Business.Domain.Entities;
 using Business.Domain.Enums;
 using Business.Domain.ValueObjects;
 using FluentResults;
+using MassTransit;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using Shared.Queues.Enums;
+using Shared.Queues.IntegrationEvents;
 
 namespace Business.Application.UseCases.CreateTransaction;
 
-internal sealed class CreateTransactionCommandHandler(IUnitOfWorkBusiness unitOfWork)
+internal sealed class CreateTransactionCommandHandler(
+    IUnitOfWorkBusiness unitOfWork, IPublishEndpoint publishEndpoint, ILogger<CreateTransactionCommandHandler> logger)
     : IRequestHandler<CreateTransactionCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
@@ -35,6 +40,21 @@ internal sealed class CreateTransactionCommandHandler(IUnitOfWorkBusiness unitOf
 
         await unitOfWork.Transactions.AddAsync(transaction, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await publishEndpoint.Publish(
+                new TenantNotificationRequested(
+                    request.TenantId, request.UserId, "Нови догађај је додат", transaction.Title,
+                    PushEntityType.Transaction, PushAction.Created, transaction.Id),
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Broker being unreachable must not fail the create — the notification is a
+            // side effect, not part of this operation's success criteria.xs
+            logger.LogWarning(ex, "Failed to publish TenantNotificationRequested for created transaction {TransactionId}", transaction.Id);
+        }
 
         return Result.Ok(transaction.Id);
     }

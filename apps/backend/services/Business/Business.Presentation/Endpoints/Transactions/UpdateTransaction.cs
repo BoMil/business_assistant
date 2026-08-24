@@ -31,7 +31,7 @@ public static class UpdateTransaction
         CancellationToken cancellationToken)
     {
         var command = new UpdateTransactionCommand(
-            id, user.GetTenantId(), request.Title, request.Description,
+            id, user.GetTenantId(), user.GetUserId(), request.Title, request.Description,
             request.From, request.To, request.LocationAddress, request.LocationLatitude, request.LocationLongitude,
             request.ClientId,
             request.Assets.Select(asset => new TransactionAssetInput(asset.AssetId, asset.Quantity, asset.Price)).ToList());

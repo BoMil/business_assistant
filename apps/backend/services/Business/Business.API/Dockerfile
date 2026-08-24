@@ -23,6 +23,7 @@ COPY ["apps/backend/services/Business/Business.Persistence/Business.Persistence.
 COPY ["apps/backend/services/Business/Business.Presentation/Business.Presentation.csproj", "apps/backend/services/Business/Business.Presentation/"]
 COPY ["apps/backend/shared/Shared.Application/Shared.Application.csproj", "apps/backend/shared/Shared.Application/"]
 COPY ["apps/backend/shared/Shared.Domain/Shared.Domain.csproj", "apps/backend/shared/Shared.Domain/"]
+COPY ["apps/backend/shared/Shared.Queues/Shared.Queues.csproj", "apps/backend/shared/Shared.Queues/"]
 
 RUN dotnet restore "apps/backend/services/Business/Business.API/Business.API.csproj"
 
