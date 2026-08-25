@@ -25,4 +25,13 @@ final class Environment {
   /// it is intentionally not committed with a real value.
   static const googlePlacesApiKey =
       String.fromEnvironment('GOOGLE_PLACES_API_KEY', defaultValue: '');
+
+  /// Sentry DSN for crash/error reporting. Shared across every tenant (one
+  /// Sentry project) rather than one per tenant, so all reports land in a
+  /// single dashboard — see TenantConfig().tenantId, set as a Sentry tag in
+  /// main.dart, for per-tenant filtering there. An empty DSN disables the
+  /// SDK (Sentry's own documented behaviour), so a build without one
+  /// configured yet simply doesn't report.
+  static const sentryDsn =
+      String.fromEnvironment('SENTRY_DSN', defaultValue: '');
 }

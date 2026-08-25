@@ -44,9 +44,13 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Tenant environment files — contain server URLs per environment.
-# Commit only if you are comfortable storing those URLs in git history.
-# .env/
+# Tenant environment files — contain real API keys/DSNs (Google Places,
+# Sentry), so the real per-tenant files must never be committed. Only the
+# .example templates (blank secret fields) are tracked; CI materializes the
+# real file from the template and injects secrets from GitHub Actions
+# secrets (see .github/workflows/mobile-android.yml).
+.env/*.json
+!.env/*.json.example
 
 # Android signing — never commit keystores or key.properties
 android/key.properties

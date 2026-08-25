@@ -1,7 +1,7 @@
 {
-  "ENVIRONMENT": "STAGING",
-  "SERVER_ADDRESS": "https://staging-api.businessassistant.com",
-  "GOOGLE_PLACES_API_KEY": "AIzaSyDlsUz6UlgyCwG-dDbYHP4wEZbQnJ_R_bo",
+  "ENVIRONMENT": "PRODUCTION",
+  "SERVER_ADDRESS": "https://api.businessassistant.com",
+  "GOOGLE_PLACES_API_KEY": "",
   "TENANT_ID": "demo",
   "TENANT_TYPE": "Rental",
   "CURRENCY": "EUR",
@@ -19,5 +19,6 @@
   "FIREBASE_ANDROID_APP_ID": "",
   "FIREBASE_MESSAGING_SENDER_ID": "",
   "FIREBASE_PROJECT_ID": "",
-  "FIREBASE_STORAGE_BUCKET": ""
+  "FIREBASE_STORAGE_BUCKET": "",
+  "SENTRY_DSN": ""
 }

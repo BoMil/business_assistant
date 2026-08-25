@@ -5,12 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:business_assistant/config/environment/environment.dart';
 import 'package:business_assistant/config/firebase/firebase_config.dart';
 import 'package:business_assistant/config/routes/bottom_nav_tabs.dart';
 import 'package:business_assistant/config/routes/router_config.dart';
 import 'package:business_assistant/config/routes/routes.dart';
+import 'package:business_assistant/config/tenant/tenant_config.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/authentication/cubits/auth/auth_cubit.dart';
 import 'package:business_assistant/core/features/authentication/cubits/user_info/user_info_cubit.dart';
@@ -30,7 +32,7 @@ import 'package:business_assistant/theme/themes.dart';
 ///   1. Suppress debug prints in non-DEV environments.
 ///   2. Initialize Firebase, if this tenant has a project configured.
 ///   3. Initialize the Dio interceptor (token injection + 401 refresh).
-///   4. Run MyApp.
+///   4. Initialize Sentry (a no-op if no DSN is configured) and run MyApp.
 void main() async {
   // Disable all debugPrint() calls in release mode and non-DEV environments
   // so no sensitive data appears in device logs on staging/production.
@@ -68,7 +70,21 @@ void main() async {
   // repository can make an HTTP call.
   AppInterceptor().initializeInterceptor();
 
-  runApp(const MyApp());
+  // One shared Sentry project across every tenant — the tenant tag is what
+  // lets the dashboard be filtered per tenant instead of needing a separate
+  // project each. Only enabled in PRODUCTION for now — comment out this
+  // condition to test Sentry locally.
+  if (Environment.environment == 'PRODUCTION') {
+    await SentryFlutter.init((options) {
+      options.dsn = Environment.sentryDsn;
+      options.environment = Environment.environment;
+    }, appRunner: () => runApp(const MyApp()));
+    await Sentry.configureScope(
+      (scope) => scope.setTag('tenant', TenantConfig().tenantId),
+    );
+  } else {
+    runApp(const MyApp());
+  }
 }
 
 /// Must be a top-level function — Firebase's own requirement for background

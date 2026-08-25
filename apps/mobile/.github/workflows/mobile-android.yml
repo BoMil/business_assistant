@@ -98,12 +98,27 @@ jobs:
             echo "name=staging" >> $GITHUB_OUTPUT
           fi
 
-      # ── 8.5. Fetch tenant config from backend (optional) ─────────────────────
+      # ── 8.5. Materialize env file and inject secrets ─────────────────────────
+      # .env/*.json is gitignored (real API keys/DSNs) — only the .example
+      # template (blank secret fields) is committed. Start from that template
+      # and fill in the two secret fields from GitHub Actions repo secrets.
+      - name: Materialize env file and inject secrets
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+        run: |
+          ENV_FILE=".env/${{ matrix.tenant }}.${{ steps.env_name.outputs.name }}.json"
+          cp "$ENV_FILE.example" "$ENV_FILE"
+          jq --arg dsn "$SENTRY_DSN" --arg places "$GOOGLE_PLACES_API_KEY" \
+            '.SENTRY_DSN = $dsn | .GOOGLE_PLACES_API_KEY = $places' \
+            "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+
+      # ── 8.6. Fetch tenant config from backend (optional) ─────────────────────
       # Once a real Identity API is deployed, set TENANT_CONFIG_API_URL and
       # TENANT_CONFIG_API_KEY as repo secrets to pull fresh branding + feature
       # flags from the tenant's database row and merge them into the local
       # .env file before building. Until then (no secret configured) this step
-      # is a no-op — the checked-in .env file is used as-is, same as today.
+      # is a no-op — the materialized .env file from the previous step is used as-is.
       - name: Fetch tenant config from backend (optional)
         env:
           TENANT_CONFIG_API_URL: ${{ secrets.TENANT_CONFIG_API_URL }}

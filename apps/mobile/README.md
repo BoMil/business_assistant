@@ -82,6 +82,12 @@ loaded from `.env/<tenant>.<environment>.json`, e.g. `.env/demo.development.json
 `lib/config/environment/environment.dart` reads this into a typed config, and
 `lib/config/tenant/feature_flags.dart` exposes the `FEATURE_*` flags.
 
+These files contain real API keys/DSNs (Google Places, Sentry) and are
+gitignored — only `.env/<tenant>.<environment>.json.example` (blank secret
+fields) is committed. For local dev, copy the `.example` file and fill in
+`GOOGLE_PLACES_API_KEY`/`SENTRY_DSN` yourself; CI does the same from GitHub
+Actions secrets (see below).
+
 `TenantConfig` (colors, name) and `FeatureFlags` (`Rental`, `Inventory`,
 `Reporting`, `Poultry`, `ThemeChange`, `Language`) are kept **1:1 with the
 backend's `Tenant` entity** (Identity service) — same field names on both
@@ -98,15 +104,19 @@ come from a local `.env` file or from the database via CI (see below).
 2. Ensures the tenant asset directory is listed in `pubspec.yaml`
 3. Generates `flutter_launcher_icons.yaml` / `flutter_native_splash.yaml` and runs the generators
 
+Before that, a **"Materialize env file and inject secrets"** step copies the
+committed `.env/<tenant>.<environment>.json.example` template to the real
+(gitignored) filename and fills in `SENTRY_DSN`/`GOOGLE_PLACES_API_KEY` from
+the `SENTRY_DSN`/`GOOGLE_PLACES_API_KEY` repo secrets.
+
 Right after that, an optional **"Fetch tenant config from backend"** step calls
 `GET /tenants/{slug}/config` on the Identity API (protected by an `X-Api-Key`
 header) and merges the tenant's live colors/feature-flags from the database
 into the `.env/<tenant>.<environment>.json` file before the build — only the
 overlapping keys are overwritten, so `SERVER_ADDRESS`/`ENVIRONMENT`/
-`PACKAGE_NAME`/`TENANT_ID` always come from the local file. This step needs
-the `TENANT_CONFIG_API_URL` and `TENANT_CONFIG_API_KEY` repo secrets; until a
-backend is actually deployed and those secrets are set, it's a no-op and the
-checked-in `.env` file is used as-is, same as local development.
+`PACKAGE_NAME`/`TENANT_ID` always come from the materialized file. This step
+needs the `TENANT_CONFIG_API_URL` and `TENANT_CONFIG_API_KEY` repo secrets;
+until a backend is actually deployed and those secrets are set, it's a no-op.
 
 ## Localization
 
