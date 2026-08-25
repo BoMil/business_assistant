@@ -10,6 +10,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:business_assistant/config/constants/api_endpoints.dart';
 import 'package:business_assistant/config/constants/secure_storage_keys.dart';
 import 'package:business_assistant/config/environment/environment.dart';
+import 'package:business_assistant/config/routes/router_config.dart';
 
 /// Singleton Dio instance that intercepts every HTTP request/response.
 ///
@@ -171,8 +172,8 @@ class AppInterceptor {
     try {
       final response = await refreshDio.post(
         APIEndpoints.refreshToken,
-        // The Identity API expects: { "refreshToken": "<token>" }
-        data: {'refreshToken': refreshToken},
+        // The Identity API's RefreshTokenRequest expects: { "token": "<token>" }
+        data: {'token': refreshToken},
       );
 
       String? newAccessToken = response.data['accessToken'];
@@ -210,13 +211,13 @@ class AppInterceptor {
     }
   }
 
-  /// Clears all auth tokens from secure storage.
-  /// TODO: Trigger AuthCubit.logout() once we wire up the router reference.
+  /// Logs the user out via the shared AuthCubit (clears tokens and emits
+  /// Unauthenticated, which is what actually makes GoRouter redirect to login —
+  /// deleting the tokens directly from storage does not, since the router only
+  /// reacts to AuthCubit's stream).
   void _logoutUser() {
     _isTokenRefreshing = false;
-    const storage = FlutterSecureStorage();
-    storage.delete(key: SecureStorageKeys.tokenKey);
-    storage.delete(key: SecureStorageKeys.refreshTokenKey);
+    RouterState().authCubit.logout();
     debugPrint('[AppInterceptor] User logged out — tokens cleared.');
   }
 
