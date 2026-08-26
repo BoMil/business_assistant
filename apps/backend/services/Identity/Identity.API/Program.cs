@@ -5,11 +5,15 @@ using Identity.Presentation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Shared.Presentation.Extensions;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BUILDER — sve sto treba da se registruje PRE app.Build()
 // ─────────────────────────────────────────────────────────────────────────────
 var builder = WebApplication.CreateBuilder(args);
+
+// Sentry — samo Error/Critical + unhandled exceptions, iskljuceno u Development.
+builder.UseSentryIfEnabled("Identity");
 
 // Serialize enums as their name (e.g. "Rental") instead of the underlying int —
 // TenantConfigDto.Type is the first enum exposed in a response DTO, and mobile's

@@ -40,6 +40,9 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=guest
       - RabbitMq__Password=guest
+      # Sentry DSN (real credential — ne sme u appsettings/git). Ucitava se iz lokalnog
+      # .env fajla (gitignored) — vidi .env.example. Aktivan samo van Development-a.
+      - Sentry__Dsn=${SENTRY_DSN}
     ports:
       # host_port:container_port
       # Identity API dostupan na: http://localhost:5100
@@ -62,6 +65,9 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=guest
       - RabbitMq__Password=guest
+      # Sentry DSN (real credential — ne sme u appsettings/git). Ucitava se iz lokalnog
+      # .env fajla (gitignored) — vidi .env.example. Aktivan samo van Development-a.
+      - Sentry__Dsn=${SENTRY_DSN}
     ports:
       # Business API dostupan na: http://localhost:5101
       # Swagger UI: http://localhost:5101/swagger

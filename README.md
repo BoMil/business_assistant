@@ -37,11 +37,11 @@ business_assistant/
 
 ### Whole backend stack (DB + both APIs + Gateway)
 
-First time only — Docker containers can't read your `dotnet user-secrets`, so Business's Blob Storage connection string is passed in via a gitignored `.env` file instead:
+First time only — Docker containers can't read your `dotnet user-secrets`, so Business's Blob Storage connection string and the Sentry DSN are passed in via a gitignored `.env` file instead:
 
 ```bash
 cp .env.example .env
-# then edit .env and paste your real Azure Storage connection string
+# then edit .env and paste your real Azure Storage connection string and Sentry DSN
 ```
 
 ```bash
@@ -108,6 +108,24 @@ dotnet user-secrets set "BlobStorage:ConnectionString" "<your-azure-storage-conn
 This is picked up automatically when running in the `Development` environment (the local default) — no other setup needed. In production, these values come from Key Vault / App Service configuration instead of a file.
 
 When running via `docker compose` instead, the container can't see your host's user-secrets, so the same connection string is passed via the gitignored `.env` file (see "Whole backend stack" above) — `docker-compose.override.yml` maps it to `BlobStorage__ConnectionString`.
+
+## Error Tracking (Sentry)
+
+Identity and Business report unhandled exceptions and `LogError`/`LogCritical` calls to a shared backend Sentry project (via `Sentry.AspNetCore`, wired through `Shared.Presentation`'s `UseSentryIfEnabled()`) — `ServerName` is set to `"Identity"`/`"Business"` so events are distinguishable in the dashboard. **It's disabled in the `Development` environment**, so it won't fire during ordinary local development even with a DSN configured.
+
+Same secrets pattern as Blob Storage above:
+
+```bash
+cd apps/backend/services/Business/Business.API
+dotnet user-secrets set "Sentry:Dsn" "<your-sentry-dsn>"
+```
+
+```bash
+cd apps/backend/services/Identity/Identity.API
+dotnet user-secrets set "Sentry:Dsn" "<your-sentry-dsn>"
+```
+
+To actually see it report locally, run with a non-Development environment, e.g. `ASPNETCORE_ENVIRONMENT=Staging dotnet run`. Via `docker compose`, the DSN comes from the gitignored `.env` file (see "Whole backend stack" above) — `docker-compose.override.yml` maps it to `Sentry__Dsn`.
 
 ## Push Notifications
 

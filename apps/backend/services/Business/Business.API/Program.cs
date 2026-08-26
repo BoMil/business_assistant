@@ -5,8 +5,12 @@ using Business.Presentation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Shared.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Sentry — samo Error/Critical + unhandled exceptions, iskljuceno u Development.
+builder.UseSentryIfEnabled("Business");
 
 // Serialize enums as their name (e.g. "Rental", "InProgress") instead of the
 // underlying int — TransactionDto.Type/Status are consumed by the mobile client.
