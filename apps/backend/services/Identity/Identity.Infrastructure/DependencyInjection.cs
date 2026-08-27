@@ -1,3 +1,4 @@
+using System.Security.Authentication;
 using System.Text;
 using Identity.Application.Services;
 using Identity.Infrastructure.Messaging;
@@ -59,10 +60,19 @@ public static class DependencyInjection
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host(configuration["RabbitMq:Host"], "/", h =>
+                var useSsl = bool.TryParse(configuration["RabbitMq:UseSsl"], out var parsedUseSsl) && parsedUseSsl;
+                var port = (ushort)(useSsl ? 5671 : 5672);
+
+                cfg.Host(configuration["RabbitMq:Host"], port, configuration["RabbitMq:VirtualHost"] ?? "/", h =>
                 {
                     h.Username(configuration["RabbitMq:Username"]!);
                     h.Password(configuration["RabbitMq:Password"]!);
+
+                    // CloudAMQP (used in Staging/Production) requires TLS on port 5671; local RabbitMQ container stays on plain 5672.
+                    if (useSsl)
+                    {
+                        h.UseSsl(s => s.Protocol = SslProtocols.Tls12);
+                    }
                 });
                 cfg.ConfigureEndpoints(context);
             });
