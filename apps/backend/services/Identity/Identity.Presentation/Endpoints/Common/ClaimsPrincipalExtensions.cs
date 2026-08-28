@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Identity.Domain.Enums;
 
 namespace Identity.Presentation.Endpoints.Common;
 
@@ -26,5 +27,17 @@ public static class ClaimsPrincipalExtensions
             ?? throw new InvalidOperationException("JWT is missing the 'sub' claim.");
 
         return Guid.Parse(value);
+    }
+
+    /// <summary>
+    /// JwtProvider embeds the role under the standard "role" claim, which ASP.NET's JWT bearer
+    /// handler remaps to ClaimTypes.Role by default — same remapping as "sub" above.
+    /// </summary>
+    public static UserRole GetRole(this ClaimsPrincipal user)
+    {
+        var value = user.FindFirstValue(ClaimTypes.Role)
+            ?? throw new InvalidOperationException("JWT is missing the 'role' claim.");
+
+        return Enum.Parse<UserRole>(value);
     }
 }
