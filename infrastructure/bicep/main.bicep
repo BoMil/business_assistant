@@ -5,13 +5,15 @@
 // one user-assigned Managed Identity (Key Vault read + ACR pull, shared by all 3 apps), and
 // the Identity/Business/Gateway Container Apps themselves.
 //
-// RabbitMQ (CloudAMQP) and Blob Storage are NOT provisioned here — CloudAMQP is an external
-// SaaS, and the Blob Storage account already exists from earlier work. Their connection details
-// come in as secure params and are stored in Key Vault alongside everything else.
+// RabbitMQ (CloudAMQP), the tenant-images Blob Storage account, and the Identity
+// Data-Protection-keys Blob Storage account are NOT provisioned here — all three already
+// exist from earlier work (external SaaS or created ad-hoc via az cli). Their connection
+// details come in as secure params and are stored in Key Vault alongside everything else.
 //
 // Run against an existing resource group:
 //   az deployment group create -g <rg-name> -f main.bicep -p environmentName=staging \
 //     sqlAdminPassword=... jwtSecret=... ciApiKey=... blobStorageConnectionString=... \
+//     dataProtectionStorageConnectionString=... \
 //     sentryDsn=... rabbitMqHost=... rabbitMqUsername=... rabbitMqPassword=... rabbitMqVirtualHost=...
 
 @allowed(['staging', 'prod'])
@@ -32,6 +34,12 @@ param ciApiKey string
 
 @secure()
 param blobStorageConnectionString string
+
+// Separate storage account from blobStorageConnectionString (tenant images) — this one holds
+// only the ASP.NET Core Data Protection key ring (see FirebaseCredentialProtector.cs), kept in
+// its own account so a leak of tenant-image access doesn't also expose the key ring, or vice versa.
+@secure()
+param dataProtectionStorageConnectionString string
 
 @secure()
 param sentryDsn string
@@ -176,6 +184,12 @@ resource secretBlobStorage 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   properties: { value: blobStorageConnectionString }
 }
 
+resource secretDataProtectionStorage 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'dataprotection-storage-connection-string'
+  properties: { value: dataProtectionStorageConnectionString }
+}
+
 resource secretSentryDsn 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: keyVault
   name: 'sentry-dsn'
@@ -266,6 +280,7 @@ module identityApp 'modules/containerApp.bicep' = {
     secrets: concat(commonKvSecrets, [
       { name: 'identity-db-connection-string', keyVaultUrl: secretIdentityDbConn.properties.secretUri }
       { name: 'ci-api-key', keyVaultUrl: secretCiApiKey.properties.secretUri }
+      { name: 'dataprotection-storage-connection-string', keyVaultUrl: secretDataProtectionStorage.properties.secretUri }
     ])
     env: concat([
       { name: 'ASPNETCORE_ENVIRONMENT', value: aspnetEnvironment }
@@ -277,6 +292,7 @@ module identityApp 'modules/containerApp.bicep' = {
       { name: 'Jwt__ExpiryMinutes', value: '60' }
       { name: 'CiApiKey', secretRef: 'ci-api-key' }
       { name: 'BlobStorage__ConnectionString', secretRef: 'blob-storage-connection-string' }
+      { name: 'DataProtection__StorageConnectionString', secretRef: 'dataprotection-storage-connection-string' }
       { name: 'Sentry__Dsn', secretRef: 'sentry-dsn' }
     ], rabbitMqEnv)
   }

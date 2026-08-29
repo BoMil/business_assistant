@@ -18,7 +18,13 @@ public record RegisterTenantCommand(
     string OwnerPhoneNumber,
     string OwnerPassword,
     string Currency = "EUR"
-) : ICommand<Result<RegisterTenantResult>>;
+) : ICommand<Result<RegisterTenantResult>>
+{
+    // LoggingBehavior logs every request via {@Data}, which embeds this record's ToString() —
+    // override it so OwnerPassword never reaches the logs.
+    public override string ToString() =>
+        $"{nameof(RegisterTenantCommand)} {{ TenantName = {TenantName}, Slug = {Slug}, PrimaryColor = {PrimaryColor}, AccentColor = {AccentColor}, ErrorColor = {ErrorColor}, Type = {Type}, OwnerFirstName = {OwnerFirstName}, OwnerLastName = {OwnerLastName}, OwnerEmail = {OwnerEmail}, OwnerPhoneNumber = {OwnerPhoneNumber}, OwnerPassword = [REDACTED], Currency = {Currency} }}";
+}
 
 public record RegisterTenantResult(Guid TenantId, Guid OwnerId);
 

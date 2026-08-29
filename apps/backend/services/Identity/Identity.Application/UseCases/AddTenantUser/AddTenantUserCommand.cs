@@ -13,7 +13,13 @@ public record AddTenantUserCommand(
     string PhoneNumber,
     string Password,
     UserRole Role
-) : ICommand<Result<Guid>>;
+) : ICommand<Result<Guid>>
+{
+    // LoggingBehavior logs every request via {@Data}, which embeds this record's ToString() —
+    // override it so Password never reaches the logs.
+    public override string ToString() =>
+        $"{nameof(AddTenantUserCommand)} {{ TenantId = {TenantId}, FirstName = {FirstName}, LastName = {LastName}, Email = {Email}, PhoneNumber = {PhoneNumber}, Password = [REDACTED], Role = {Role} }}";
+}
 
 public sealed class AddTenantUserCommandValidator : AbstractValidator<AddTenantUserCommand>
 {

@@ -93,7 +93,22 @@ await using (var scope = app.Services.CreateAsyncScope())
 
 // Swagger je vidljiv u svim environmentima — za production deployment
 // ogranici ga sa: if (app.Environment.IsDevelopment())
-app.UseSwagger();
+//
+// Kad se pristupa kroz Gateway, YARP skida "/identity" prefiks pre prosledjivanja,
+// pa Identity sam po sebi ne zna za njega — bez ovoga bi generisani "servers" URL
+// u swagger.json-u bio relativan "/", a Swagger UI-jev "Try it out" bi gadjao
+// Gateway-jev root umesto "/identity/...", vracajuci 404. Gateway salje
+// X-Gateway-Prefix header (appsettings.json) da Swagger zna tacan prefiks;
+// kad se servis gadja direktno (bez Gateway-a), header izostaje i ponasanje ostaje nepromenjeno.
+app.UseSwagger(c =>
+{
+    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+    {
+        var prefix = httpReq.Headers["X-Gateway-Prefix"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(prefix))
+            swaggerDoc.Servers = [new() { Url = prefix }];
+    });
+});
 app.UseSwaggerUI();
 
 // Global exception handler — Zepp pattern: jedan centralizovani middleware

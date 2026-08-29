@@ -5,7 +5,12 @@ using Shared.Application.RequestTypes;
 
 namespace Identity.Application.UseCases.Login;
 
-public record LoginCommand(string Email, string Password) : ICommand<Result<LoginResult>>;
+public record LoginCommand(string Email, string Password) : ICommand<Result<LoginResult>>
+{
+    // LoggingBehavior logs every request via {@Data}, which embeds this record's ToString() —
+    // override it so Password never reaches the logs.
+    public override string ToString() => $"{nameof(LoginCommand)} {{ Email = {Email}, Password = [REDACTED] }}";
+}
 
 public record LoginResult(
     string AccessToken,

@@ -5,11 +5,9 @@ namespace Identity.Infrastructure.PushNotifications;
 
 /// <summary>
 /// Encrypts a tenant's Firebase Admin SDK service-account JSON before it's stored, using
-/// ASP.NET Core's built-in Data Protection (no new infra needed). Caveat: the default key
-/// ring persists to local disk per instance — fine for local dev/a single long-lived
-/// instance, but a multi-instance/redeployed-container deployment needs a shared key-ring
-/// store (e.g. PersistKeysToAzureBlobStorage + ProtectKeysWithAzureKeyVault) — the same
-/// already-tracked Key Vault gap noted elsewhere in this codebase, not solved here.
+/// ASP.NET Core's built-in Data Protection. The key ring is persisted to a dedicated Azure
+/// Blob container (see Identity.Infrastructure/DependencyInjection.cs) instead of local disk,
+/// so it survives container restarts/redeploys/scale-to-zero.
 /// </summary>
 internal sealed class FirebaseCredentialProtector(IDataProtectionProvider dataProtectionProvider) : IFirebaseCredentialProtector
 {

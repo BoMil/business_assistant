@@ -11,7 +11,13 @@ public record SetTenantFirebaseConfigCommand(
     string ProjectId,
     string MessagingSenderId,
     string StorageBucket,
-    string ServiceAccountJson) : ICommand<Result>;
+    string ServiceAccountJson) : ICommand<Result>
+{
+    // LoggingBehavior logs every request via {@Data}, which embeds this record's ToString() —
+    // override it so the service-account private key never reaches the logs.
+    public override string ToString() =>
+        $"{nameof(SetTenantFirebaseConfigCommand)} {{ Slug = {Slug}, AndroidApiKey = {AndroidApiKey}, AndroidAppId = {AndroidAppId}, ProjectId = {ProjectId}, MessagingSenderId = {MessagingSenderId}, StorageBucket = {StorageBucket}, ServiceAccountJson = [REDACTED] }}";
+}
 
 public sealed class SetTenantFirebaseConfigCommandValidator : AbstractValidator<SetTenantFirebaseConfigCommand>
 {

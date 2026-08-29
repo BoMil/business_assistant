@@ -5,6 +5,7 @@ using Identity.Infrastructure.Messaging;
 using Identity.Infrastructure.PushNotifications;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -49,7 +50,10 @@ public static class DependencyInjection
 
         services.SetupBlobStorage(configuration);
 
-        services.AddDataProtection();
+        // Persisted to a dedicated blob container (not local disk) so the key ring survives
+        // container restarts/redeploys/scale-to-zero — see FirebaseCredentialProtector.cs.
+        services.AddDataProtection()
+            .PersistKeysToAzureBlobStorage(configuration["DataProtection:StorageConnectionString"]!, "dataprotection-keys", "identity-keys.xml");
         services.AddSingleton<FirebaseAppCache>();
         services.AddScoped<IFirebaseCredentialProtector, FirebaseCredentialProtector>();
         services.AddScoped<IPushNotificationService, FirebasePushNotificationService>();

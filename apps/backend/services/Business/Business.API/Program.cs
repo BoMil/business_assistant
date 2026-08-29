@@ -61,7 +61,17 @@ await using (var scope = app.Services.CreateAsyncScope())
     await dbContext.Database.MigrateAsync();
 }
 
-app.UseSwagger();
+// Kad se pristupa kroz Gateway, YARP skida "/business" prefiks pre prosledjivanja —
+// vidi identican komentar u Identity.API/Program.cs za puno objasnjenje.
+app.UseSwagger(c =>
+{
+    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+    {
+        var prefix = httpReq.Headers["X-Gateway-Prefix"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(prefix))
+            swaggerDoc.Servers = [new() { Url = prefix }];
+    });
+});
 app.UseSwaggerUI();
 
 app.UseExceptionHandler(exceptionHandlerApp =>
