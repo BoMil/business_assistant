@@ -37,8 +37,15 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
 
         var totalCount = await query.CountAsync(cancellationToken);
 
+        // Two-tier default sort: active (Pending/InProgress) events on top, ascending by From
+        // (soonest-upcoming/already-started first); Finished/Canceled events below, descending
+        // by To (most-recently-finished first). The null-padded ThenBy keys let each tier's
+        // ordering compose without disturbing the other (they're null for rows outside that tier).
+        var now = DateTime.UtcNow;
         var items = await query
-            .OrderByDescending(t => t.From)
+            .OrderBy(t => t.IsCancelled || (t.To.HasValue && t.To < now) ? 1 : 0)
+            .ThenBy(t => t.IsCancelled || (t.To.HasValue && t.To < now) ? (DateTime?)null : t.From)
+            .ThenByDescending(t => t.IsCancelled || (t.To.HasValue && t.To < now) ? t.To : (DateTime?)null)
             .ThenByDescending(t => t.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

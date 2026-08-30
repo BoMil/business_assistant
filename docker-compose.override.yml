@@ -29,7 +29,7 @@ services:
       - Jwt__Secret=dev-super-secret-key-minimum-32-characters-long-for-hmacsha256
       - Jwt__Issuer=identity-api
       - Jwt__Audience=business-assistant-clients
-      - Jwt__ExpiryMinutes=60
+      - Jwt__ExpiryMinutes=2880
       # Deljeni kljuc za GET /tenants/{slug}/config — koristi ga CI/CD pipeline, dev only
       - CiApiKey=dev-ci-api-key-change-me
       # Pravi Azure Storage connection string (real cloud credential — ne sme u appsettings/git).

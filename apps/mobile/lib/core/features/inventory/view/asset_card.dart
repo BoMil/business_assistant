@@ -51,7 +51,7 @@ class AssetCard extends StatelessWidget {
             children: [
               if (price != null)
                 Text(
-                  '${price.toStringAsFixed(0)} $currencySymbol',
+                  '${price % 1 == 0 ? price.toStringAsFixed(0) : price.toString()} $currencySymbol',
                   style: TextStyle(color: context.colors.statusFinished, fontSize: 15, fontWeight: FontWeight.w700),
                 ),
               const SizedBox(height: 4),

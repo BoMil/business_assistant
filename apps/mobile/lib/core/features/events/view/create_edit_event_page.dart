@@ -106,7 +106,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
                 rightContent:
                     asset.rentalPrice != null
                         ? Text(
-                          '${asset.rentalPrice!.toStringAsFixed(0)} $currencySymbol',
+                          '${asset.rentalPrice! % 1 == 0 ? asset.rentalPrice!.toStringAsFixed(0) : asset.rentalPrice.toString()} $currencySymbol',
                           style: TextStyle(color: theme.statusFinished, fontSize: 15, fontWeight: FontWeight.w600),
                         )
                         : null,
@@ -213,7 +213,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
               padding: const EdgeInsets.only(right: 16),
               child: Center(
                 child: Text(
-                  '${totalValue.toStringAsFixed(0)} $currencySymbol',
+                  '${totalValue % 1 == 0 ? totalValue.toStringAsFixed(0) : totalValue.toString()} $currencySymbol',
                   style: TextStyle(color: theme.statusFinished, fontSize: 15, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -347,14 +347,21 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
     );
   }
 
-  Widget _buildBalanceSection(BuildContext context, CreateEditEventState state, ThemeColor theme, String currencySymbol) {
+  Widget _buildBalanceSection(
+    BuildContext context,
+    CreateEditEventState state,
+    ThemeColor theme,
+    String currencySymbol,
+  ) {
     final t = TranslationStorage.translation;
 
     final assetsValue = state.eventAssets.fold<double>(0, (sum, ea) => sum + ea.price * ea.quantity);
-    final includedCosts =
-        state.eventCosts.where((ec) => ec.isIncludedInTotalCost).fold<double>(0, (sum, ec) => sum + ec.cost);
-    final extraCosts =
-        state.eventCosts.where((ec) => !ec.isIncludedInTotalCost).fold<double>(0, (sum, ec) => sum + ec.cost);
+    final includedCosts = state.eventCosts
+        .where((ec) => ec.isIncludedInTotalCost)
+        .fold<double>(0, (sum, ec) => sum + ec.cost);
+    final extraCosts = state.eventCosts
+        .where((ec) => !ec.isIncludedInTotalCost)
+        .fold<double>(0, (sum, ec) => sum + ec.cost);
     final netBalance = assetsValue - extraCosts;
 
     return CardFrame(
@@ -399,10 +406,14 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
       children: [
         Text(
           label,
-          style: TextStyle(color: theme.primaryText, fontSize: 14, fontWeight: isBold ? FontWeight.w700 : FontWeight.w500),
+          style: TextStyle(
+            color: theme.primaryText,
+            fontSize: 14,
+            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+          ),
         ),
         Text(
-          '${value.toStringAsFixed(0)} $currencySymbol',
+          '${value % 1 == 0 ? value.toStringAsFixed(0) : value.toString()} $currencySymbol',
           style: TextStyle(color: valueColor, fontSize: 14, fontWeight: FontWeight.w700),
         ),
       ],

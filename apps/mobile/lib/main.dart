@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:business_assistant/config/environment/environment.dart';
@@ -41,6 +42,10 @@ void main() async {
   }
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Loads intl's locale data (month/weekday names etc.) so DateFormat can
+  // render dates in Serbian, not just the built-in default (en_US).
+  await initializeDateFormatting();
 
   if (FirebaseConfig().isConfigured) {
     await Firebase.initializeApp(options: FirebaseConfig().currentPlatform);

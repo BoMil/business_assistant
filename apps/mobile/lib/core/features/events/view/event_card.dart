@@ -63,7 +63,8 @@ class EventCard extends StatelessWidget {
                   children: [
                     TextSpan(text: '${t.eventCardBalanceLabel}: '),
                     TextSpan(
-                      text: '${event.netBalance.toStringAsFixed(0)} $currencySymbol',
+                      text:
+                          '${event.netBalance % 1 == 0 ? event.netBalance.toStringAsFixed(0) : event.netBalance.toString()} $currencySymbol',
                       style: TextStyle(color: balanceColor),
                     ),
                   ],
@@ -80,7 +81,8 @@ class EventCard extends StatelessWidget {
                   children: [
                     TextSpan(text: '${t.eventCardChargedLabel}: '),
                     TextSpan(
-                      text: '${event.chargedTotal.toStringAsFixed(0)} $currencySymbol',
+                      text:
+                          '${event.chargedTotal % 1 == 0 ? event.chargedTotal.toStringAsFixed(0) : event.chargedTotal.toString()} $currencySymbol',
                       style: TextStyle(color: theme.statusFinished),
                     ),
                   ],

@@ -276,7 +276,7 @@ module identityApp 'modules/containerApp.bicep' = {
     image: bootstrapImage
     targetPort: 8080
     external: false
-    minReplicas: 0
+    minReplicas: 1
     secrets: concat(commonKvSecrets, [
       { name: 'identity-db-connection-string', keyVaultUrl: secretIdentityDbConn.properties.secretUri }
       { name: 'ci-api-key', keyVaultUrl: secretCiApiKey.properties.secretUri }
@@ -289,7 +289,7 @@ module identityApp 'modules/containerApp.bicep' = {
       { name: 'Jwt__Secret', secretRef: 'jwt-secret' }
       { name: 'Jwt__Issuer', value: jwtIssuer }
       { name: 'Jwt__Audience', value: jwtAudience }
-      { name: 'Jwt__ExpiryMinutes', value: '60' }
+      { name: 'Jwt__ExpiryMinutes', value: '2880' }
       { name: 'CiApiKey', secretRef: 'ci-api-key' }
       { name: 'BlobStorage__ConnectionString', secretRef: 'blob-storage-connection-string' }
       { name: 'DataProtection__StorageConnectionString', secretRef: 'dataprotection-storage-connection-string' }
@@ -309,7 +309,7 @@ module businessApp 'modules/containerApp.bicep' = {
     image: bootstrapImage
     targetPort: 8080
     external: false
-    minReplicas: 0
+    minReplicas: 1
     secrets: concat(commonKvSecrets, [
       { name: 'business-db-connection-string', keyVaultUrl: secretBusinessDbConn.properties.secretUri }
     ])
@@ -337,7 +337,7 @@ module gatewayApp 'modules/containerApp.bicep' = {
     image: bootstrapImage
     targetPort: 8080
     external: true
-    minReplicas: 0
+    minReplicas: 1
     env: [
       { name: 'ASPNETCORE_ENVIRONMENT', value: aspnetEnvironment }
       { name: 'ASPNETCORE_URLS', value: 'http://+:8080' }

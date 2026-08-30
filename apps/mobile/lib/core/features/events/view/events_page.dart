@@ -9,6 +9,7 @@ import 'package:business_assistant/core/features/events/cubits/events/events_cub
 import 'package:business_assistant/core/features/events/models/page_props/create_edit_event_page_props.dart';
 import 'package:business_assistant/core/features/events/view/event_card.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_card_skeleton.dart';
+import 'package:business_assistant/core/features/events/view/widgets/event_date_divider.dart';
 import 'package:business_assistant/core/features/main_header/view/main_header.dart';
 import 'package:business_assistant/core/features/pagination/triggers/pagination_listener_cubit_generic_trigger.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
@@ -110,14 +111,26 @@ class _EventsPageContent extends StatelessWidget {
                 );
               }
 
+              DateTime? lastDateKey;
+              final children = <Widget>[];
+              for (final event in items) {
+                final from = event.from;
+                final dateKey = from == null ? null : DateTime(from.year, from.month, from.day);
+                if (dateKey != null && dateKey != lastDateKey) {
+                  children.add(EventDateDivider(date: dateKey));
+                  lastDateKey = dateKey;
+                }
+                children.add(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: EventCard(event: event, onTap: () => _openEditEvent(context, event.id)),
+                  ),
+                );
+              }
+
               return Column(
                 children: [
-                  ...items.map(
-                    (event) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: EventCard(event: event, onTap: () => _openEditEvent(context, event.id)),
-                    ),
-                  ),
+                  ...children,
                   // "Load more" placeholder — only shown once page 1 already has items.
                   if (state.currentState == CubitState.loading) const EventCardSkeleton(),
                 ],

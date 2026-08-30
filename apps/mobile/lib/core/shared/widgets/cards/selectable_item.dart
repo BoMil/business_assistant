@@ -76,18 +76,22 @@ class SelectableItem extends StatelessWidget {
                               style: TextStyle(color: textColor, fontSize: fontSize, fontWeight: fontWeight),
                             ),
 
-                            // Subtitle
-                            if (subtitle != null) ...[
-                              Text(
-                                subtitle!,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: context.colors.primaryText.withValues(alpha: 0.5),
-                                  fontSize: fontSize - 2,
-                                  fontWeight: fontWeight,
+                            // Subtitle — one Text per line so a long first line (e.g. an
+                            // address) can't swallow the following lines: TextOverflow.ellipsis
+                            // without maxLines is unreliable across multiple '\n'-joined lines.
+                            if (subtitle != null)
+                              ...subtitle!.split('\n').map(
+                                (line) => Text(
+                                  line,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: context.colors.primaryText.withValues(alpha: 0.5),
+                                    fontSize: fontSize - 2,
+                                    fontWeight: fontWeight,
+                                  ),
                                 ),
                               ),
-                            ],
                           ],
                         ),
                       ),

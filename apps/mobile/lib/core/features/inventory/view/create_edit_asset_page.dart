@@ -62,6 +62,11 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
     super.dispose();
   }
 
+  String _formatPriceForInput(double? price) {
+    if (price == null) return '';
+    return price % 1 == 0 ? price.toStringAsFixed(0) : price.toString();
+  }
+
   void _populateControllersOnce(CreateEditAssetState state, bool isEditMode) {
     if (_controllersPopulated) return;
     // In edit mode, wait for the asset to actually load — otherwise this
@@ -70,8 +75,8 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
     _controllersPopulated = true;
     _nameController.text = state.name;
     _descriptionController.text = state.description;
-    _rentalPriceController.text = state.rentalPrice?.toStringAsFixed(0) ?? '';
-    _salePriceController.text = state.salePrice?.toStringAsFixed(0) ?? '';
+    _rentalPriceController.text = _formatPriceForInput(state.rentalPrice);
+    _salePriceController.text = _formatPriceForInput(state.salePrice);
     _stockCountController.text = state.stockCount.toString();
   }
 
