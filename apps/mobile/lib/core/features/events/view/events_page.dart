@@ -9,6 +9,7 @@ import 'package:business_assistant/core/features/events/cubits/events/events_cub
 import 'package:business_assistant/core/features/events/models/page_props/event_preview_page_props.dart';
 import 'package:business_assistant/core/features/events/models/responses/event_response.dart';
 import 'package:business_assistant/core/features/events/view/event_card.dart';
+import 'package:business_assistant/core/features/events/view/events_calendar_view.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_card_skeleton.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_date_divider.dart';
 import 'package:business_assistant/core/features/main_header/view/main_header.dart';
@@ -18,7 +19,9 @@ import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart'
 import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/text_search.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
+import 'package:business_assistant/theme/theme_color.dart';
 import 'package:business_assistant/theme/theme_constants.dart';
+import 'package:business_assistant/l10n/app_localizations.dart';
 
 /// Events tab — a paginated, server-searched list of the tenant's Rental
 /// events, with a FAB to create a new one. Pagination/search mechanics come
@@ -32,8 +35,21 @@ class EventsPage extends StatelessWidget {
   }
 }
 
-class _EventsPageContent extends StatelessWidget {
+class _EventsPageContent extends StatefulWidget {
   const _EventsPageContent();
+
+  @override
+  State<_EventsPageContent> createState() => _EventsPageContentState();
+}
+
+class _EventsPageContentState extends State<_EventsPageContent> with SingleTickerProviderStateMixin {
+  late final TabController _tabController = TabController(length: 2, vsync: this);
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   Future<void> _openCreateEvent(BuildContext context) async {
     final cubit = context.read<EventsCubit>();
@@ -65,7 +81,7 @@ class _EventsPageContent extends StatelessWidget {
         pageBottomBar: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(ThemeConstants.pagePadding, 12, ThemeConstants.pagePadding, 16),
+            padding: const EdgeInsets.fromLTRB(ThemeConstants.pagePadding, 0, ThemeConstants.pagePadding, 0),
             child: CustomOutlinedButton(
               title: t.addNewEventButton,
               backgroundColor: theme.brandPrimary,
@@ -74,79 +90,96 @@ class _EventsPageContent extends StatelessWidget {
             ),
           ),
         ),
-        pageBody: GenericPaginationTrigger<EventsCubit>(
-          fixedContent: SliverAppBar(
-            toolbarHeight: 70,
-            collapsedHeight: 70,
-            automaticallyImplyLeading: false,
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            pinned: true,
-            flexibleSpace: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: TextSearch(
-                hintText: t.eventsSearchHint,
-                onTypingComplete: (query) => context.read<EventsCubit>().changeSearch(query),
+        pageBody: Column(
+          children: [
+            TabBar(
+              controller: _tabController,
+              labelColor: theme.brandPrimary,
+              unselectedLabelColor: theme.primaryText.withValues(alpha: 0.5),
+              indicatorColor: theme.brandPrimary,
+              tabs: [Tab(text: t.eventsListTab), Tab(text: t.eventsCalendarTab)],
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [_buildListTab(context, t, theme), const EventsCalendarView()],
               ),
             ),
-          ),
-          child: BlocBuilder<EventsCubit, EventsState>(
-            builder: (context, state) {
-              final items = state.eventsResponse.items;
+          ],
+        ),
+      ),
+    );
+  }
 
-              if (state.currentState == CubitState.loading && items.isEmpty) {
-                return const EventCardSkeleton();
-              }
-
-              if (state.currentState == CubitState.error && items.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Center(
-                    child: Text(state.errorMessage ?? t.genericErrorMessage, style: TextStyle(color: theme.brandError)),
-                  ),
-                );
-              }
-
-              if (items.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Center(
-                    child: Text(
-                      t.eventsEmptyStateText,
-                      style: TextStyle(color: theme.primaryText.withValues(alpha: 0.5)),
-                    ),
-                  ),
-                );
-              }
-
-              DateTime? lastDateKey;
-              final children = <Widget>[];
-              for (final event in items) {
-                final from = event.from;
-                final dateKey = from == null ? null : DateTime(from.year, from.month, from.day);
-                if (dateKey != null && dateKey != lastDateKey) {
-                  children.add(EventDateDivider(date: dateKey));
-                  lastDateKey = dateKey;
-                }
-                children.add(
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: EventCard(event: event, onTap: () => _openEventPreview(context, event)),
-                  ),
-                );
-              }
-
-              return Column(
-                children: [
-                  ...children,
-                  // "Load more" placeholder — only shown once page 1 already has items.
-                  if (state.currentState == CubitState.loading) const EventCardSkeleton(),
-                ],
-              );
-            },
+  Widget _buildListTab(BuildContext context, AppLocalizations t, ThemeColor theme) {
+    return GenericPaginationTrigger<EventsCubit>(
+      fixedContent: SliverAppBar(
+        toolbarHeight: 70,
+        collapsedHeight: 70,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        pinned: true,
+        flexibleSpace: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: TextSearch(
+            hintText: t.eventsSearchHint,
+            onTypingComplete: (query) => context.read<EventsCubit>().changeSearch(query),
           ),
         ),
+      ),
+      child: BlocBuilder<EventsCubit, EventsState>(
+        builder: (context, state) {
+          final items = state.eventsResponse.items;
+
+          if (state.currentState == CubitState.loading && items.isEmpty) {
+            return const EventCardSkeleton();
+          }
+
+          if (state.currentState == CubitState.error && items.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: Text(state.errorMessage ?? t.genericErrorMessage, style: TextStyle(color: theme.brandError)),
+              ),
+            );
+          }
+
+          if (items.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: Text(t.eventsEmptyStateText, style: TextStyle(color: theme.primaryText.withValues(alpha: 0.5))),
+              ),
+            );
+          }
+
+          DateTime? lastDateKey;
+          final children = <Widget>[];
+          for (final event in items) {
+            final from = event.from;
+            final dateKey = from == null ? null : DateTime(from.year, from.month, from.day);
+            if (dateKey != null && dateKey != lastDateKey) {
+              children.add(EventDateDivider(date: dateKey));
+              lastDateKey = dateKey;
+            }
+            children.add(
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: EventCard(event: event, onTap: () => _openEventPreview(context, event)),
+              ),
+            );
+          }
+
+          return Column(
+            children: [
+              ...children,
+              // "Load more" placeholder — only shown once page 1 already has items.
+              if (state.currentState == CubitState.loading) const EventCardSkeleton(),
+            ],
+          );
+        },
       ),
     );
   }

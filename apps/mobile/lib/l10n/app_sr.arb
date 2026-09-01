@@ -68,6 +68,8 @@
 
     "eventsSearchHint": "Претражи догађаје...",
     "eventsEmptyStateText": "Још нема догађаја",
+    "eventsListTab": "Листа",
+    "eventsCalendarTab": "Календар",
 
     "eventDetailsTitle": "Детаљи догађаја",
     "eventStatusLabel": "Статус",

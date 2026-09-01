@@ -54,6 +54,15 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
         return (items, totalCount);
     }
 
+    public Task<List<Transaction>> GetByDateRangeAsync(
+        Guid tenantId, DateTime from, DateTime to, CancellationToken cancellationToken = default) =>
+        context.Transactions
+            .Include(t => t.Assets)
+            .Include(t => t.Costs)
+            .Where(t => t.TenantId == tenantId && t.From != null && t.To != null)
+            .Where(t => t.From <= to && t.To >= from)
+            .ToListAsync(cancellationToken);
+
     public async Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default) =>
         await context.Transactions.AddAsync(transaction, cancellationToken);
 

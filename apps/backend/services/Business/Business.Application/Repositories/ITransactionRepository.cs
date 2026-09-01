@@ -16,6 +16,15 @@ public interface ITransactionRepository
     Task<(List<Transaction> Items, int TotalCount)> GetPagedAsync(
         Guid tenantId, int page, int pageSize, string? searchTerm, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// All transactions (no paging) whose [From,To] range overlaps [<paramref name="from"/>,
+    /// <paramref name="to"/>] — same overlap check as <see cref="GetReservedQuantityAsync"/>.
+    /// Used by GetTransactionsByDateRange for the mobile Events calendar view (one fetch per
+    /// visible month).
+    /// </summary>
+    Task<List<Transaction>> GetByDateRangeAsync(
+        Guid tenantId, DateTime from, DateTime to, CancellationToken cancellationToken = default);
+
     Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default);
 
     /// <summary>

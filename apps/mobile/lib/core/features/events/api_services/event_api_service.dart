@@ -36,6 +36,23 @@ class EventApiService {
     }
   }
 
+  /// Unpaginated — all events overlapping [from, to]. Used by the Events calendar tab,
+  /// which fetches one visible month at a time.
+  Future<ApiResponse<List<EventResponse>>> getEventsByDateRange(DateTime from, DateTime to) async {
+    try {
+      final response = await dio.get(
+        APIEndpoints.transactionsByDateRange,
+        queryParameters: {'from': from.toIso8601String(), 'to': to.toIso8601String()},
+      );
+      final items = (response.data as List).map((x) => EventResponse.fromJson(x as Map<String, dynamic>)).toList();
+      return ApiResponse.completed(items);
+    } on DioException catch (e) {
+      return ApiResponse.error(DioExceptionHandler().handleError(e, dontDisplayToast: true));
+    } catch (e) {
+      return ApiResponse.error('Something went wrong. Please try again.');
+    }
+  }
+
   Future<ApiResponse<EventResponse>> getEventById(String id) async {
     // TODO: temporary mock data for UI testing — remove and let the real
     // Dio call below run once the Business API is reachable.

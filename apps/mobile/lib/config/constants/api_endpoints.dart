@@ -16,6 +16,7 @@
 ///
 /// Business microservice endpoints:
 ///   GET/POST   /business/transactions              → list / create an event (TransactionType.Rental)
+///   GET        /business/transactions/by-date-range → unpaginated list of events overlapping [from,to] (calendar view)
 ///   GET/PUT    /business/transactions/{id}          → get / update a single event
 ///   POST       /business/transactions/{id}/cancel   → soft-cancel an event
 ///   DELETE     /business/transactions/{id}          → hard-delete an event (not yet implemented server-side)
@@ -37,6 +38,7 @@ class APIEndpoints {
   static String deviceTokens = '/identity/users/me/device-tokens';
 
   static String transactions = '/business/transactions';
+  static String transactionsByDateRange = '/business/transactions/by-date-range';
   static String transactionById(String id) => '/business/transactions/$id';
   static String cancelTransaction(String id) => '/business/transactions/$id/cancel';
 

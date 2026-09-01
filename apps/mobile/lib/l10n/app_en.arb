@@ -73,6 +73,8 @@
 
     "eventsSearchHint": "Search events...",
     "eventsEmptyStateText": "No events yet",
+    "eventsListTab": "List",
+    "eventsCalendarTab": "Calendar",
 
     "eventDetailsTitle": "Event Details",
     "eventStatusLabel": "Status",
