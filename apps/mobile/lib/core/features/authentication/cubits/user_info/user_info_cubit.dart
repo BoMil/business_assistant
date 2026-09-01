@@ -25,9 +25,9 @@ class UserInfoCubit extends Cubit<UserInfoState> {
   final ImageApiService imageApiService;
 
   UserInfoCubit({UserApiService? userApiService, ImageApiService? imageApiService})
-      : userApiService = userApiService ?? UserApiService(),
-        imageApiService = imageApiService ?? ImageApiService(),
-        super(const UserInfoState());
+    : userApiService = userApiService ?? UserApiService(),
+      imageApiService = imageApiService ?? ImageApiService(),
+      super(const UserInfoState());
 
   /// Owner and Admin can add/edit/delete Inventory products — Member is view-only.
   bool get canManageInventory => state.role == UserRole.owner || state.role == UserRole.admin;
