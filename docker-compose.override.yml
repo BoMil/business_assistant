@@ -35,6 +35,11 @@ services:
       # Pravi Azure Storage connection string (real cloud credential — ne sme u appsettings/git).
       # Isti storage account kao business.api. Ucitava se iz lokalnog .env fajla (gitignored) — vidi .env.example.
       - BlobStorage__ConnectionString=${BLOB_STORAGE_CONNECTION_STRING}
+      # Data Protection kljuc ring (real cloud credential — ne sme u appsettings/git). Isti
+      # storage account/container kao produkcija — namerno, Data Protection je dizajniran
+      # za deljeni key ring izmedju instanci. Ucitava se iz lokalnog .env fajla (gitignored)
+      # — vidi .env.example.
+      - DataProtection__StorageConnectionString=${DATAPROTECTION_STORAGE_CONNECTION_STRING}
       # RabbitMQ (Docker DNS razresava "rabbitmq" kao ime containera) — "guest/guest" je
       # RabbitMQ-ov default nalog, dev only.
       - RabbitMq__Host=rabbitmq

@@ -12,7 +12,9 @@ import 'package:business_assistant/core/features/clients/models/page_props/creat
 import 'package:business_assistant/core/features/clients/view/client_events_page.dart';
 import 'package:business_assistant/core/features/clients/view/create_edit_client_page.dart';
 import 'package:business_assistant/core/features/events/models/page_props/create_edit_event_page_props.dart';
+import 'package:business_assistant/core/features/events/models/page_props/event_preview_page_props.dart';
 import 'package:business_assistant/core/features/events/view/create_edit_event_page.dart';
+import 'package:business_assistant/core/features/events/view/event_preview_page.dart';
 import 'package:business_assistant/core/features/inventory/models/page_props/create_edit_asset_page_props.dart';
 import 'package:business_assistant/core/features/inventory/view/create_edit_asset_page.dart';
 import 'package:business_assistant/core/shared/widgets/navigation/bottom_navigation_frame.dart';
@@ -135,6 +137,28 @@ class Routes {
           return CustomTransitionPage<bool>(
             key: state.pageKey,
             child: CreateEditEventPage(pageProps: pageProps),
+            transitionDuration: const Duration(milliseconds: 250),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteNames.eventPreviewPage,
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          EventPreviewPageProps? pageProps;
+          try {
+            pageProps = state.extra as EventPreviewPageProps?;
+          } catch (e) {
+            debugPrint('No data in the route extra params');
+          }
+          return CustomTransitionPage<bool>(
+            key: state.pageKey,
+            child: EventPreviewPage(pageProps: pageProps),
             transitionDuration: const Duration(milliseconds: 250),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(

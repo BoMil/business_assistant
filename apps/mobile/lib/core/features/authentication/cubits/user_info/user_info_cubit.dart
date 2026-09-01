@@ -8,6 +8,7 @@ import 'package:business_assistant/core/features/authentication/models/enums/use
 import 'package:business_assistant/core/features/inventory/api_services/image_api_service.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
+import 'package:business_assistant/core/utils/safe_emit_cubit_extension.dart';
 
 part 'user_info_state.dart';
 
@@ -43,7 +44,7 @@ class UserInfoCubit extends Cubit<UserInfoState> {
     }
 
     final user = response.data!;
-    emit(
+    safeEmit(
       state.copyWith(
         currentState: CubitState.loaded,
         firstName: user.firstName,
@@ -64,27 +65,27 @@ class UserInfoCubit extends Cubit<UserInfoState> {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
 
-    emit(state.copyWith(isUploadingImage: true, clearError: true));
+    safeEmit(state.copyWith(isUploadingImage: true, clearError: true));
 
     final uploadResponse = await imageApiService.uploadImage(
       File(pickedFile.path),
       endpoint: APIEndpoints.identityImages,
     );
     if (uploadResponse.status != ResponseStatus.completed) {
-      emit(state.copyWith(isUploadingImage: false, errorMessage: uploadResponse.message));
+      safeEmit(state.copyWith(isUploadingImage: false, errorMessage: uploadResponse.message));
       return;
     }
 
     final imgUrl = uploadResponse.data!;
     final updateResponse = await userApiService.updateUserImage(imgUrl);
     if (updateResponse.status != ResponseStatus.completed) {
-      emit(state.copyWith(isUploadingImage: false, errorMessage: updateResponse.message));
+      safeEmit(state.copyWith(isUploadingImage: false, errorMessage: updateResponse.message));
       return;
     }
 
-    emit(state.copyWith(isUploadingImage: false, imgUrl: imgUrl));
+    safeEmit(state.copyWith(isUploadingImage: false, imgUrl: imgUrl));
   }
 
   /// Resets to empty — called on logout.
-  void clear() => emit(const UserInfoState());
+  void clear() => safeEmit(const UserInfoState());
 }

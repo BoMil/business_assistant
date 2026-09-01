@@ -32,6 +32,7 @@ class RouteNames {
   // ── Event detail (pushed full-screen on top of the Events tab) ───────────
   static const String createEventPage = '/events/create';
   static const String editEventPage = '/events/edit';
+  static const String eventPreviewPage = '/events/preview';
 
   // ── Product detail (pushed full-screen on top of the Inventory tab) ─────
   static const String createAssetPage = '/inventory/create';

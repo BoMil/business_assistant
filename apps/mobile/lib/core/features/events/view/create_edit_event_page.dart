@@ -34,9 +34,11 @@ class CreateEditEventPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<CreateEditEventCubit>(
       create:
-          (_) =>
-              CreateEditEventCubit(eventId: pageProps?.eventId, initialClientId: pageProps?.initialClientId)
-                ..loadFormData(),
+          (_) => CreateEditEventCubit(
+                eventId: pageProps?.eventId,
+                initialEvent: pageProps?.event,
+                initialClientId: pageProps?.initialClientId,
+              )..loadFormData(),
       child: const _CreateEditEventPageContent(),
     );
   }
@@ -162,8 +164,6 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
   void _onStateChange(BuildContext context, CreateEditEventState state) {
     final t = TranslationStorage.translation;
 
-    _populateControllersOnce(state, context.read<CreateEditEventCubit>().isEditMode);
-
     if (state.saveSucceeded) {
       ToastMessage().showSuccessToast(text: t.eventSavedToast);
       context.pop(true);
@@ -201,6 +201,7 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
       builder: (context, state) {
         final cubit = context.read<CreateEditEventCubit>();
         final isEditMode = cubit.isEditMode;
+        _populateControllersOnce(state, isEditMode);
         final totalValue =
             state.eventAssets.fold<double>(0, (sum, ea) => sum + ea.price * ea.quantity) +
             state.eventCosts.where((ec) => ec.isIncludedInTotalCost).fold<double>(0, (sum, ec) => sum + ec.cost);

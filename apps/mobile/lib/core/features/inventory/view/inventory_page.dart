@@ -14,8 +14,10 @@ import 'package:business_assistant/core/features/main_header/view/main_header.da
 import 'package:business_assistant/core/features/pagination/triggers/pagination_listener_cubit_generic_trigger.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
+import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/text_search.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
+import 'package:business_assistant/theme/theme_constants.dart';
 
 /// Inventory tab — a paginated, server-searched list of the tenant's
 /// products (Assets), with a FAB to create a new one. Pagination/search
@@ -61,13 +63,19 @@ class _InventoryPageContent extends StatelessWidget {
       child: PageFrame(
         isHeaderVisible: false,
         pageHeader: const MainHeader(),
-        floatingActionButton:
+        pageBottomBar:
             canManageInventory
-                ? FloatingActionButton(
-                  heroTag: 'inventoryFab',
-                  onPressed: () => _openCreateAsset(context),
-                  backgroundColor: theme.brandPrimary,
-                  child: const Icon(Icons.add, color: Colors.white),
+                ? SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(ThemeConstants.pagePadding, 12, ThemeConstants.pagePadding, 16),
+                    child: CustomOutlinedButton(
+                      title: t.addNewProductButton,
+                      backgroundColor: theme.brandPrimary,
+                      color: Colors.white,
+                      onClick: () => _openCreateAsset(context),
+                    ),
+                  ),
                 )
                 : null,
         pageBody: GenericPaginationTrigger<AssetsCubit>(

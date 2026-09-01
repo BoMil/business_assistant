@@ -5,7 +5,8 @@ import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/clients/cubits/client_events/client_events_cubit.dart';
 import 'package:business_assistant/core/features/clients/models/page_props/client_events_page_props.dart';
-import 'package:business_assistant/core/features/events/models/page_props/create_edit_event_page_props.dart';
+import 'package:business_assistant/core/features/events/models/page_props/event_preview_page_props.dart';
+import 'package:business_assistant/core/features/events/models/responses/event_response.dart';
 import 'package:business_assistant/core/features/events/view/event_card.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_card_skeleton.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
@@ -34,8 +35,8 @@ class _ClientEventsPageContent extends StatelessWidget {
 
   const _ClientEventsPageContent({required this.clientName});
 
-  void _openEditEvent(BuildContext context, String eventId) {
-    context.push(RouteNames.editEventPage, extra: CreateEditEventPageProps(eventId: eventId));
+  void _openEventPreview(BuildContext context, EventResponse event) {
+    context.push(RouteNames.eventPreviewPage, extra: EventPreviewPageProps(event: event, clientName: clientName));
   }
 
   @override
@@ -79,7 +80,7 @@ class _ClientEventsPageContent extends StatelessWidget {
                 ...state.events.map(
                   (event) => Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: EventCard(event: event, onTap: () => _openEditEvent(context, event.id)),
+                    child: EventCard(event: event, onTap: () => _openEventPreview(context, event)),
                   ),
                 ),
               ],

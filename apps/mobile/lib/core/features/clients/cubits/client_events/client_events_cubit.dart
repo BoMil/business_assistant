@@ -3,6 +3,7 @@ import 'package:business_assistant/core/features/clients/api_services/client_api
 import 'package:business_assistant/core/features/events/models/responses/event_response.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
+import 'package:business_assistant/core/utils/safe_emit_cubit_extension.dart';
 
 part 'client_events_state.dart';
 
@@ -17,15 +18,15 @@ class ClientEventsCubit extends Cubit<ClientEventsState> {
         super(const ClientEventsState());
 
   Future<void> loadEvents() async {
-    emit(state.copyWith(currentState: CubitState.loading));
+    safeEmit(state.copyWith(currentState: CubitState.loading));
 
     final response = await clientApiService.getClientEvents(clientId);
 
     if (response.status == ResponseStatus.error) {
-      emit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
+      safeEmit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
       return;
     }
 
-    emit(state.copyWith(currentState: CubitState.loaded, events: response.data ?? []));
+    safeEmit(state.copyWith(currentState: CubitState.loaded, events: response.data ?? []));
   }
 }

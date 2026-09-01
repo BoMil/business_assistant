@@ -5,6 +5,7 @@ import 'package:business_assistant/core/features/clients/models/requests/update_
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/location_input_field.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
+import 'package:business_assistant/core/utils/safe_emit_cubit_extension.dart';
 
 part 'create_edit_client_state.dart';
 
@@ -23,19 +24,19 @@ class CreateEditClientCubit extends Cubit<CreateEditClientState> {
 
   Future<void> loadFormData() async {
     if (!isEditMode) {
-      emit(state.copyWith(currentState: CubitState.loaded));
+      safeEmit(state.copyWith(currentState: CubitState.loaded));
       return;
     }
 
-    emit(state.copyWith(currentState: CubitState.loading));
+    safeEmit(state.copyWith(currentState: CubitState.loading));
     final response = await clientApiService.getClientById(clientId!);
     if (response.status == ResponseStatus.error) {
-      emit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
+      safeEmit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
       return;
     }
 
     final client = response.data!;
-    emit(state.copyWith(
+    safeEmit(state.copyWith(
       currentState: CubitState.loaded,
       name: client.name,
       phoneNumber: client.phoneNumber,
@@ -47,15 +48,15 @@ class CreateEditClientCubit extends Cubit<CreateEditClientState> {
     ));
   }
 
-  void setName(String value) => emit(state.copyWith(name: value, isDirty: true));
+  void setName(String value) => safeEmit(state.copyWith(name: value, isDirty: true));
 
-  void setPhoneNumber(String value) => emit(state.copyWith(phoneNumber: value, isDirty: true));
+  void setPhoneNumber(String value) => safeEmit(state.copyWith(phoneNumber: value, isDirty: true));
 
-  void setEmail(String value) => emit(state.copyWith(email: value, isDirty: true));
+  void setEmail(String value) => safeEmit(state.copyWith(email: value, isDirty: true));
 
-  void setDescription(String value) => emit(state.copyWith(description: value, isDirty: true));
+  void setDescription(String value) => safeEmit(state.copyWith(description: value, isDirty: true));
 
-  void setLocation(LocationOutput location) => emit(state.copyWith(
+  void setLocation(LocationOutput location) => safeEmit(state.copyWith(
         locationAddress: location.address,
         locationLatitude: location.latitude,
         locationLongitude: location.longitude,
@@ -67,11 +68,11 @@ class CreateEditClientCubit extends Cubit<CreateEditClientState> {
         state.phoneNumber.trim().isEmpty ||
         state.email.trim().isEmpty ||
         state.locationAddress.trim().isEmpty) {
-      emit(state.copyWith(errorMessage: 'Name, phone number, email and location are required.'));
+      safeEmit(state.copyWith(errorMessage: 'Name, phone number, email and location are required.'));
       return;
     }
 
-    emit(state.copyWith(isSaving: true, clearError: true));
+    safeEmit(state.copyWith(isSaving: true, clearError: true));
 
     final description = state.description.trim().isEmpty ? null : state.description.trim();
 
@@ -104,22 +105,22 @@ class CreateEditClientCubit extends Cubit<CreateEditClientState> {
     }
 
     if (response.status == ResponseStatus.completed) {
-      emit(state.copyWith(isSaving: false, saveSucceeded: true));
+      safeEmit(state.copyWith(isSaving: false, saveSucceeded: true));
     } else {
-      emit(state.copyWith(isSaving: false, errorMessage: response.message));
+      safeEmit(state.copyWith(isSaving: false, errorMessage: response.message));
     }
   }
 
   Future<void> deleteClient() async {
     if (!isEditMode) return;
-    emit(state.copyWith(isDeleting: true, clearError: true));
+    safeEmit(state.copyWith(isDeleting: true, clearError: true));
 
     final response = await clientApiService.removeClient(clientId!);
 
     if (response.status == ResponseStatus.completed) {
-      emit(state.copyWith(isDeleting: false, deleteSucceeded: true));
+      safeEmit(state.copyWith(isDeleting: false, deleteSucceeded: true));
     } else {
-      emit(state.copyWith(isDeleting: false, errorMessage: response.message));
+      safeEmit(state.copyWith(isDeleting: false, errorMessage: response.message));
     }
   }
 }

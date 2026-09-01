@@ -10,6 +10,7 @@ import 'package:business_assistant/core/features/inventory/models/requests/updat
 import 'package:business_assistant/core/features/inventory/models/responses/category_response.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
+import 'package:business_assistant/core/utils/safe_emit_cubit_extension.dart';
 
 part 'create_edit_asset_state.dart';
 
@@ -42,30 +43,30 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
     if (isEditMode) {
       unawaited(_loadAsset());
     } else {
-      emit(state.copyWith(currentState: CubitState.loaded));
+      safeEmit(state.copyWith(currentState: CubitState.loaded));
     }
   }
 
   Future<void> _loadCategories() async {
-    emit(state.copyWith(categoriesState: CubitState.loading));
+    safeEmit(state.copyWith(categoriesState: CubitState.loading));
     final response = await categoryApiService.getCategories();
     if (response.status == ResponseStatus.error) {
-      emit(state.copyWith(categoriesState: CubitState.error, errorMessage: response.message));
+      safeEmit(state.copyWith(categoriesState: CubitState.error, errorMessage: response.message));
       return;
     }
-    emit(state.copyWith(categoriesState: CubitState.loaded, availableCategories: response.data ?? []));
+    safeEmit(state.copyWith(categoriesState: CubitState.loaded, availableCategories: response.data ?? []));
   }
 
   Future<void> _loadAsset() async {
-    emit(state.copyWith(currentState: CubitState.loading));
+    safeEmit(state.copyWith(currentState: CubitState.loading));
     final response = await assetApiService.getAssetById(assetId!);
     if (response.status == ResponseStatus.error) {
-      emit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
+      safeEmit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
       return;
     }
 
     final asset = response.data!;
-    emit(
+    safeEmit(
       state.copyWith(
         currentState: CubitState.loaded,
         name: asset.name,
@@ -80,47 +81,47 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
     );
   }
 
-  void setName(String value) => emit(state.copyWith(name: value, isDirty: true));
+  void setName(String value) => safeEmit(state.copyWith(name: value, isDirty: true));
 
   void selectCategory(CategoryResponse? category) =>
-      emit(state.copyWith(categoryId: category?.id, clearCategoryId: category == null, isDirty: true));
+      safeEmit(state.copyWith(categoryId: category?.id, clearCategoryId: category == null, isDirty: true));
 
-  void setDescription(String value) => emit(state.copyWith(description: value, isDirty: true));
+  void setDescription(String value) => safeEmit(state.copyWith(description: value, isDirty: true));
 
   void setSalePrice(double? value) =>
-      emit(state.copyWith(salePrice: value, clearSalePrice: value == null, isDirty: true));
+      safeEmit(state.copyWith(salePrice: value, clearSalePrice: value == null, isDirty: true));
 
   void setRentalPrice(double? value) =>
-      emit(state.copyWith(rentalPrice: value, clearRentalPrice: value == null, isDirty: true));
+      safeEmit(state.copyWith(rentalPrice: value, clearRentalPrice: value == null, isDirty: true));
 
-  void setStockCount(int value) => emit(state.copyWith(stockCount: value, isDirty: true));
+  void setStockCount(int value) => safeEmit(state.copyWith(stockCount: value, isDirty: true));
 
   Future<void> pickAndUploadImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
 
-    emit(state.copyWith(isUploadingImage: true, clearError: true));
+    safeEmit(state.copyWith(isUploadingImage: true, clearError: true));
 
     final response = await imageApiService.uploadImage(File(pickedFile.path));
 
     if (response.status == ResponseStatus.completed) {
-      emit(state.copyWith(isUploadingImage: false, imgUrl: response.data, isDirty: true));
+      safeEmit(state.copyWith(isUploadingImage: false, imgUrl: response.data, isDirty: true));
     } else {
-      emit(state.copyWith(isUploadingImage: false, errorMessage: response.message));
+      safeEmit(state.copyWith(isUploadingImage: false, errorMessage: response.message));
     }
   }
 
   Future<void> save() async {
     if (state.name.trim().isEmpty) {
-      emit(state.copyWith(errorMessage: 'Name is required.'));
+      safeEmit(state.copyWith(errorMessage: 'Name is required.'));
       return;
     }
     if (state.rentalPrice == null && state.salePrice == null) {
-      emit(state.copyWith(errorMessage: 'Rental price or product price is required.'));
+      safeEmit(state.copyWith(errorMessage: 'Rental price or product price is required.'));
       return;
     }
 
-    emit(state.copyWith(isSaving: true, clearError: true));
+    safeEmit(state.copyWith(isSaving: true, clearError: true));
 
     final description = state.description.trim().isEmpty ? null : state.description.trim();
 
@@ -153,22 +154,22 @@ class CreateEditAssetCubit extends Cubit<CreateEditAssetState> {
     }
 
     if (response.status == ResponseStatus.completed) {
-      emit(state.copyWith(isSaving: false, saveSucceeded: true));
+      safeEmit(state.copyWith(isSaving: false, saveSucceeded: true));
     } else {
-      emit(state.copyWith(isSaving: false, errorMessage: response.message));
+      safeEmit(state.copyWith(isSaving: false, errorMessage: response.message));
     }
   }
 
   Future<void> deleteAsset() async {
     if (!isEditMode) return;
-    emit(state.copyWith(isDeleting: true, clearError: true));
+    safeEmit(state.copyWith(isDeleting: true, clearError: true));
 
     final response = await assetApiService.removeAsset(assetId!);
 
     if (response.status == ResponseStatus.completed) {
-      emit(state.copyWith(isDeleting: false, deleteSucceeded: true));
+      safeEmit(state.copyWith(isDeleting: false, deleteSucceeded: true));
     } else {
-      emit(state.copyWith(isDeleting: false, errorMessage: response.message));
+      safeEmit(state.copyWith(isDeleting: false, errorMessage: response.message));
     }
   }
 }

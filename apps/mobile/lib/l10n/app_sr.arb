@@ -70,6 +70,7 @@
     "eventsEmptyStateText": "Још нема догађаја",
 
     "eventDetailsTitle": "Детаљи догађаја",
+    "eventStatusLabel": "Статус",
     "eventTitleLabel": "Назив",
     "eventDescriptionLabel": "Опис",
     "eventFromLabel": "Од",
@@ -106,6 +107,7 @@
     "confirmDeleteEvent": "Да ли сте сигурни да желите да обришете овај догађај? Ова акција је неповратна.",
     "saveChangesButton": "Сачувај измене",
     "createEventButton": "Креирај догађај",
+    "editEventButton": "Измени овај догађај",
 
     "eventSavedToast": "Догађај сачуван",
     "eventCancelledToast": "Догађај отказан",
@@ -144,6 +146,8 @@
     "clientEventsLabel": "Догађаји",
     "addNewEventButton": "Додај нови догађај",
     "createClientButton": "Креирај клијента",
+    "addNewClientButton": "Додај новог клијента",
+    "addNewProductButton": "Додај нови производ",
 
     "removeClientButton": "Уклони клијента",
     "confirmDeleteClient": "Да ли сте сигурни да желите да уклоните овог клијента? Ова акција је неповратна.",

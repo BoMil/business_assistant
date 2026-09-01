@@ -7,6 +7,7 @@ import 'package:business_assistant/core/features/authentication/models/requests/
 import 'package:business_assistant/core/features/authentication/models/responses/login_response.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/utils/api/api_response.dart';
+import 'package:business_assistant/core/utils/safe_emit_cubit_extension.dart';
 
 part 'login_state.dart';
 
@@ -35,16 +36,16 @@ class LoginCubit extends Cubit<LoginState> {
 
   /// Sends POST /auth/login with [email] and [password].
   Future<void> login({required String email, required String password}) async {
-    emit(state.copyWith(currentState: CubitState.loading, errorMessage: null));
+    safeEmit(state.copyWith(currentState: CubitState.loading, errorMessage: null));
 
     final response = await authApiService.login(LoginRequest(email: email, password: password));
 
     if (response.status == ResponseStatus.completed) {
-      emit(state.copyWith(currentState: CubitState.loaded, loginResponse: response.data));
+      safeEmit(state.copyWith(currentState: CubitState.loaded, loginResponse: response.data));
     }
 
     if (response.status == ResponseStatus.error) {
-      emit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
+      safeEmit(state.copyWith(currentState: CubitState.error, errorMessage: response.message));
     }
   }
 

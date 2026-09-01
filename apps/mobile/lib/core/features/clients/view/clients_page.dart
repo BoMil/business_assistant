@@ -13,8 +13,10 @@ import 'package:business_assistant/core/features/clients/view/widgets/client_car
 import 'package:business_assistant/core/features/main_header/view/main_header.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
+import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/text_search.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
+import 'package:business_assistant/theme/theme_constants.dart';
 
 /// Clients tab — an unpaginated (GET /clients returns everything at once),
 /// client-side-searched list of the tenant's clients, with a FAB to create a
@@ -60,13 +62,19 @@ class _ClientsPageContent extends StatelessWidget {
       child: PageFrame(
         isHeaderVisible: false,
         pageHeader: const MainHeader(),
-        floatingActionButton:
+        pageBottomBar:
             canManageClients
-                ? FloatingActionButton(
-                  heroTag: 'clientsFab',
-                  onPressed: () => _openCreateClient(context),
-                  backgroundColor: theme.brandPrimary,
-                  child: const Icon(Icons.add, color: Colors.white),
+                ? SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(ThemeConstants.pagePadding, 12, ThemeConstants.pagePadding, 16),
+                    child: CustomOutlinedButton(
+                      title: t.addNewClientButton,
+                      backgroundColor: theme.brandPrimary,
+                      color: Colors.white,
+                      onClick: () => _openCreateClient(context),
+                    ),
+                  ),
                 )
                 : null,
         pageBody: CustomScrollView(

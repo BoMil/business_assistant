@@ -17,7 +17,7 @@ class ClientsCubit extends Cubit<ClientsState> {
         super(const ClientsState());
 
   Future<void> loadClients() async {
-    emit(state.copyWith(currentState: CubitState.loading));
+    safeEmit(state.copyWith(currentState: CubitState.loading));
 
     final response = await clientApiService.getClients();
 
@@ -32,7 +32,7 @@ class ClientsCubit extends Cubit<ClientsState> {
   void changeSearch(String term) => safeEmit(state.copyWith(searchTerm: term));
 
   void resetState() {
-    emit(const ClientsState());
+    safeEmit(const ClientsState());
     loadClients();
   }
 }

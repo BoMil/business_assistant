@@ -6,7 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:business_assistant/config/routes/route_names.dart';
 import 'package:business_assistant/config/translations/translation_storage.dart';
 import 'package:business_assistant/core/features/events/cubits/events/events_cubit.dart';
-import 'package:business_assistant/core/features/events/models/page_props/create_edit_event_page_props.dart';
+import 'package:business_assistant/core/features/events/models/page_props/event_preview_page_props.dart';
+import 'package:business_assistant/core/features/events/models/responses/event_response.dart';
 import 'package:business_assistant/core/features/events/view/event_card.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_card_skeleton.dart';
 import 'package:business_assistant/core/features/events/view/widgets/event_date_divider.dart';
@@ -14,8 +15,10 @@ import 'package:business_assistant/core/features/main_header/view/main_header.da
 import 'package:business_assistant/core/features/pagination/triggers/pagination_listener_cubit_generic_trigger.dart';
 import 'package:business_assistant/core/shared/enums/cubit_state.dart';
 import 'package:business_assistant/core/shared/pages/page_frame/page_frame.dart';
+import 'package:business_assistant/core/shared/widgets/buttons/custom_outlined_button.dart';
 import 'package:business_assistant/core/shared/widgets/input_fields/text_search.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
+import 'package:business_assistant/theme/theme_constants.dart';
 
 /// Events tab — a paginated, server-searched list of the tenant's Rental
 /// events, with a FAB to create a new one. Pagination/search mechanics come
@@ -38,9 +41,9 @@ class _EventsPageContent extends StatelessWidget {
     if (saved == true) cubit.resetState();
   }
 
-  Future<void> _openEditEvent(BuildContext context, String eventId) async {
+  Future<void> _openEventPreview(BuildContext context, EventResponse event) async {
     final cubit = context.read<EventsCubit>();
-    final saved = await context.push<bool>(RouteNames.editEventPage, extra: CreateEditEventPageProps(eventId: eventId));
+    final saved = await context.push<bool>(RouteNames.eventPreviewPage, extra: EventPreviewPageProps(event: event));
     if (saved == true) cubit.resetState();
   }
 
@@ -59,11 +62,17 @@ class _EventsPageContent extends StatelessWidget {
       child: PageFrame(
         isHeaderVisible: false,
         pageHeader: const MainHeader(),
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'eventsFab',
-          onPressed: () => _openCreateEvent(context),
-          backgroundColor: theme.brandPrimary,
-          child: const Icon(Icons.add, color: Colors.white),
+        pageBottomBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(ThemeConstants.pagePadding, 12, ThemeConstants.pagePadding, 16),
+            child: CustomOutlinedButton(
+              title: t.addNewEventButton,
+              backgroundColor: theme.brandPrimary,
+              color: Colors.white,
+              onClick: () => _openCreateEvent(context),
+            ),
+          ),
         ),
         pageBody: GenericPaginationTrigger<EventsCubit>(
           fixedContent: SliverAppBar(
@@ -123,7 +132,7 @@ class _EventsPageContent extends StatelessWidget {
                 children.add(
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: EventCard(event: event, onTap: () => _openEditEvent(context, event.id)),
+                    child: EventCard(event: event, onTap: () => _openEventPreview(context, event)),
                   ),
                 );
               }

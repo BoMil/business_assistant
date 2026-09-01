@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:business_assistant/config/routes/bottom_nav_tabs.dart';
+import 'package:business_assistant/core/utils/safe_emit_cubit_extension.dart';
 
 part 'bottom_navigation_state.dart';
 
@@ -18,7 +19,7 @@ class BottomNavigationCubit extends Cubit<BottomNavigationState> {
 
   /// Switches to [index] directly — used by BottomNavigationBar's onTap.
   void changeScreen(int index) {
-    emit(state.copyWith(currentIndex: index));
+    safeEmit(state.copyWith(currentIndex: index));
   }
 
   /// Switches to the tab whose route path matches [path] — use this to jump
@@ -27,12 +28,12 @@ class BottomNavigationCubit extends Cubit<BottomNavigationState> {
   void changeScreenByPath(String path) {
     final index = tabs.indexWhere((tab) => tab.path == path);
     if (index == -1) return;
-    emit(state.copyWith(currentIndex: index));
+    safeEmit(state.copyWith(currentIndex: index));
   }
 
   /// Resets to the first tab — called on logout so the next login starts fresh.
   void resetCurrentIndex() {
-    emit(state.copyWith(currentIndex: 0));
+    safeEmit(state.copyWith(currentIndex: 0));
   }
 
   /// True if the tab at [path] is currently selected.

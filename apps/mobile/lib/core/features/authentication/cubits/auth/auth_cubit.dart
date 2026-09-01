@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:business_assistant/config/constants/secure_storage_keys.dart';
 import 'package:business_assistant/core/features/authentication/models/responses/login_response.dart';
+import 'package:business_assistant/core/utils/safe_emit_cubit_extension.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 part 'auth_state.dart';
 
@@ -35,7 +36,7 @@ class AuthCubit extends Cubit<AuthState> {
     debugPrint('[AuthCubit] initAuthState — token valid: $isValid');
 
     if (isValid) {
-      emit(Authenticated());
+      safeEmit(Authenticated());
     } else {
       logout();
     }
@@ -62,7 +63,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
 
     if (isValid) {
-      emit(Authenticated());
+      safeEmit(Authenticated());
     } else {
       logout();
     }
@@ -73,7 +74,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> logout() async {
     redirectToHomeInitialy = true;
     await _clearStorage();
-    emit(Unauthenticated());
+    safeEmit(Unauthenticated());
   }
 
   Future<void> _clearStorage() async {
