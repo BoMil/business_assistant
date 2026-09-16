@@ -21,6 +21,7 @@ import 'package:business_assistant/core/utils/launcher.dart';
 import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
 import 'package:business_assistant/theme/theme_color.dart';
+import 'package:business_assistant/theme/theme_constants.dart';
 
 /// Create/edit form for a Rental event — reused for both flows since the
 /// fields and validation are identical; only pageProps.eventId (null →
@@ -35,10 +36,10 @@ class CreateEditEventPage extends StatelessWidget {
     return BlocProvider<CreateEditEventCubit>(
       create:
           (_) => CreateEditEventCubit(
-                eventId: pageProps?.eventId,
-                initialEvent: pageProps?.event,
-                initialClientId: pageProps?.initialClientId,
-              )..loadFormData(),
+            eventId: pageProps?.eventId,
+            initialEvent: pageProps?.event,
+            initialClientId: pageProps?.initialClientId,
+          )..loadFormData(),
       child: const _CreateEditEventPageContent(),
     );
   }
@@ -310,37 +311,46 @@ class _CreateEditEventPageContentState extends State<_CreateEditEventPageContent
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
-                const SizedBox(height: 28),
-
-                if (isEditMode && !state.isCancelled) ...[
-                  CustomOutlinedButton(
-                    title: t.cancelEventButton,
-                    backgroundColor: Colors.transparent,
-                    borderColor: theme.brandError,
-                    color: theme.brandError,
-                    onClick: () => _confirm(context, message: t.confirmCancelEvent, onConfirm: cubit.cancelEvent),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                if (isEditMode) ...[
-                  CustomOutlinedButton(
-                    title: t.deleteEventButton,
-                    backgroundColor: Colors.transparent,
-                    borderColor: theme.brandError,
-                    color: theme.brandError,
-                    onClick: () => _confirm(context, message: t.confirmDeleteEvent, onConfirm: cubit.deleteEvent),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                ButtonWithLoadingState(
-                  buttonText: isEditMode ? t.saveChangesButton : t.createEventButton,
-                  loading: state.isSaving,
-                  buttonPressed: state.canSave(isEditMode) ? cubit.save : null,
-                  backgroundColor: theme.brandPrimary,
-                  textColor: Colors.white,
-                ),
                 const SizedBox(height: 24),
               ],
+            ),
+          ),
+          pageBottomBar: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(ThemeConstants.pagePadding, 12, ThemeConstants.pagePadding, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isEditMode && !state.isCancelled) ...[
+                    CustomOutlinedButton(
+                      title: t.cancelEventButton,
+                      backgroundColor: Colors.transparent,
+                      borderColor: theme.brandError,
+                      color: theme.brandError,
+                      onClick: () => _confirm(context, message: t.confirmCancelEvent, onConfirm: cubit.cancelEvent),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  if (isEditMode) ...[
+                    CustomOutlinedButton(
+                      title: t.deleteEventButton,
+                      backgroundColor: Colors.transparent,
+                      borderColor: theme.brandError,
+                      color: theme.brandError,
+                      onClick: () => _confirm(context, message: t.confirmDeleteEvent, onConfirm: cubit.deleteEvent),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  ButtonWithLoadingState(
+                    buttonText: isEditMode ? t.saveChangesButton : t.createEventButton,
+                    loading: state.isSaving,
+                    buttonPressed: state.canSave(isEditMode) ? cubit.save : null,
+                    backgroundColor: theme.brandPrimary,
+                    textColor: Colors.white,
+                  ),
+                ],
+              ),
             ),
           ),
         );

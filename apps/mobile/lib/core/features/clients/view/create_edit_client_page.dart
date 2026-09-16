@@ -18,6 +18,7 @@ import 'package:business_assistant/core/shared/widgets/input_fields/primary_inpu
 import 'package:business_assistant/core/utils/launcher.dart';
 import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
+import 'package:business_assistant/theme/theme_constants.dart';
 
 /// Create/edit form for a Client — reused for both flows since the fields
 /// and validation are identical; only pageProps.clientId (null → create) and
@@ -262,39 +263,59 @@ class _CreateEditClientPageContentState extends State<_CreateEditClientPageConte
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
-                const SizedBox(height: 28),
-
-                if (canManageClients) ...[
-                  if (isEditMode) ...[
-                    CustomOutlinedButton(
-                      title: t.addNewEventButton,
-                      backgroundColor: Colors.transparent,
-                      borderColor: theme.brandPrimary,
-                      color: theme.brandPrimary,
-                      onClick: () => _openAddNewEvent(context, cubit.clientId!),
-                    ),
-                    const SizedBox(height: 10),
-                    CustomOutlinedButton(
-                      title: t.removeClientButton,
-                      backgroundColor: Colors.transparent,
-                      borderColor: theme.brandError,
-                      color: theme.brandError,
-                      onClick: () => _confirm(context, message: t.confirmDeleteClient, onConfirm: cubit.deleteClient),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                  ButtonWithLoadingState(
-                    buttonText: isEditMode ? t.saveChangesButton : t.createClientButton,
-                    loading: state.isSaving,
-                    buttonPressed: state.canSave(isEditMode) ? cubit.save : null,
-                    backgroundColor: theme.brandPrimary,
-                    textColor: Colors.white,
-                  ),
-                ],
                 const SizedBox(height: 24),
               ],
             ),
           ),
+          pageBottomBar:
+              canManageClients
+                  ? SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        ThemeConstants.pagePadding,
+                        12,
+                        ThemeConstants.pagePadding,
+                        16,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isEditMode) ...[
+                            CustomOutlinedButton(
+                              title: t.addNewEventButton,
+                              backgroundColor: Colors.transparent,
+                              borderColor: theme.brandPrimary,
+                              color: theme.brandPrimary,
+                              onClick: () => _openAddNewEvent(context, cubit.clientId!),
+                            ),
+                            const SizedBox(height: 10),
+                            CustomOutlinedButton(
+                              title: t.removeClientButton,
+                              backgroundColor: Colors.transparent,
+                              borderColor: theme.brandError,
+                              color: theme.brandError,
+                              onClick:
+                                  () => _confirm(
+                                    context,
+                                    message: t.confirmDeleteClient,
+                                    onConfirm: cubit.deleteClient,
+                                  ),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                          ButtonWithLoadingState(
+                            buttonText: isEditMode ? t.saveChangesButton : t.createClientButton,
+                            loading: state.isSaving,
+                            buttonPressed: state.canSave(isEditMode) ? cubit.save : null,
+                            backgroundColor: theme.brandPrimary,
+                            textColor: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  : null,
         );
       },
     );

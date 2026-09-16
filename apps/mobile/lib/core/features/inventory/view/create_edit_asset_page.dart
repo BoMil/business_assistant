@@ -19,6 +19,7 @@ import 'package:business_assistant/core/shared/widgets/modals/selection_bottom_m
 import 'package:business_assistant/core/utils/toast_message.dart';
 import 'package:business_assistant/theme/get_theme_color.dart';
 import 'package:business_assistant/theme/theme_color.dart';
+import 'package:business_assistant/theme/theme_constants.dart';
 
 /// Create/edit form for an Inventory product (Asset) — reused for both flows
 /// since the fields and validation are identical; only pageProps.assetId
@@ -367,31 +368,51 @@ class _CreateEditAssetPageContentState extends State<_CreateEditAssetPageContent
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
-                const SizedBox(height: 28),
-
-                if (canManageInventory) ...[
-                  if (isEditMode) ...[
-                    CustomOutlinedButton(
-                      title: t.removeProductButton,
-                      backgroundColor: Colors.transparent,
-                      borderColor: theme.brandError,
-                      color: theme.brandError,
-                      onClick: () => _confirm(context, message: t.confirmDeleteProduct, onConfirm: cubit.deleteAsset),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                  ButtonWithLoadingState(
-                    buttonText: isEditMode ? t.saveChangesButton : t.createProductButton,
-                    loading: state.isSaving,
-                    buttonPressed: state.canSave(isEditMode) ? cubit.save : null,
-                    backgroundColor: theme.brandPrimary,
-                    textColor: Colors.white,
-                  ),
-                ],
                 const SizedBox(height: 24),
               ],
             ),
           ),
+          pageBottomBar:
+              canManageInventory
+                  ? SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        ThemeConstants.pagePadding,
+                        12,
+                        ThemeConstants.pagePadding,
+                        16,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isEditMode) ...[
+                            CustomOutlinedButton(
+                              title: t.removeProductButton,
+                              backgroundColor: Colors.transparent,
+                              borderColor: theme.brandError,
+                              color: theme.brandError,
+                              onClick:
+                                  () => _confirm(
+                                    context,
+                                    message: t.confirmDeleteProduct,
+                                    onConfirm: cubit.deleteAsset,
+                                  ),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                          ButtonWithLoadingState(
+                            buttonText: isEditMode ? t.saveChangesButton : t.createProductButton,
+                            loading: state.isSaving,
+                            buttonPressed: state.canSave(isEditMode) ? cubit.save : null,
+                            backgroundColor: theme.brandPrimary,
+                            textColor: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  : null,
         );
       },
     );
