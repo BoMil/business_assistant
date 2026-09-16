@@ -31,8 +31,8 @@ class UpdateEventRequest {
   Map<String, dynamic> toJson() => {
         'title': title,
         'description': description,
-        'from': from.toIso8601String(),
-        'to': to.toIso8601String(),
+        'from': from.toUtc().toIso8601String(),
+        'to': to.toUtc().toIso8601String(),
         'locationAddress': locationAddress,
         'locationLatitude': locationLatitude,
         'locationLongitude': locationLongitude,

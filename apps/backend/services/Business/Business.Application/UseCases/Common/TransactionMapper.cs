@@ -25,9 +25,16 @@ internal static class TransactionMapper
         var chargedTotal = assetsTotal + includedCostsTotal;
         var netBalance = chargedTotal - allCostsTotal;
 
+        // EF Core loses DateTimeKind on the SQL Server round-trip (returns Unspecified) — From/To
+        // are stored as true UTC instants (the client sends .toUtc()), so re-tag them as Utc here;
+        // otherwise System.Text.Json serializes them without a 'Z' suffix and the client can't tell
+        // they need converting back to local time for display.
+        var from = transaction.From.HasValue ? DateTime.SpecifyKind(transaction.From.Value, DateTimeKind.Utc) : (DateTime?)null;
+        var to = transaction.To.HasValue ? DateTime.SpecifyKind(transaction.To.Value, DateTimeKind.Utc) : (DateTime?)null;
+
         return new TransactionDto(
             transaction.Id, transaction.Type, transaction.Title, transaction.Description,
-            transaction.From, transaction.To,
+            from, to,
             transaction.Location?.Address, transaction.Location?.Latitude, transaction.Location?.Longitude,
             transaction.ClientId, transaction.GetStatus(now), assetDtos, costDtos, chargedTotal, netBalance);
     }

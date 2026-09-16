@@ -42,7 +42,7 @@ class EventApiService {
     try {
       final response = await dio.get(
         APIEndpoints.transactionsByDateRange,
-        queryParameters: {'from': from.toIso8601String(), 'to': to.toIso8601String()},
+        queryParameters: {'from': from.toUtc().toIso8601String(), 'to': to.toUtc().toIso8601String()},
       );
       final items = (response.data as List).map((x) => EventResponse.fromJson(x as Map<String, dynamic>)).toList();
       return ApiResponse.completed(items);
