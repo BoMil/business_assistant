@@ -14,7 +14,7 @@ public class RefreshToken : Entity<Guid>
 
     private RefreshToken() { }
 
-    public static RefreshToken Create(Guid userId, string token, int expiryDays = 7)
+    public static RefreshToken Create(Guid userId, string token, int expiryDays = 60)
     {
         return new RefreshToken
         {

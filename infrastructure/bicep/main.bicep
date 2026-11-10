@@ -220,6 +220,14 @@ resource secretRabbitMqVirtualHost 'Microsoft.KeyVault/vaults/secrets@2023-07-01
   properties: { value: rabbitMqVirtualHost }
 }
 
+// Full AMQP URI for Identity's KEDA rabbitmq scale rule (the scaler takes one connection string,
+// not separate host/user/password). Assumes username/password/vhost are URL-safe (true for CloudAMQP).
+resource secretRabbitMqConnectionUri 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'rabbitmq-connection-uri'
+  properties: { value: 'amqps://${rabbitMqUsername}:${rabbitMqPassword}@${rabbitMqHost}:5671/${rabbitMqVirtualHost}' }
+}
+
 // ── Container Apps Environment ─────────────────────────────────────────────────────────────
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: 'log-ba-${environmentName}'
@@ -276,12 +284,26 @@ module identityApp 'modules/containerApp.bicep' = {
     image: bootstrapImage
     targetPort: 8080
     external: false
-    minReplicas: 1
+    minReplicas: 0
     secrets: concat(commonKvSecrets, [
       { name: 'identity-db-connection-string', keyVaultUrl: secretIdentityDbConn.properties.secretUri }
       { name: 'ci-api-key', keyVaultUrl: secretCiApiKey.properties.secretUri }
       { name: 'dataprotection-storage-connection-string', keyVaultUrl: secretDataProtectionStorage.properties.secretUri }
+      { name: 'rabbitmq-connection-uri', keyVaultUrl: secretRabbitMqConnectionUri.properties.secretUri }
     ])
+    // Scale-to-zero: HTTP wakes it for API calls; the rabbitmq rule wakes it when Business publishes
+    // TenantNotificationRequested while Identity is at 0 replicas (otherwise pushes wait for the next HTTP call).
+    scaleRules: [
+      { name: 'http-requests', http: { metadata: { concurrentRequests: '10' } } }
+      {
+        name: 'rabbitmq-notifications'
+        custom: {
+          type: 'rabbitmq'
+          metadata: { queueName: 'TenantNotificationRequested', mode: 'QueueLength', value: '1' }
+          auth: [ { secretRef: 'rabbitmq-connection-uri', triggerParameter: 'host' } ]
+        }
+      }
+    ]
     env: concat([
       { name: 'ASPNETCORE_ENVIRONMENT', value: aspnetEnvironment }
       { name: 'ASPNETCORE_URLS', value: 'http://+:8080' }
@@ -289,7 +311,7 @@ module identityApp 'modules/containerApp.bicep' = {
       { name: 'Jwt__Secret', secretRef: 'jwt-secret' }
       { name: 'Jwt__Issuer', value: jwtIssuer }
       { name: 'Jwt__Audience', value: jwtAudience }
-      { name: 'Jwt__ExpiryMinutes', value: '2880' }
+      { name: 'Jwt__ExpiryMinutes', value: '43200' } // 30 days
       { name: 'CiApiKey', secretRef: 'ci-api-key' }
       { name: 'BlobStorage__ConnectionString', secretRef: 'blob-storage-connection-string' }
       { name: 'DataProtection__StorageConnectionString', secretRef: 'dataprotection-storage-connection-string' }
@@ -309,7 +331,7 @@ module businessApp 'modules/containerApp.bicep' = {
     image: bootstrapImage
     targetPort: 8080
     external: false
-    minReplicas: 1
+    minReplicas: 0
     secrets: concat(commonKvSecrets, [
       { name: 'business-db-connection-string', keyVaultUrl: secretBusinessDbConn.properties.secretUri }
     ])
@@ -337,7 +359,7 @@ module gatewayApp 'modules/containerApp.bicep' = {
     image: bootstrapImage
     targetPort: 8080
     external: true
-    minReplicas: 1
+    minReplicas: 0
     env: [
       { name: 'ASPNETCORE_ENVIRONMENT', value: aspnetEnvironment }
       { name: 'ASPNETCORE_URLS', value: 'http://+:8080' }

@@ -23,6 +23,9 @@ param maxReplicas int = 3
 param cpu string = '0.25'
 param memory string = '0.5Gi'
 
+@description('Scale rules. Empty = Container Apps\' default HTTP rule. Defining any rule replaces that default, so include an http rule explicitly if the app must still wake on requests.')
+param scaleRules array = []
+
 resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: name
   location: location
@@ -68,6 +71,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       scale: {
         minReplicas: minReplicas
         maxReplicas: maxReplicas
+        rules: scaleRules
       }
     }
   }
