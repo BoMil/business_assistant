@@ -87,7 +87,7 @@ flutter:
     # GIF assets (e.g. the shared button loading spinner)
     - assets/gifs/
     # Demo tenant assets: logo.png, app_icon.png, splash_logo.png
-    - assets/tenants/demo/
+    - assets/tenants/masterrent/
 
   fonts:
     - family: Inter

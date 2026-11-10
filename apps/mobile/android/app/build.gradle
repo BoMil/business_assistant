@@ -23,7 +23,7 @@ if (project.hasProperty("dart-defines")) {
     }
 }
 
-def tenantPackageName = System.getenv("PACKAGE_NAME") ?: "com.businessassistant.demo"
+def tenantPackageName = System.getenv("PACKAGE_NAME") ?: "com.businessassistant.masterrent"
 def tenantAppName = System.getenv("APP_NAME") ?: dartDefines["APP_NAME"] ?: "Business Assistant"
 
 // Read key.properties for local release signing (not used on CI).

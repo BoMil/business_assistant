@@ -31,7 +31,7 @@ jobs:
     # Add more tenants here as the platform grows (e.g. "acme", "beta").
     strategy:
       matrix:
-        tenant: [demo]
+        tenant: [masterrent]
 
     # All steps run from the apps/mobile directory (monorepo layout)
     defaults:
@@ -165,7 +165,12 @@ jobs:
 
           echo "Merged tenant config into $ENV_FILE"
 
-      - name: Build release APK
+      # ── 8.7. Build the release App Bundle ─────────────────────────────────
+      # Play Store requires an .aab, not an .apk, for new app submissions.
+      # --build-number is pinned to the GitHub run number so every upload gets
+      # a strictly increasing versionCode, which Play requires; versionName
+      # still comes from pubspec.yaml, bumped by hand for real releases.
+      - name: Build release App Bundle
         env:
           PACKAGE_NAME: com.businessassistant.${{ matrix.tenant }}
           APP_NAME: Business Assistant
@@ -174,13 +179,28 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           GITHUB_ACTIONS: true
         run: |
-          flutter build apk --release \
+          flutter build appbundle --release \
+            --build-number=${{ github.run_number }} \
             --dart-define-from-file=.env/${{ matrix.tenant }}.${{ steps.env_name.outputs.name }}.json
 
-      # ── 9. Upload APK as a workflow artifact ─────────────────────────────────
-      - name: Upload APK artifact
+      # ── 9. Upload the App Bundle as a workflow artifact ──────────────────────
+      - name: Upload App Bundle artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.tenant }}-${{ steps.env_name.outputs.name }}-release.apk
-          path: apps/mobile/build/app/outputs/flutter-apk/app-release.apk
+          name: ${{ matrix.tenant }}-${{ steps.env_name.outputs.name }}-release.aab
+          path: apps/mobile/build/app/outputs/bundle/release/app-release.aab
           retention-days: 14
+
+      # ── 10. Publish to the Play Console (production builds only) ────────────
+      # Requires the app to already exist in Play Console with at least one
+      # manually-uploaded release (Google doesn't allow the very first release
+      # to be created via API) and GOOGLE_PLAY_SERVICE_ACCOUNT_JSON to be set
+      # as a repo secret — see the CI/CD plan for the full manual setup steps.
+      - name: Publish to Play Store (Internal testing)
+        if: steps.env_name.outputs.name == 'production'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.businessassistant.${{ matrix.tenant }}
+          releaseFiles: apps/mobile/build/app/outputs/bundle/release/app-release.aab
+          track: internal

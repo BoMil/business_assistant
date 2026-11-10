@@ -6,7 +6,7 @@
 # build flavors here, so the copied root config must be named exactly
 # "flutter_native_splash.yaml" (no "-<tenant>" suffix).
 #
-# Usage: ./tools/generate_splash_screen.sh <tenant>   e.g. ./tools/generate_splash_screen.sh demo
+# Usage: ./tools/generate_splash_screen.sh <tenant>   e.g. ./tools/generate_splash_screen.sh masterrent
 set -e  # Exit on error
 
 TENANT="$1"

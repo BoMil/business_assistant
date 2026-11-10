@@ -6,9 +6,9 @@ set -e
 # environment variables, then runs the generators.
 #
 # Required environment variables (set as GitHub Actions secrets/inputs):
-#   TENANT_ID      — tenant slug, e.g. "demo"
+#   TENANT_ID      — tenant slug, e.g. "masterrent"
 #   APP_NAME       — display name, e.g. "Business Assistant"
-#   PACKAGE_NAME   — Android applicationId, e.g. "com.businessassistant.demo"
+#   PACKAGE_NAME   — Android applicationId, e.g. "com.businessassistant.masterrent"
 #
 # Assets must already exist in the repo at:
 #   assets/tenants/$TENANT_ID/logo.png

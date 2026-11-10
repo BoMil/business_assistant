@@ -10,7 +10,7 @@
 # the tenant as a build flavor and write into an unused src/<flavor>/ dir
 # instead of the real app icon.
 #
-# Usage: ./tools/generate_flutter_icons.sh <tenant>   e.g. ./tools/generate_flutter_icons.sh demo
+# Usage: ./tools/generate_flutter_icons.sh <tenant>   e.g. ./tools/generate_flutter_icons.sh masterrent
 set -e  # Exit on error
 
 TENANT="$1"
