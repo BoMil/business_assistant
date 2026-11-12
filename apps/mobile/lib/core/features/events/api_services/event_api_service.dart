@@ -10,11 +10,6 @@ import 'package:business_assistant/core/utils/api/app_interceptor.dart';
 import 'package:business_assistant/core/utils/api/dio_exception_handler.dart';
 
 /// Wraps every Business API call for Events (TransactionType.Rental transactions).
-///
-/// deleteEvent() calls DELETE /transactions/{id}, which does not exist on the
-/// Business API yet (only CancelTransaction — a soft cancel — is implemented
-/// server-side). It will fail with a 404 until a RemoveTransaction use case
-/// is added on the backend.
 class EventApiService {
   final Dio dio;
 

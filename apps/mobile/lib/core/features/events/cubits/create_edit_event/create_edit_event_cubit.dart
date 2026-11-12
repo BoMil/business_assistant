@@ -292,8 +292,7 @@ class CreateEditEventCubit extends Cubit<CreateEditEventState> {
     }
   }
 
-  /// DELETE /transactions/{id} — not yet implemented server-side, see
-  /// EventApiService.deleteEvent doc comment.
+  /// DELETE /transactions/{id} — hard delete (event + its assets/costs).
   Future<void> deleteEvent() async {
     if (!isEditMode) return;
     safeEmit(state.copyWith(isDeleting: true, clearError: true));

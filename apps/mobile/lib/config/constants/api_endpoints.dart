@@ -19,7 +19,7 @@
 ///   GET        /business/transactions/by-date-range → unpaginated list of events overlapping [from,to] (calendar view)
 ///   GET/PUT    /business/transactions/{id}          → get / update a single event
 ///   POST       /business/transactions/{id}/cancel   → soft-cancel an event
-///   DELETE     /business/transactions/{id}          → hard-delete an event (not yet implemented server-side)
+///   DELETE     /business/transactions/{id}          → hard-delete an event
 ///   GET/POST   /business/assets                     → list (unpaginated) / create an asset (product)
 ///   GET        /business/assets/paged                → paginated, server-searched list of assets
 ///   GET/PUT/DELETE /business/assets/{id}            → get / update / remove a single asset

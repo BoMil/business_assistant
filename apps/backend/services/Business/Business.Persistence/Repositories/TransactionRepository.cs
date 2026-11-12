@@ -66,6 +66,8 @@ internal sealed class TransactionRepository(BusinessDbContext context) : ITransa
     public async Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default) =>
         await context.Transactions.AddAsync(transaction, cancellationToken);
 
+    public void Remove(Transaction transaction) => context.Transactions.Remove(transaction);
+
     public void TrackNewChildren(Transaction transaction)
     {
         context.TransactionAssets.AddRange(transaction.Assets);

@@ -26,6 +26,7 @@ public interface ITransactionRepository
         Guid tenantId, DateTime from, DateTime to, CancellationToken cancellationToken = default);
 
     Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default);
+    void Remove(Transaction transaction);
 
     /// <summary>
     /// Explicitly marks a Transaction's current Assets/Costs as Added. Needed after an Update
