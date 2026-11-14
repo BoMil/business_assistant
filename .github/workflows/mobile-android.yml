@@ -27,11 +27,20 @@ jobs:
     name: Build Android (${{ matrix.tenant }})
     runs-on: ubuntu-latest
 
+    # GitHub Environment whose secrets apply to this run (SERVER_ADDRESS,
+    # TENANT_CONFIG_API_URL/KEY differ per backend). Same rule as the
+    # "Determine environment" step below — keep the two in sync.
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/main' && 'production' || 'staging') }}
+
     # Matrix strategy: one job per tenant.
     # Add more tenants here as the platform grows (e.g. "acme", "beta").
+    # tenant = asset folder / .env file prefix; slug = Tenant.Slug in the
+    # Identity database, used by the "Fetch tenant config" step.
     strategy:
       matrix:
-        tenant: [masterrent]
+        include:
+          - tenant: masterrent
+            slug: master-rent
 
     # All steps run from the apps/mobile directory (monorepo layout)
     defaults:
@@ -101,16 +110,22 @@ jobs:
       # ── 8.5. Materialize env file and inject secrets ─────────────────────────
       # .env/*.json is gitignored (real API keys/DSNs) — only the .example
       # template (blank secret fields) is committed. Start from that template
-      # and fill in the two secret fields from GitHub Actions repo secrets.
+      # and fill in the secret fields from GitHub Actions secrets
+      # (SERVER_ADDRESS is a per-Environment secret, the rest repo-level).
       - name: Materialize env file and inject secrets
         env:
+          SERVER_ADDRESS: ${{ secrets.SERVER_ADDRESS }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
         run: |
+          if [ -z "$SERVER_ADDRESS" ]; then
+            echo "::error::SERVER_ADDRESS secret is not set for the '${{ steps.env_name.outputs.name }}' environment."
+            exit 1
+          fi
           ENV_FILE=".env/${{ matrix.tenant }}.${{ steps.env_name.outputs.name }}.json"
           cp "$ENV_FILE.example" "$ENV_FILE"
-          jq --arg dsn "$SENTRY_DSN" --arg places "$GOOGLE_PLACES_API_KEY" \
-            '.SENTRY_DSN = $dsn | .GOOGLE_PLACES_API_KEY = $places' \
+          jq --arg server "$SERVER_ADDRESS" --arg dsn "$SENTRY_DSN" --arg places "$GOOGLE_PLACES_API_KEY" \
+            '.SERVER_ADDRESS = $server | .SENTRY_DSN = $dsn | .GOOGLE_PLACES_API_KEY = $places' \
             "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
 
       # ── 8.6. Fetch tenant config from backend (optional) ─────────────────────
@@ -131,9 +146,10 @@ jobs:
             exit 0
           fi
 
-          echo "Fetching tenant config for '${{ matrix.tenant }}' from $TENANT_CONFIG_API_URL"
-          curl -sf -H "X-Api-Key: $TENANT_CONFIG_API_KEY" \
-            "$TENANT_CONFIG_API_URL/tenants/${{ matrix.tenant }}/config" -o tenant-config.json
+          echo "Fetching tenant config for '${{ matrix.slug }}' from $TENANT_CONFIG_API_URL"
+          # --retry: the Container Apps scale to zero, so the first request may hit a cold start.
+          curl -sf --retry 3 --retry-delay 10 -H "X-Api-Key: $TENANT_CONFIG_API_KEY" \
+            "$TENANT_CONFIG_API_URL/tenants/${{ matrix.slug }}/config" -o tenant-config.json
 
           # Backend returns hex colors like "#1A237E" — mobile expects ARGB "FF1A237E".
           # TenantConfigDto is flat (not nested under featureFlags/modules) and
@@ -170,10 +186,11 @@ jobs:
       # --build-number is pinned to the GitHub run number so every upload gets
       # a strictly increasing versionCode, which Play requires; versionName
       # still comes from pubspec.yaml, bumped by hand for real releases.
+      # APP_NAME is deliberately not set here: build.gradle prefers the env var
+      # over the dart-define, and the launcher label must come from the .env file.
       - name: Build release App Bundle
         env:
           PACKAGE_NAME: com.businessassistant.${{ matrix.tenant }}
-          APP_NAME: Business Assistant
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
@@ -195,7 +212,7 @@ jobs:
       # Requires the app to already exist in Play Console with at least one
       # manually-uploaded release (Google doesn't allow the very first release
       # to be created via API) and GOOGLE_PLAY_SERVICE_ACCOUNT_JSON to be set
-      # as a repo secret — see the CI/CD plan for the full manual setup steps.
+      # as a repo secret — see apps/mobile/README.md "Play Store release (CI)".
       - name: Publish to Play Store (Internal testing)
         if: steps.env_name.outputs.name == 'production'
         uses: r0adkll/upload-google-play@v1

@@ -106,8 +106,9 @@ come from a local `.env` file or from the database via CI (see below).
 
 Before that, a **"Materialize env file and inject secrets"** step copies the
 committed `.env/<tenant>.<environment>.json.example` template to the real
-(gitignored) filename and fills in `SENTRY_DSN`/`GOOGLE_PLACES_API_KEY` from
-the `SENTRY_DSN`/`GOOGLE_PLACES_API_KEY` repo secrets.
+(gitignored) filename and fills in `SERVER_ADDRESS`/`SENTRY_DSN`/
+`GOOGLE_PLACES_API_KEY` from GitHub Actions secrets (`SERVER_ADDRESS` is a
+per-Environment secret, see below).
 
 Right after that, an optional **"Fetch tenant config from backend"** step calls
 `GET /tenants/{slug}/config` on the Identity API (protected by an `X-Api-Key`
@@ -115,8 +116,55 @@ header) and merges the tenant's live colors/feature-flags from the database
 into the `.env/<tenant>.<environment>.json` file before the build — only the
 overlapping keys are overwritten, so `SERVER_ADDRESS`/`ENVIRONMENT`/
 `PACKAGE_NAME`/`TENANT_ID` always come from the materialized file. This step
-needs the `TENANT_CONFIG_API_URL` and `TENANT_CONFIG_API_KEY` repo secrets;
-until a backend is actually deployed and those secrets are set, it's a no-op.
+needs the `TENANT_CONFIG_API_URL` and `TENANT_CONFIG_API_KEY` secrets; if they
+aren't set it's a no-op — but then the Firebase fields stay blank and push
+notifications are silently disabled in that build.
+
+## Play Store release (CI)
+
+Workflow: `.github/workflows/mobile-android.yml` (repo root — GitHub ignores
+workflow files anywhere else). Push to `main` touching `apps/mobile/**` →
+`production` build → upload to the Play **Internal testing** track. Push to
+`develop` → `staging` build (artifact only). Manual run (`workflow_dispatch`)
+→ pick the environment.
+
+### GitHub secrets
+
+Repo-level (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | `base64 -i android/upload-keystore.jks \| pbcopy` |
+| `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` | from `android/key.properties` |
+| `SENTRY_DSN`, `GOOGLE_PLACES_API_KEY` | same values as the local `.env` file |
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | full JSON key of the Play publishing service account |
+
+Per GitHub Environment (Settings → Environments → `production`, later `staging`):
+
+| Secret | Value |
+|---|---|
+| `SERVER_ADDRESS` | Gateway base URL (no trailing slash) |
+| `TENANT_CONFIG_API_URL` | Gateway base URL + `/identity` |
+| `TENANT_CONFIG_API_KEY` | `CiApiKey` of that backend (Key Vault secret `ci-api-key`) |
+
+### One-time Play Console setup
+
+1. Create the app in Play Console (package `com.businessassistant.<tenant>`),
+   fill in App content: privacy policy URL, Data safety, content rating,
+   target audience, and **App access** (reviewer login — the app is login-only).
+2. Run the workflow once (`workflow_dispatch`, `production`). The publish step
+   fails because the app has no release yet — expected. Download the `.aab`
+   from the run's artifacts and upload it **manually** to Internal testing
+   (Google doesn't allow the first release via API). Using the CI-built bundle
+   keeps `versionCode` (= `github.run_number`) strictly increasing.
+3. Service account: Google Cloud Console → enable *Google Play Android
+   Developer API* → create a service account → JSON key → Play Console →
+   Users and permissions → invite its email with release permissions for the
+   app. Put the JSON in `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`.
+4. From then on every push to `main` lands in Internal testing; promotion to
+   Closed testing / Production is done by hand in Play Console. Personal
+   developer accounts must run a closed test with ≥12 testers for 14 days
+   before Production access is granted.
 
 ## Localization
 

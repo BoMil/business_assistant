@@ -285,7 +285,6 @@ First (and so far only) use: `CreateTransactionCommandHandler`/`CreateAssetComma
   }
   ```
 - All relative paths are centralized in `lib/config/constants/api_endpoints.dart` on `APIEndpoints` — never inline a path string in a service. Every path starts with `/identity` or `/business` — that's what the Gateway uses to route the request to the right microservice (see "API Gateway" above). Adding an endpoint to an existing service is just a new `APIEndpoints` entry with the right prefix; nothing else needs to change on the mobile side.
-- `AssetApiService.getAssets()`/`getAssetById()` currently have an early mock-data `return` before the real Dio call (explicitly marked `// TODO: temporary mock data`) — this is a known, intentional stopgap while the Business API isn't wired up from the mobile side yet, not a bug to silently remove.
 
 ### Translations
 
